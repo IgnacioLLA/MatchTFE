@@ -1,0 +1,95 @@
+﻿@page "/frontapi"
+@inject HttpClient Http
+
+<PageTitle>Acceso al Gateway</PageTitle>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-cloud-arrow-down"></i> Conexión al Gateway
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Realiza una petición HTTP al endpoint del Gateway y visualiza la respuesta.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary btn-lg" @onclick="HandleCall" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Cargando...</span>
+                            }
+                            else
+                            {
+                                <i class="bi bi-send"></i>
+                                <span>Llamar al Endpoint</span>
+                            }
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(responseMessage))
+                    {
+                        <div class="mt-4">
+                            <div class="alert @(hasError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+                                <h5 class="alert-heading">
+                                    @if (hasError)
+                                    {
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                        <span>Error</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Respuesta recibida</span>
+                                    }
+                                </h5>
+                                <hr>
+                                <p class="mb-0">@responseMessage</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-muted">
+                    <small>
+                        <i class="bi bi-info-circle"></i>
+                        Endpoint: <code>https://localhost:7124/raulputero</code>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string responseMessage = "";
+    private bool isLoading = false;
+    private bool hasError = false;
+
+    private async Task HandleCall()
+    {
+        isLoading = true;
+        hasError = false;
+        responseMessage = "";
+
+        try
+        {
+            var response = await Http.GetStringAsync("/raulputero");
+            responseMessage = response;
+            hasError = false;
+        }
+        catch (Exception ex)
+        {
+            responseMessage = ex.Message;
+            hasError = true;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

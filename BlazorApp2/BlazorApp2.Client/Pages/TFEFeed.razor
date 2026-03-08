@@ -1,0 +1,84 @@
+﻿@page "/tfe-feed"
+@using ClassLibrary.Shared
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="d-flex flex-column align-center pt-10">
+    <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-8" Color="Color.Primary">Propuestas TFG</MudText>
+
+    @if (propuestas == null)
+    {
+        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+    }
+    else
+    {
+        @* Mostramos la primera propuesta de la lista (simulando Tinder) *@
+        @if (propuestas.Any())
+        {
+            <TfgCard 
+                Propuesta="propuestas.First()" 
+                OnAccept="AceptarPropuesta" 
+                OnReject="RechazarPropuesta" />
+            <MudText Typo="Typo.caption" Class="mt-4">@propuestas.Count propuestas restantes</MudText>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">¡Has visto todas las propuestas por hoy!</MudAlert>
+        }
+    }
+</MudContainer>
+
+@code {
+    private List<PropuestaTfgDto>? propuestas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulamos carga de microservicio
+        await Task.Delay(800);
+
+        propuestas = new List<PropuestaTfgDto>
+        {
+            new PropuestaTfgDto {
+                Id = 1,
+                Titulo = "IA aplicada a Ciberseguridad",
+                Tutor = "Dr. Armando Bronca",
+                ImagenUrl = "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400",
+                DescripcionCorta = "Desarrollo de un modelo predictivo para detectar ataques de denegación de servicio antes de que ocurran.",
+                DuracionEstimada = "6 meses",
+                Topics = new List<string> { "IA", "Python", "Seguridad" },
+                FechaExpiracion = DateTime.Now.AddDays(5)
+            },
+            new PropuestaTfgDto {
+                Id = 2,
+                Titulo = "E-Commerce con Microservicios",
+                Tutor = "Dra. Maria Web",
+                ImagenUrl = "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=400",
+                DescripcionCorta = "Arquitectura escalable usando .NET 10 y Docker para gestionar una tienda online con alta concurrencia.",
+                DuracionEstimada = "9 meses",
+                Topics = new List<string> { "Microservicios", "Docker", "DotNet" },
+                FechaExpiracion = DateTime.Now.AddDays(20)
+            }
+        };
+    }
+
+    private async Task AceptarPropuesta(PropuestaTfgDto propuesta)
+    {
+        // 1. Lógica de negocio: Llamar al microservicio
+        // await Http.PostAsJsonAsync("api/propuestas/aceptar", propuesta.Id);
+
+        Console.WriteLine($"Has aceptado: {propuesta.Titulo}");
+
+        // 2. Lógica visual: Quitar de la lista para que pase a la siguiente
+        EliminarDeLaVista(propuesta);
+    }
+
+    private void RechazarPropuesta(PropuestaTfgDto propuesta)
+    {
+        Console.WriteLine($"Has rechazado: {propuesta.Titulo}");
+        EliminarDeLaVista(propuesta);
+    }
+
+    private void EliminarDeLaVista(PropuestaTfgDto p)
+    {
+        propuestas?.Remove(p);
+        StateHasChanged(); // Forzamos a Blazor a repintar la pantalla
+    }
+}

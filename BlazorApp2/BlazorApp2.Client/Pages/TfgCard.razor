@@ -1,0 +1,90 @@
+@using ClassLibrary.Shared
+
+@* Cambio clave: width 100% y max-width para adaptabilidad *@
+<MudCard Elevation="4"
+         Style="max-width: 600px; width: 100%; border-radius: 20px; overflow: hidden; position: relative;"
+         Class="mx-auto my-4">
+
+    @* 1. Imagen de Cabecera (Altura adaptable en móviles) *@
+    <MudCardMedia Image="@Propuesta.ImagenUrl" Height="220" />
+
+    <MudCardContent>
+        @* 2. Fila Superior: Título y Fecha de publicación *@
+        <div class="d-flex justify-space-between align-start mb-1">
+            <MudText Typo="Typo.h5" Style="font-weight: bold;">@Propuesta.Titulo</MudText>
+            @* Nueva Fecha de Publicación con estilo sutil *@
+            <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space: nowrap; margin-left: 10px;">
+                @Propuesta.FechaPublicacion.ToString("dd/MM/yyyy")
+            </MudText>
+        </div>
+
+        @* 3. Nombre del Tutor *@
+        <div class="d-flex align-center mb-2">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1 mud-text-secondary" />
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Tutor: @Propuesta.Tutor</MudText>
+        </div>
+
+        @* 4. Badge de Duración *@
+        <div class="d-flex align-center mb-3">
+            <MudIcon Icon="@Icons.Material.Filled.AccessTime" Size="Size.Small" Class="mr-1" Color="Color.Info" />
+            <MudText Typo="Typo.caption" Style="font-weight: 500;">Duración: @Propuesta.DuracionEstimada</MudText>
+        </div>
+
+        @* 5. Contenedor de Tags (Topics) *@
+        <div class="d-flex flex-wrap gap-1 mb-3">
+            @foreach (var tag in Propuesta.Topics)
+            {
+                @* Usamos Variant.Filled para que resalten más en tarjetas anchas *@
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary" Class="ma-0">@tag</MudChip>
+            }
+        </div>
+
+        @* 6. Descripción Corta *@
+        <MudText Typo="Typo.body2" Style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; min-height: 60px; line-height: 1.4;">
+            @Propuesta.DescripcionCorta
+        </MudText>
+
+        @* 7. Indicador de Caducidad *@
+        <div class="mt-4 p-2" style="background-color: var(--mud-palette-background-grey); border-radius: 8px;">
+            @{
+                var diasRestantes = (Propuesta.FechaExpiracion - DateTime.Now).Days;
+                var colorBarra = diasRestantes < 7 ? Color.Error : Color.Success;
+            }
+            <div class="d-flex justify-space-between mb-1">
+                <MudText Typo="Typo.caption" Color="@colorBarra" Style="font-weight: bold;">
+                    <MudIcon Icon="@Icons.Material.Filled.Event" Size="Size.Small" Class="mr-1" />
+                    @(diasRestantes > 0 ? $"Expira en {diasRestantes} días" : "Plazo cerrado")
+                </MudText>
+                <MudText Typo="Typo.caption">@((int)Propuesta.PorcentajeTiempoRestante)% tiempo restante</MudText>
+            </div>
+            <MudProgressLinear Color="@colorBarra" Value="@Propuesta.PorcentajeTiempoRestante" Size="Size.Small" Rounded="true" />
+        </div>
+    </MudCardContent>
+
+    @* Botones tipo Tinder (Centrados y con espacio adaptable) *@
+    <MudCardActions Class="d-flex justify-center gap-10 pb-8 pt-4">
+
+        <MudFab Color="Color.Error"
+                StartIcon="@Icons.Material.Filled.Close"
+                Size="Size.Large"
+                OnClick="HandleReject"
+                Shadow="true" />
+
+        <MudFab Color="Color.Success"
+                StartIcon="@Icons.Material.Filled.Favorite"
+                Size="Size.Large"
+                OnClick="HandleAccept"
+                Shadow="true" />
+
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired] public PropuestaTfgDto Propuesta { get; set; } = new();
+
+    [Parameter] public EventCallback<PropuestaTfgDto> OnAccept { get; set; }
+    [Parameter] public EventCallback<PropuestaTfgDto> OnReject { get; set; }
+
+    private async Task HandleAccept() => await OnAccept.InvokeAsync(Propuesta);
+    private async Task HandleReject() => await OnReject.InvokeAsync(Propuesta);
+}

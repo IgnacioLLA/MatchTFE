@@ -1,0 +1,13 @@
+services:
+  blazorapp2:
+    image: ${DOCKER_REGISTRY-}blazorapp2
+    build:
+      context: .
+      dockerfile: BlazorApp2/BlazorApp2/Dockerfile
+
+  apigateway:
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: APIGateway/Dockerfile
+

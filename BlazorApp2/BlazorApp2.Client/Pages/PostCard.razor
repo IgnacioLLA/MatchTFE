@@ -1,0 +1,44 @@
+@* PostCard.razor *@
+@using ClassLibrary
+@using ClassLibrary.Shared
+
+<MudCard Elevation="2" Class="mb-4">
+    @* Class="mb-4" añade margen inferior entre posts *@
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Color="Color.Primary">
+                <MudImage Src="@Post.AvatarUrl" />
+            </MudAvatar>
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body1" Style="font-weight: bold;">@Post.NombreAutor</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Default">@Post.FechaPublicacion.ToString("g")</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Default" />
+        </CardHeaderActions>
+    </MudCardHeader>
+
+    <MudCardContent>
+        <MudText Typo="Typo.body1">
+            @Post.Contenido
+        </MudText>
+    </MudCardContent>
+
+    <MudCardActions>
+        <MudButton Variant="Variant.Text" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Favorite">
+            @Post.MeGusta
+        </MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Default" StartIcon="@Icons.Material.Outlined.ChatBubbleOutline">
+            @Post.Comentarios
+        </MudButton>
+        <MudSpacer />
+        <MudIconButton Icon="@Icons.Material.Outlined.Share" Color="Color.Default" />
+    </MudCardActions>
+</MudCard>
+
+@code {
+    // Este atributo permite que el componente "Padre" le pase los datos a esta tarjeta
+    [Parameter, EditorRequired]
+    public PostDto Post { get; set; } = default!;
+}

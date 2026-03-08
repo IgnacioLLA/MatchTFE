@@ -1,0 +1,58 @@
+﻿@inherits LayoutComponentBase
+
+
+<MudLayout>
+    <MudDrawer Open="true" Elevation="1" Variant="@DrawerVariant.Persistent">
+
+        @* Header del Portal *@
+        <div class="pa-6">
+            <MudText Typo="Typo.h6" Class="mud-text-secondary">
+                MATCH-TFE
+            </MudText>
+            <MudText Typo="Typo.caption">
+                Búsqueda de TFE
+            </MudText>
+        </div>
+
+        @* Lista de Navegación *@
+        <MudNavMenu Class="mt-4">
+            <MudNavLink href="/tfe-feed" Icon="@Icons.Material.Filled.Explore" IconColor="Color.Primary"
+                         ActiveClass="active-nav-link">
+                Descubrir
+            </MudNavLink>
+
+            <MudNavLink href="/prueba" Icon="@Icons.Material.Filled.Layers"
+                        >
+                Mis Matches
+            </MudNavLink>
+
+            <MudNavLink href="/frontapi" Icon="@Icons.Material.Filled.AddCircle">
+                Crear Propuesta
+            </MudNavLink>
+
+            <MudNavLink href="/perfil" Icon="@Icons.Material.Filled.Person"
+                        >
+                Mi Perfil
+            </MudNavLink>
+        </MudNavMenu>
+
+        <MudSpacer />
+
+        @* Sección de Usuario (Footer del Drawer) *@
+        <div class="pa-4 mt-auto" style="border-top: 1px solid #2d304e;">
+            <div class="d-flex align-center">
+                <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Medium" Class="mr-3">
+                    DR
+                </MudAvatar>
+                <div>
+                    <MudText Typo="Typo.body2" >Dr. Rodríguez</MudText>
+                    <MudText Typo="Typo.caption">Catedrático</MudText>
+                </div>
+            </div>
+        </div>
+    </MudDrawer>
+
+    <MudMainContent Class="pa-0">
+        @Body
+    </MudMainContent>
+</MudLayout>

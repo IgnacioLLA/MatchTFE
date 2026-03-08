@@ -1,0 +1,104 @@
+﻿@page "/prueba"
+@layout MainLayout
+
+@using ClassLibrary.Shared
+@using BlazorApp2.Client.Components
+
+<MudContainer MaxWidth="MaxWidth.Small"
+              Class="pt-6 pb-8">
+    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: bold;">Inicio</MudText>
+
+    @if (listaDePosts == null)
+    {
+        // Esto se muestra mientras los datos "cargan"
+        <div class="d-flex justify-center mt-10">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else if (listaDePosts.Count == 0)
+    {
+        <MudText Align="Align.Center" Color="Color.Default">No hay publicaciones aún. ¡Sé el primero!</MudText>
+    }
+    else
+    {
+        // La magia de Blazor: un bucle que crea una tarjeta por cada elemento en la lista
+        @foreach (var post in listaDePosts)
+        {
+            <div class="mb-4">
+                <PostCard Post="post" />
+            </div>
+        }
+    }
+</MudContainer>
+
+@code {
+    // Nuestra lista temporal de datos
+    private List<PostDto>? listaDePosts;
+
+    // Este método nativo de Blazor se ejecuta justo cuando la página carga
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulamos un pequeño retraso de red de 1 segundo para que veas el "cargando..."
+        await Task.Delay(1000);
+
+        // Llenamos la lista con nuestros 5 posts falsos
+        listaDePosts = new List<PostDto>
+        {
+            new PostDto 
+            { 
+                Id = 1, 
+                NombreAutor = "Ana Gómez", 
+                AvatarUrl = "https://i.pravatar.cc/150?img=5", 
+                Contenido = "Terminando de maquetar el frontend con MudBlazor. ¡Me está encantando lo rápido que se avanza! 🚀", 
+                FechaPublicacion = DateTime.Now.AddMinutes(-15), 
+                MeGusta = 42, 
+                Comentarios = 5,
+                UsuarioLeDioLike = true // Simulamos que el usuario actual ya le dio like a este
+            },
+            new PostDto 
+            { 
+                Id = 2, 
+                NombreAutor = "Carlos Ruiz", 
+                AvatarUrl = "https://i.pravatar.cc/150?img=11", 
+                Contenido = "¿Alguien más piensa que la arquitectura por microservicios es genial hasta que toca configurar el Gateway? 😅", 
+                FechaPublicacion = DateTime.Now.AddHours(-2), 
+                MeGusta = 18, 
+                Comentarios = 12,
+                UsuarioLeDioLike = false
+            },
+            new PostDto 
+            { 
+                Id = 3, 
+                NombreAutor = "Laura Méndez", 
+                AvatarUrl = "https://i.pravatar.cc/150?img=47", 
+                Contenido = "Hoy aprendí la diferencia entre una Entidad y un DTO. Mi backend ahora es mucho más seguro. ¡Gran día de código!", 
+                FechaPublicacion = DateTime.Now.AddHours(-5), 
+                MeGusta = 105, 
+                Comentarios = 20,
+                UsuarioLeDioLike = false
+            },
+            new PostDto 
+            { 
+                Id = 4, 
+                NombreAutor = "Dev Ninja", 
+                AvatarUrl = "https://i.pravatar.cc/150?img=33", 
+                Contenido = "Solo pasaba por aquí para recordarles que siempre, SIEMPRE hagan commit antes de irse a dormir. Buenas noches. 🌙", 
+                FechaPublicacion = DateTime.Now.AddDays(-1), 
+                MeGusta = 250, 
+                Comentarios = 45,
+                UsuarioLeDioLike = true
+            },
+            new PostDto 
+            { 
+                Id = 5, 
+                NombreAutor = "Elena Torres", 
+                AvatarUrl = "https://i.pravatar.cc/150?img=20", 
+                Contenido = "Buscando recomendaciones de bases de datos para mi próximo proyecto. ¿PostgreSQL o SQL Server? Os leo en los comentarios 👇", 
+                FechaPublicacion = DateTime.Now.AddDays(-2), 
+                MeGusta = 34, 
+                Comentarios = 56,
+                UsuarioLeDioLike = false
+            }
+        };
+    }
+}

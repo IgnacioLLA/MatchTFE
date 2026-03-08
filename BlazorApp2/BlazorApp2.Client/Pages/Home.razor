@@ -1,0 +1,20 @@
+﻿@page "/"
+
+<SectionContent SectionName="Migas">
+    <MudBreadcrumbs Items="_migas" />
+</SectionContent>
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@code {
+    // Definimos la lista dinámica de migas de pan para esta página concreta
+    private List<BreadcrumbItem> _migas = new List<BreadcrumbItem>
+    {
+        new BreadcrumbItem("Descubrimiento de Alumnos", href: "/home"),
+        new BreadcrumbItem("Perfil Candidato", href: null, disabled: true) // disabled: true hace que no sea clickeable (es la página actual)
+    };
+}

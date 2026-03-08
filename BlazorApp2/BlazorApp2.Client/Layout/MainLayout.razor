@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    <MudDrawer Open="true" ClipMode="DrawerClipMode.Never" Elevation="1" Variant="@DrawerVariant.Persistent">
+        <NavMenu />
+    </MudDrawer>
+
+    <MudAppBar Elevation="0">
+        @* Aquí creamos el "hueco" dinámico llamado "Migas" *@
+        <div class="ml-4">
+            <SectionOutlet SectionName="Migas" />
+        </div>
+
+        <MudSpacer />
+
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Class="mr-4" />
+    </MudAppBar>
+
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-8">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>

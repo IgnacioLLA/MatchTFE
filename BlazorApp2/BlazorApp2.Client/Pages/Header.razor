@@ -1,0 +1,40 @@
+﻿@* Inyectamos el contenido en el "hueco" llamado Migas del MainLayout *@
+<SectionContent SectionName="Migas">
+    
+    @* SeparatorIcon cambia la barra "/" por defecto por la flecha de tu diseño *@
+    <MudBreadcrumbs Items="Items" SeparatorIcon="@Icons.Material.Filled.ChevronRight">
+        <ItemTemplate Context="item">
+            @if (item.Disabled)
+            {
+                @* Estilo para la página ACTUAL (Blanco y en negrita) *@
+                <MudText Typo="Typo.body2" Style="font-weight: bold; color: white;">@item.Text</MudText>
+            }
+            else
+            {
+                @* Estilo para las páginas ANTERIORES (Gris y clickeable) *@
+                <MudLink Href="@item.Href" Underline="Underline.None">
+                    <MudText Typo="Typo.body2" Style="color: #7a829a; transition: color 0.2s;" 
+                             Class="hover-white">@item.Text</MudText>
+                </MudLink>
+            }
+        </ItemTemplate>
+    </MudBreadcrumbs>
+
+</SectionContent>
+
+@code {
+    // Parámetro obligatorio: La lista de migas que le pasaremos desde cada página
+    [Parameter, EditorRequired]
+    public List<BreadcrumbItem> Items { get; set; } = new();
+}
+
+<style>
+    /* Pequeño efecto hover para que el texto gris se ilumine al pasar el ratón */
+    .hover-white:hover {
+        color: white !important;
+    }
+    /* Quitamos el padding por defecto de MudBreadcrumbs para que alinee perfecto */
+    .mud-breadcrumbs {
+        padding: 0;
+    }
+</style>
