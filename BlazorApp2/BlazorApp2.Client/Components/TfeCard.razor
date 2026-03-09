@@ -1,0 +1,138 @@
+@* TfeCard.razor *@
+
+<div class="animate-fade-in tfe-card-container">
+    @* MAIN CARD - Replicating reference image style *@
+    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
+        <MudGrid Spacing="4">
+            @* Left side: Large Icon container *@
+            <MudItem xs="12" md="5" Class="d-flex justify-center align-center">
+                <MudPaper Elevation="0" Class="rounded-xl d-flex align-center justify-center" 
+                          Style="width: 100%; aspect-ratio: 4/3; background-color: #E3F2FD;">
+                    <div class="relative d-flex align-center justify-center">
+                        <MudIcon Icon="@GetIcon(Proposal.IconName)" Style="font-size: 8rem;" Color="Color.Primary" />
+                        @* Optional small overlapping icon like in the image *@
+                        <MudPaper Class="pa-2 absolute rounded-lg border-all bg-white" Style="bottom: 10px; right: -10px; elevation: 0;">
+                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary"/>
+                        </MudPaper>
+                    </div>
+                </MudPaper>
+            </MudItem>
+
+            @* Right side: Proposal details *@
+            <MudItem xs="12" md="7">
+                <MudText Typo="Typo.h5" Class="mb-4" Style="font-weight: 800; line-height: 1.2;">
+                    @Proposal.Title
+                </MudText>
+
+                @* Tutor info block *@
+                <div class="d-flex align-center mb-6">
+                    <MudAvatar Size="Size.Medium" Class="mr-3">@Proposal.TutorName[0]</MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.body2" Style="font-weight: bold;">@Proposal.TutorName</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@Proposal.Department</MudText>
+                    </div>
+                </div>
+
+                @* Technology chips - Sutil blue style *@
+                <div class="d-flex flex-wrap gap-2 mb-8">
+                    @foreach (var tech in Proposal.Technologies)
+                    {
+                        <MudChip T="string" Variant="Variant.Text" Color="Color.Primary" Size="Size.Small" 
+                                 Style="background-color: #E3F2FD; color: #1565C0; font-weight: 500;" 
+                                 Class="px-4 py-1">@tech</MudChip>
+                    }
+                </div>
+
+                @* Technical data block - Styled with icons and hierarchical text *@
+                <MudGrid Spacing="3">
+                    <MudItem xs="6">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Outlined.Timer" Size="Size.Small" Class="mr-2 mud-text-secondary" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="text-transform: uppercase; font-weight: bold;">Duración</MudText>
+                                <MudText Typo="Typo.body2" Style="font-weight: bold;">@Proposal.EstimatedDuration</MudText>
+                            </div>
+                        </div>
+                    </MudItem>
+                    <MudItem xs="6">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Outlined.CalendarToday" Size="Size.Small" Class="mr-2 mud-text-secondary" />
+                            <div>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="text-transform: uppercase; font-weight: bold;">Fecha Caducidad</MudText>
+                                <MudText Typo="Typo.body2" Style="font-weight: bold;">@Proposal.ExpirationDate.ToString("dd MMMM, yyyy")</MudText>
+                            </div>
+                        </div>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+    @* DESCRIPTION SECTION - Styled separately as in reference *@
+    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-10">
+        <div class="d-flex align-center mb-6">
+            <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Class="mr-3" />
+            <MudText Typo="Typo.h6"><b>Descripción del Proyecto</b></MudText>
+        </div>
+        
+        <MudText Typo="Typo.body1" Class="mb-4" Style="line-height: 1.8; color: #4b5563;">
+            @Proposal.Description
+        </MudText>
+    </MudPaper>
+
+    @* FLOATING ACTION BAR - Pegajosa en la parte inferior con texto en español *@
+    <MudPaper Elevation="4" Class="pa-4 rounded-xl d-flex align-center justify-space-between sticky-bottom bg-white border-all">
+        <div class="d-none d-sm-block">
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">¿Te convence esta propuesta?</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Puedes guardarla para revisar después.</MudText>
+        </div>
+
+        <div class="d-flex align-center gap-3">
+            @* Spanish text for main action buttons *@
+            <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large" 
+                       OnClick="@(() => OnDecision.InvokeAsync(false))" Class="rounded-lg px-6"
+                       StartIcon="@Icons.Material.Filled.Close">
+                Descartar
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large" 
+                       OnClick="@(() => OnDecision.InvokeAsync(true))" Class="rounded-lg px-6" StartIcon="@Icons.Material.Filled.CheckCircle">
+                Me interesa
+            </MudButton>
+            <MudIconButton Icon="@Icons.Material.Outlined.BookmarkBorder" />
+            <MudIconButton Icon="@Icons.Material.Outlined.Share" />
+        </div>
+    </MudPaper>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public TfeProposalDto Proposal { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<bool> OnDecision { get; set; }
+
+    // Icon helper remains here, where it is used.
+    private string GetIcon(string iconName)
+    {
+        return iconName switch
+        {
+            "Security" => Icons.Material.Filled.Security,
+            "LocalShipping" => Icons.Material.Filled.LocalShipping,
+            _ => Icons.Material.Filled.Psychology
+        };
+    }
+}
+
+<style>
+    /* Clase auxiliar para bordes y sombras similares a tu captura */
+    .border-all {
+        border: 1px solid #ebedef;
+    }
+    
+    .sticky-bottom {
+        position: sticky;
+        bottom: 20px;
+        z-index: 10;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+    }
+</style>

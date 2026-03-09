@@ -6,25 +6,51 @@
 <MudPopoverProvider />
 
 <MudLayout>
-    <MudDrawer Open="true" ClipMode="DrawerClipMode.Never" Elevation="1" Variant="@DrawerVariant.Persistent">
+    @* BARRA LATERAL *@
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="@DrawerVariant.Responsive">
+        <div class="pa-4 mt-2">
+            <MudText Typo="Typo.overline" Style="color: #7a829a; font-weight: bold; letter-spacing: 1px;">
+                MENÚ PRINCIPAL
+            </MudText>
+        </div>
         <NavMenu />
     </MudDrawer>
 
+    @* BARRA SUPERIOR *@
     <MudAppBar Elevation="0">
-        @* Aquí creamos el "hueco" dinámico llamado "Migas" *@
-        <div class="ml-4">
-            <SectionOutlet SectionName="Migas" />
-        </div>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+        
+        @* Logo que retorna a Home *@
+        <MudLink Href="/" Underline="Underline.None" Color="Color.Inherit" Class="d-flex align-center">
+            <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 800; letter-spacing: -0.5px;">
+                MATCH-TFE
+            </MudText>
+        </MudLink>
 
         <MudSpacer />
 
         <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" />
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Class="mr-4" />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Class="mr-2" />
+
+        @* Perfil con nombre oculto en móvil (d-none) *@
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2">
+            <MudAvatar Variant="Variant.Filled" Size="Size.Medium" Class="mr-sm-3">DR</MudAvatar>
+            <div class="d-none d-sm-flex flex-column align-start">
+                <MudText Typo="Typo.body2" Style="text-transform: none; line-height: 1.2;"><b>Dr. Rodríguez</b></MudText>
+                <MudText Typo="Typo.caption" Style="text-transform: none;">Catedrático</MudText>
+            </div>
+        </MudButton>
     </MudAppBar>
 
+    @* CONTENIDO CENTRAL: Aquí está la magia de la simetría *@
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.False" Class="pa-8">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-6 px-4 px-sm-12">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+    private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+}

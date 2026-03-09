@@ -1,84 +1,100 @@
 ﻿@page "/tfe-feed"
-@using TFELibrary.Shared
+@inject ISnackbar Snackbar
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="d-flex flex-column align-center pt-10">
-    <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-8" Color="Color.Primary">Propuestas TFG</MudText>
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8">
+    
+    @* Pestañas superiores en español *@
+    <MudTabs ActivePanelIndex="0" Border="true" Class="mb-6">
+        <MudTabPanel Text="Propuestas de TFE" Icon="@Icons.Material.Filled.Assignment" />
+        <MudTabPanel Text="Perfiles de Profesores" Icon="@Icons.Material.Filled.People" />
+    </MudTabs>
 
-    @if (propuestas == null)
+    @if (_proposalsQueue.Any())
     {
-        <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+        var current = _proposalsQueue.Peek();
+
+        @* LLAMADA A LA TARJETA (Asegúrate de que el nombre coincide con tu archivo TfeCard.razor) *@
+        <TfeCard 
+            @key="current.Id"
+            Proposal="@current" 
+            OnDecision="HandleAction" />
     }
     else
     {
-        @* Mostramos la primera propuesta de la lista (simulando Tinder) *@
-        @if (propuestas.Any())
-        {
-            <TfgCard 
-                Propuesta="propuestas.First()" 
-                OnAccept="@AceptarPropuesta" 
-                OnReject="@RechazarPropuesta" />
-            <MudText Typo="Typo.caption" Class="mt-4">@propuestas.Count propuestas restantes</MudText>
-        }
-        else
-        {
-            <MudAlert Severity="Severity.Info">¡Has visto todas las propuestas por hoy!</MudAlert>
-        }
+        @* MENSAJE DE COLA VACÍA *@
+        <div class="d-flex flex-column align-center justify-center mt-15 text-center">
+            <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Style="font-size: 5rem;" Class="mb-4" />
+            <MudText Typo="Typo.h4" Style="font-weight: 700;">¡Has visto todo por hoy!</MudText>
+            <MudText Typo="Typo.body1" Class="mud-text-secondary mb-6">
+                Parece que has revisado todas las propuestas por ahora.<br />Vuelve más tarde para ver nuevos proyectos.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadMockData">Recargar Propuestas</MudButton>
+        </div>
     }
+
 </MudContainer>
 
 @code {
-    private List<PropuestaTfgDto>? propuestas;
+    private Queue<TfeProposalDto> _proposalsQueue = new();
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Simulamos carga de microservicio
-        await Task.Delay(800);
+        LoadMockData();
+    }
 
-        propuestas = new List<PropuestaTfgDto>
+    private void LoadMockData()
+    {
+        // Aquí están los mockups restaurados y adaptados a tu diseño exacto
+        var mockData = new List<TfeProposalDto>
         {
-            new PropuestaTfgDto {
-                Id = 1,
-                Titulo = "IA aplicada a Ciberseguridad",
-                Tutor = "Dr. Armando Bronca",
-                ImagenUrl = "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400",
-                DescripcionCorta = "Desarrollo de un modelo predictivo para detectar ataques de denegación de servicio antes de que ocurran.",
-                DuracionEstimada = "6 meses",
-                Topics = new List<string> { "IA", "Python", "Seguridad" },
-                FechaExpiracion = DateTime.Now.AddDays(5)
+            new () { 
+                Id = 1, 
+                Title = "Diseño e Implementación de una Red Neuronal para Detección de Patrones en Imágenes Médicas", 
+                Description = "El presente Trabajo de Fin de Grado (TFG) o Máster (TFM) se enfoca en la investigación y desarrollo de arquitecturas avanzadas de aprendizaje profundo para el análisis automatizado de radiografías y tomografías computarizadas. El objetivo principal es identificar patrones tempranos de patologías pulmonares con una precisión superior al 95%.\n\nEl alumno seleccionado tendrá la oportunidad de trabajar con bases de datos reales y utilizar infraestructura de computación de alto rendimiento del departamento. Se requiere una base sólida en matemáticas y programación.", 
+                TutorName = "Dr. Roberto García", 
+                Department = "Departamento de Inteligencia Artificial y Computación",
+                Technologies = new() { "Python", "TensorFlow", "Deep Learning", "PyTorch", "Computer Vision" },
+                EstimatedDuration = "6 meses (Aprox. 300h)", 
+                ExpirationDate = new DateTime(2024, 06, 30), 
+                IconName = "Psychology" 
             },
-            new PropuestaTfgDto {
-                Id = 2,
-                Titulo = "E-Commerce con Microservicios",
-                Tutor = "Dra. Maria Web",
-                ImagenUrl = "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&w=400",
-                DescripcionCorta = "Arquitectura escalable usando .NET 10 y Docker para gestionar una tienda online con alta concurrencia.",
-                DuracionEstimada = "9 meses",
-                Topics = new List<string> { "Microservicios", "Docker", "DotNet" },
-                FechaExpiracion = DateTime.Now.AddDays(20)
+            new () { 
+                Id = 2, 
+                Title = "Auditoría y Seguridad en Smart Contracts de Ethereum", 
+                Description = "Análisis de vulnerabilidades en la red Ethereum usando Solidity y herramientas de verificación formal para prevenir ataques de reentrada y manipulación de oráculos en entornos DeFi.", 
+                TutorName = "Dra. Elena Belmonte", 
+                Department = "Arquitectura de Sistemas y Criptografía",
+                Technologies = new() { "Solidity", "Blockchain", "Web3", "Ethereum" },
+                EstimatedDuration = "4 meses (Aprox. 200h)", 
+                ExpirationDate = new DateTime(2024, 09, 15), 
+                IconName = "Security" 
+            },
+            new () { 
+                Id = 3, 
+                Title = "Optimización de Rutas Logísticas de Última Milla", 
+                Description = "Uso de algoritmos genéticos y machine learning para optimizar rutas de entrega en entornos urbanos, reduciendo la huella de carbono y los tiempos de espera.", 
+                TutorName = "Dr. Sergio Masa", 
+                Department = "Matemática Aplicada y Estadística",
+                Technologies = new() { "Java", "Algoritmos Genéticos", "Logística" },
+                EstimatedDuration = "5 meses (Aprox. 250h)", 
+                ExpirationDate = new DateTime(2024, 07, 20), 
+                IconName = "LocalShipping" 
             }
         };
+
+        foreach (var p in mockData) _proposalsQueue.Enqueue(p);
     }
 
-    private async Task AceptarPropuesta(PropuestaTfgDto propuesta)
+    private void HandleAction(bool isLike)
     {
-        // 1. Lógica de negocio: Llamar al microservicio
-        // await Http.PostAsJsonAsync("api/propuestas/aceptar", propuesta.Id);
+        if (!_proposalsQueue.Any()) return;
 
-        Console.WriteLine($"Has aceptado: {propuesta.Titulo}");
+        var processed = _proposalsQueue.Dequeue();
+        
+        // Notificación en español
+        Snackbar.Add(isLike ? $"¡Te interesa: {processed.Title}!" : "Propuesta descartada", 
+            isLike ? Severity.Success : Severity.Normal);
 
-        // 2. Lógica visual: Quitar de la lista para que pase a la siguiente
-        EliminarDeLaVista(propuesta);
-    }
-
-    private void RechazarPropuesta(PropuestaTfgDto propuesta)
-    {
-        Console.WriteLine($"Has rechazado: {propuesta.Titulo}");
-        EliminarDeLaVista(propuesta);
-    }
-
-    private void EliminarDeLaVista(PropuestaTfgDto p)
-    {
-        propuestas?.Remove(p);
-        StateHasChanged(); // Forzamos a Blazor a repintar la pantalla
+        StateHasChanged();
     }
 }
