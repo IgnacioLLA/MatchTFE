@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/BlazorApp2/BlazorApp2.Client/Layout/MainLayout - Copia.razor
+/BlazorApp2/BlazorApp2.Client/Pages/Home - Copia.razor
+/BlazorApp2/BlazorApp2.Client/Pages/TFEFeed - Copia.razor
