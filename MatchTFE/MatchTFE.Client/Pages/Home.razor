@@ -1,89 +1,90 @@
 ﻿@page "/"
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-8 px-4 px-sm-8">
-    
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-8 px-4 px-sm-8 animate-fade-in">
+
     @* 1. Bienvenida *@
     <div class="mb-8">
-        <MudText Typo="Typo.h3" Class="mb-2">¡Hola, Dr. Rodríguez!</MudText>
-        <MudText Typo="Typo.h6" Class="mud-text-secondary">¡Es un buen día para encontrar al candidato ideal!</MudText>
+        <MudText Typo="Typo.h3" Class="app-title-tight mb-2">¡Hola, Dr. Rodríguez!</MudText>
+        <MudText Typo="Typo.body1" Class="mud-text-secondary">¡Es un buen día para encontrar al candidato ideal!</MudText>
     </div>
 
     <MudGrid>
         <MudItem xs="12" md="8">
-            
-            @* 2. Stats: xs="12" hace que en móvil ocupen todo el ancho (columna) *@
+
+            @* 2. Stats con bordes y sombras globales *@
             <MudGrid Class="mb-8">
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="1" Class="pa-4 rounded-lg">
-                        <MudText Typo="Typo.h4"><b>14</b></MudText>
-                        <MudText Typo="Typo.caption">Propuestas nuevas hoy</MudText>
+                    <MudPaper Elevation="0" Class="pa-4 border-all rounded-xl bg-white h-100">
+                        <MudText Typo="Typo.h4" Class="font-weight-extrabold">14</MudText>
+                        <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Propuestas nuevas hoy</MudText>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="1" Class="pa-4 rounded-lg">
-                        <MudText Typo="Typo.h4"><b>5</b></MudText>
-                        <MudText Typo="Typo.caption">Matches confirmados</MudText>
+                    <MudPaper Elevation="0" Class="pa-4 border-all rounded-xl bg-white h-100">
+                        <MudText Typo="Typo.h4" Class="font-weight-extrabold">5</MudText>
+                        <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Matches confirmados</MudText>
                     </MudPaper>
                 </MudItem>
                 <MudItem xs="12" sm="4">
-                    <MudPaper Elevation="1" Class="pa-4 rounded-lg">
-                        <MudText Typo="Typo.h4"><b>3</b></MudText>
-                        <MudText Typo="Typo.caption">Solicitudes pendientes</MudText>
+                    <MudPaper Elevation="0" Class="pa-4 border-all rounded-xl bg-white h-100">
+                        <MudText Typo="Typo.h4" Class="font-weight-extrabold">3</MudText>
+                        <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Solicitudes pendientes</MudText>
                     </MudPaper>
                 </MudItem>
             </MudGrid>
 
             @* 3. Recomendados *@
-            <MudText Typo="Typo.h6" Class="mb-4">Recomendados para ti</MudText>
+            <MudText Typo="Typo.h6" Class="font-weight-bold mb-4">Recomendados para ti</MudText>
             <MudGrid Class="mb-8">
-                @foreach(var candidato in _recomendados)
+                @foreach (var candidato in _recomendados)
                 {
-                    @* También en columna en móvil (xs=12) *@
                     <MudItem xs="12" sm="4">
-                        <MudPaper Elevation="1" Class="pa-4 rounded-lg text-center">
-                            <MudAvatar Size="Size.Large" Class="mb-2">@candidato.Nombre[0]</MudAvatar>
-                            <MudText Typo="Typo.body1"><b>@candidato.Nombre</b></MudText>
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@candidato.Afinidad% Afinidad</MudChip>
+                        <MudPaper Elevation="0" Class="pa-5 border-all rounded-xl bg-white text-center h-100">
+                            <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Class="avatar-lg mb-3 mx-auto">@candidato.Nombre[0]</MudAvatar>
+                            <MudText Typo="Typo.body1" Class="font-weight-bold mb-1">@candidato.Nombre</MudText>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text">@candidato.Afinidad% Afinidad</MudChip>
                         </MudPaper>
                     </MudItem>
                 }
             </MudGrid>
 
-            @* 4. CTA: flex-column en móvil, flex-row en escritorio *@
-            <MudPaper Elevation="2" Class="pa-6 pa-sm-8 rounded-lg d-flex flex-column flex-sm-row align-center justify-space-between">
+            @* 4. CTA *@
+            <MudPaper Elevation="0" Class="pa-6 pa-sm-8 border-all rounded-xl bg-white d-flex flex-column flex-sm-row align-center justify-space-between">
                 <div class="mb-4 mb-sm-0 text-center text-sm-start">
-                    <MudText Typo="Typo.h5"><b>¿Buscas algo específico?</b></MudText>
-                    <MudText Typo="Typo.body1">Explora cientos de perfiles y propuestas ahora.</MudText>
+                    <MudText Typo="Typo.h5" Class="font-weight-bold">¿Buscas algo específico?</MudText>
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary">Explora cientos de perfiles y propuestas ahora.</MudText>
                 </div>
-                <MudButton Variant="Variant.Filled" Size="Size.Large" 
-                           Href="/tfe-feed" Class="px-10 py-3">
-                    Empezar a buscar ahora
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                           Href="/tfe-feed"
+                           Class="px-10 py-3 rounded-lg font-weight-bold home-cta-button">
+                    Buscar
                 </MudButton>
             </MudPaper>
         </MudItem>
 
-        @* COLUMNA LATERAL (Alertas y Onboarding) *@
+        @* COLUMNA LATERAL *@
         <MudItem xs="12" md="4">
-             @if (_porcentajePerfil < 100)
+            @if (_porcentajePerfil < 100)
             {
-                <MudPaper Elevation="1" Class="pa-6 rounded-lg mb-6">
-                    <MudText Typo="Typo.subtitle2"><b>Completa tu perfil</b></MudText>
-                    <MudProgressLinear Value="_porcentajePerfil" Class="my-3" Size="Size.Large">
-                        <MudText Typo="Typo.caption"><b>@_porcentajePerfil%</b></MudText>
+                <MudPaper Elevation="0" Class="pa-6 border-all rounded-xl bg-white mb-6">
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-2">Completa tu perfil</MudText>
+                    @* Añadimos Color="Color.Primary" para que el texto blanco contraste *@
+                    <MudProgressLinear Color="Color.Primary" Value="_porcentajePerfil" Class="my-3 rounded-pill" Size="Size.Large">
+                        <MudText Typo="Typo.caption" Class="font-weight-bold">@_porcentajePerfil%</MudText>
                     </MudProgressLinear>
                 </MudPaper>
             }
 
-            <MudPaper Elevation="1" Class="pa-6 rounded-lg mb-6">
-                <MudText Typo="Typo.subtitle2" Class="mb-4"><b>Alertas</b></MudText>
+            <MudPaper Elevation="0" Class="pa-6 border-all rounded-xl bg-white mb-6">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-4">Alertas</MudText>
                 <div class="d-flex align-center mb-4">
-                    <MudIcon Icon="@Icons.Material.Filled.Warning" Class="mr-3" Size="Size.Small"/>
-                    <MudText Typo="Typo.caption">La propuesta "IA" caduca en 2 días.</MudText>
+                    <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Class="mr-3" Size="Size.Small" />
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">La propuesta "IA" caduca en 2 días.</MudText>
                 </div>
             </MudPaper>
 
-            <MudPaper Elevation="1" Class="pa-6 rounded-lg">
-                <MudText Typo="Typo.subtitle2" Class="mb-4"><b>Últimos Matches</b></MudText>
+            <MudPaper Elevation="0" Class="pa-6 border-all rounded-xl bg-white">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-4">Últimos Matches</MudText>
                 <MudAvatarGroup Max="3" Spacing="3">
                     <MudAvatar Image="https://randomuser.me/api/portraits/men/1.jpg" />
                     <MudAvatar Image="https://randomuser.me/api/portraits/women/2.jpg" />
