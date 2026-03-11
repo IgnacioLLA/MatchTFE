@@ -1,5 +1,5 @@
-using BlazorApp2.Client.Pages;
-using BlazorApp2.Components;
+using MatchTFE.Client.Pages;
+using MatchTFE.Components;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +32,6 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(BlazorApp2.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(MatchTFE.Client._Imports).Assembly);
 
 app.Run();

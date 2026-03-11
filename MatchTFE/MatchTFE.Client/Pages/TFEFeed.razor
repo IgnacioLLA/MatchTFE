@@ -1,0 +1,91 @@
+﻿@page "/tfe-feed"
+@inject ISnackbar Snackbar
+
+<DiscoverLayout ActiveIndex="0"
+                MobileTitle="Descubrir un proyecto"
+                MobileButtonText="Buscar perfiles"
+                MobileButtonIcon="@Icons.Material.Filled.People">
+
+    @if (_proposalsQueue.Any())
+    {
+        var current = _proposalsQueue.Peek();
+        <TfeCard @key="current.Id" Proposal="@current" OnDecision="HandleAction" />
+    }
+    else
+    {
+        <div class="d-flex flex-column align-center justify-center mt-15 text-center">
+            <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Class="icon-huge mb-4" />
+            <MudText Typo="Typo.h4" Class="font-weight-bold">¡Has visto todo por hoy!</MudText>
+            <MudText Typo="Typo.body1" Class="mud-text-secondary mb-6">
+                Parece que has revisado todas las propuestas por ahora.<br />Vuelve más tarde para ver nuevos proyectos.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadMockData">Recargar Propuestas</MudButton>
+        </div>
+    }
+</DiscoverLayout>
+
+@code {
+    private Queue<TfeProposalDto> _proposalsQueue = new();
+
+    protected override void OnInitialized() { LoadMockData(); }
+
+    private void LoadMockData()
+    {
+        var mockData = new List<TfeProposalDto>
+        {
+            new () {
+                Id = 1,
+                Title = "Diseño e Implementación de una Red Neuronal para Detección de Patrones en Imágenes Médicas",
+                Description = "El presente Trabajo de Fin de Grado (TFG) se enfoca en la investigación y desarrollo de arquitecturas avanzadas de aprendizaje profundo para el análisis automatizado de radiografías y tomografías computarizadas. El objetivo principal es identificar patrones tempranos de patologías pulmonares con una precisión superior al 95%.\n\nEl alumno seleccionado tendrá la oportunidad de trabajar con bases de datos reales del Hospital Universitario y utilizar la infraestructura de computación de alto rendimiento (HPC) del departamento. Se requiere una base sólida en matemáticas, álgebra lineal y programación en Python.",
+                TutorName = "Dr. Roberto García",
+                Department = "Dpto. Inteligencia Artificial y Computación",
+                Technologies = new() { "Python", "TensorFlow", "Deep Learning", "PyTorch", "Computer Vision", "Keras" },
+                EstimatedDuration = "6 meses (Aprox. 300h)",
+                ExpirationDate = new DateTime(2024, 06, 30),
+                IconName = "Psychology"
+            },
+            new () {
+                Id = 2,
+                Title = "Auditoría y Seguridad en Smart Contracts de Ethereum",
+                Description = "Este proyecto propone un análisis exhaustivo de vulnerabilidades en la red Ethereum utilizando Solidity y herramientas de verificación formal. El objetivo es crear un framework automatizado para prevenir ataques de reentrada (re-entrancy) y manipulación de oráculos en entornos de Finanzas Descentralizadas (DeFi).\n\nIdeal para estudiantes apasionados por la ciberseguridad y la criptografía que busquen un reto técnico exigente.",
+                TutorName = "Dra. Elena Belmonte",
+                Department = "Arquitectura de Sistemas y Criptografía",
+                Technologies = new() { "Solidity", "Blockchain", "Web3.js", "Ethereum", "Ciberseguridad", "Auditoría" },
+                EstimatedDuration = "4 meses (Aprox. 200h)",
+                ExpirationDate = new DateTime(2024, 09, 15),
+                IconName = "Security"
+            },
+            new () {
+                Id = 3,
+                Title = "Migración a Arquitectura Cloud-Native y Microservicios",
+                Description = "Estudio práctico y ejecución simulada de la migración de un sistema monolítico legado (Java EE) hacia una arquitectura orientada a microservicios alojada en la nube.\n\nEl candidato diseñará la topología de red, configurará los pipelines de CI/CD y desplegará los contenedores orquestados, midiendo las mejoras en latencia, escalabilidad y tolerancia a fallos del nuevo sistema frente al antiguo.",
+                TutorName = "Prof. Miguel Aranda",
+                Department = "Ingeniería de Software y Sistemas",
+                Technologies = new() { "Docker", "Kubernetes", "AWS", "Microservicios", "CI/CD", "Java Spring Boot", "Terraform" },
+                EstimatedDuration = "5 meses (Aprox. 250h)",
+                ExpirationDate = new DateTime(2024, 11, 20),
+                IconName = "Cloud" // MudBlazor usará el default si no lo encuentra en tu switch, o puedes añadirlo al GetIcon
+            },
+            new () {
+                Id = 4,
+                Title = "Optimización de Rutas Logísticas de Última Milla",
+                Description = "Aplicación de algoritmos genéticos y machine learning clásico para optimizar rutas de entrega en entornos urbanos de alta densidad. El enfoque estará en reducir la huella de carbono, los tiempos de espera del cliente final y el coste operativo de la flota de vehículos eléctricos.",
+                TutorName = "Dr. Sergio Masa",
+                Department = "Matemática Aplicada y Estadística",
+                Technologies = new() { "Java", "Algoritmos Genéticos", "Logística", "Python", "Data Analysis" },
+                EstimatedDuration = "5 meses (Aprox. 250h)",
+                ExpirationDate = new DateTime(2024, 07, 20),
+                IconName = "LocalShipping"
+            }
+        };
+
+        foreach (var p in mockData) _proposalsQueue.Enqueue(p);
+    }
+
+    private void HandleAction(bool isLike)
+    {
+        if (!_proposalsQueue.Any()) return;
+        var processed = _proposalsQueue.Dequeue();
+        StateHasChanged();
+    }
+}

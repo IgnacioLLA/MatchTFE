@@ -1,0 +1,65 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<MudLayout>
+    @* BARRA LATERAL *@
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="@DrawerVariant.Responsive">
+        
+        <div class="pa-4 mt-2">
+            <MudText Typo="Typo.overline" Style="color: #7a829a; font-weight: bold; letter-spacing: 1px;">
+                MENÚ PRINCIPAL
+            </MudText>
+        </div>
+
+        @* ¡AQUÍ LLAMAS A TU COMPONENTE! *@
+
+        <NavMenu/>
+
+    </MudDrawer>
+
+    @* BARRA SUPERIOR *@
+    <MudAppBar Elevation="0" Class="app-topbar">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
+        
+        <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 800; letter-spacing: -0.5px;">
+            MATCH-TFE
+        </MudText>
+
+        <MudSpacer />
+
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications" />
+        <MudIconButton Icon="@Icons.Material.Filled.Settings" Class="mr-2" />
+
+        <MudButton Variant="Variant.Text" OnClick="HandleProfileButton" Class="d-flex align-center ml-4 mr-4 user-profile-btn">
+            <MudAvatar Variant="Variant.Filled" Size="Size.Medium" Class="mr-3">DR</MudAvatar>
+            <div class="d-flex flex-column align-start">
+                <MudText Typo="Typo.body2" Class="user-name" Style="text-transform: none;"><b>Dr. Rodríguez</b></MudText>
+                <MudText Typo="Typo.caption" Class="user-role" Style="text-transform: none;">Catedrático</MudText>
+            </div>
+        </MudButton>
+    </MudAppBar>
+
+    <MudMainContent Class="pt-10 pl-8">
+        <MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+
+    private void HandleProfileButton()
+    {
+        // Navegar al perfil
+    }
+}

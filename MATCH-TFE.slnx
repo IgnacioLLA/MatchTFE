@@ -1,8 +1,8 @@
 <Solution>
   <Project Path="../TFELibrary/TFELibrary.csproj" Id="6466a7b7-09e8-409c-9886-e31a64c15a4c" />
   <Project Path="APIGateway/APIGateway.csproj" Id="240b5de9-0591-48ed-9eb7-45114a6d9014" />
-  <Project Path="BlazorApp2/BlazorApp2.Client/BlazorApp2.Client.csproj" />
-  <Project Path="BlazorApp2/BlazorApp2/BlazorApp2.csproj" />
+  <Project Path="MatchTFE/MatchTFE.Client/MatchTFE.Client.csproj" />
+  <Project Path="MatchTFE/MatchTFE/MatchTFE.csproj" />
   <Project Path="docker-compose.dcproj">
     <Build />
   </Project>

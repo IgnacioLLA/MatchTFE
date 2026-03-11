@@ -1,0 +1,121 @@
+﻿@page "/match"
+@using TFELibrary.Shared
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8 mb-10 animate-fade-in">
+
+    <div class="d-flex align-center mb-6 mt-4">
+        <MudText Typo="Typo.h3" Class="font-weight-bold">Mis Matches</MudText>
+    </div>
+
+    <MudText Typo="Typo.body1" Class="mud-text-secondary mb-8">
+        Aquí tienes las propuestas y perfiles en los que has mostrado interés. Contacta con ellos para dar el siguiente paso.
+    </MudText>
+
+    <MudTabs ActivePanelIndex="0" Border="true" Class="mb-6">
+
+        @* PESTAÑA 1: PROYECTOS GUARDADOS *@
+        <MudTabPanel Text="Proyectos de TFE" Icon="@Icons.Material.Filled.Assignment">
+            @if (_savedProposals.Any())
+            {
+                <MudGrid Spacing="4" Class="mt-2">
+                    @foreach (var proposal in _savedProposals)
+                    {
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
+                                <div class="d-flex align-start justify-space-between mb-3">
+                                    <MudIcon Icon="@GetIcon(proposal.IconName)" Color="Color.Primary" Size="Size.Large" />
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match</MudChip>
+                                </div>
+
+                                <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@proposal.Title</MudText>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">@proposal.TutorName • @proposal.Department</MudText>
+
+                                <MudSpacer />
+
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@Icons.Material.Filled.Email">
+                                    Contactar Tutor
+                                </MudButton>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+            else
+            {
+                <div class="pa-10 text-center">
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary">Aún no has guardado ningún proyecto.</MudText>
+                </div>
+            }
+        </MudTabPanel>
+
+        @* PESTAÑA 2: CANDIDATOS GUARDADOS *@
+        <MudTabPanel Text="Perfiles de Candidatos" Icon="@Icons.Material.Filled.People">
+            @if (_savedCandidates.Any())
+            {
+                <MudGrid Spacing="4" Class="mt-2">
+                    @foreach (var candidate in _savedCandidates)
+                    {
+                        <MudItem xs="12" sm="6" md="4">
+                            <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column align-center text-center">
+
+                                <MudAvatar Image="@candidate.AvatarUrl" Class="avatar-lg mb-3" />
+
+                                <MudText Typo="Typo.h6" Class="font-weight-bold">@candidate.FullName</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1 font-weight-bold">@candidate.Degree</MudText>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary mb-4">@candidate.AcademicYear</MudText>
+
+                                <MudSpacer />
+
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@Icons.Material.Filled.Chat">
+                                    Enviar Mensaje
+                                </MudButton>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            }
+            else
+            {
+                <div class="pa-10 text-center">
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary">Aún no has guardado ningún candidato.</MudText>
+                </div>
+            }
+        </MudTabPanel>
+
+    </MudTabs>
+</MudContainer>
+
+@code {
+    private List<TfeProposalDto> _savedProposals = new();
+    private List<CandidateProfileDto> _savedCandidates = new();
+
+    protected override void OnInitialized()
+    {
+        LoadMockMatches();
+    }
+
+    private void LoadMockMatches()
+    {
+        _savedProposals = new List<TfeProposalDto>
+        {
+            new () { Id = 1, Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García", Department = "IA y Computación", IconName = "Psychology" },
+            new () { Id = 2, Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte", Department = "Criptografía", IconName = "Security" }
+        };
+
+        _savedCandidates = new List<CandidateProfileDto>
+        {
+            new () { Id = 1, FullName = "Carlos Méndez Ruiz", Degree = "Grado en Ing. Informática", AcademicYear = "4º Curso", AvatarUrl = "https://randomuser.me/api/portraits/men/32.jpg" },
+            new () { Id = 3, FullName = "Alejandro Vargas", Degree = "Máster en Ing. de Software", AcademicYear = "1º Año (Máster)", AvatarUrl = "https://randomuser.me/api/portraits/men/85.jpg" }
+        };
+    }
+
+    private string GetIcon(string iconName)
+    {
+        return iconName switch
+        {
+            "Security" => Icons.Material.Filled.Security,
+            "LocalShipping" => Icons.Material.Filled.LocalShipping,
+            _ => Icons.Material.Filled.Psychology
+        };
+    }
+}

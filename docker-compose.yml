@@ -1,9 +1,9 @@
 services:
-  blazorapp2:
-    image: ${DOCKER_REGISTRY-}blazorapp2
+  matchtfe:
+    image: ${DOCKER_REGISTRY-}matchtfe
     build:
       context: .
-      dockerfile: BlazorApp2/BlazorApp2/Dockerfile
+      dockerfile: MatchTFE/MatchTFE/Dockerfile
     ports:
       - "5000:8080"
       - "5001:8081"
