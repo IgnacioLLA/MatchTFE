@@ -37,11 +37,6 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 });
 
-app.MapGet("/raulputero", () =>
-{
-    return "Raul es un putero y pelayo la chupa.";
-});
-
 app.Run();
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
