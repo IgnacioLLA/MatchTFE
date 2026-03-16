@@ -1,4 +1,15 @@
 services:
+  postgresdb:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: MatchTFEDb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
   matchtfe:
     image: ${DOCKER_REGISTRY-}matchtfe
     build:
@@ -18,3 +29,23 @@ services:
       context: .
       dockerfile: APIGateway/Dockerfile
 
+
+  authservice:
+    image: ${DOCKER_REGISTRY-}authservice
+    build:
+      context: .
+      dockerfile: AuthService/Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__Issuer=MatchTFE_AuthService
+      - JwtSettings__Audience=MatchTFE_Clients
+    depends_on:
+      - postgresdb
+
+volumes:
+  postgres_data:

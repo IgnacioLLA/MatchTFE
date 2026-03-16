@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "MatchTFE": "StartDebugging",
-        "apigateway": "StartDebugging"
+        "apigateway": "StartDebugging",
+        "authservice": "StartDebugging"
       }
     }
   }
