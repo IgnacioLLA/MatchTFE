@@ -1,0 +1,139 @@
+﻿@page "/register"
+@using System.ComponentModel.DataAnnotations
+@using TFELibrary.Shared
+@layout AuthLayout
+
+<MudCard Class="auth-card register-card">
+    <MudCardContent Class="auth-card-content">
+        <MudText Typo="Typo.h5" Class="auth-title">Crea tu cuenta</MudText>
+        <MudText Typo="Typo.body2" Class="auth-subtitle">Únete para buscar tu Trabajos de Fin de Estudios</MudText>
+
+        <EditForm Model="@_registerModel" OnValidSubmit="HandleRegisterAsync">
+            <DataAnnotationsValidator />
+
+            <div class="form-row-2">
+                <MudTextField @bind-Value="_registerModel.Name"
+                              Label="Nombre"
+                              Placeholder="Tu nombre"
+                              Variant="Variant.Outlined"
+                              Class="auth-input"
+                              For="@(() => _registerModel.Name)" />
+
+                <MudTextField @bind-Value="_registerModel.Surname"
+                              Label="Apellidos"
+                              Placeholder="Tus apellidos"
+                              Variant="Variant.Outlined"
+                              Class="auth-input"
+                              For="@(() => _registerModel.Surname)" />
+            </div>
+
+            <MudTextField @bind-Value="_registerModel.Email"
+                          Label="Email Institucional"
+                          Placeholder="ejemplo@institucion.edu"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Email"
+                          Class="auth-input"
+                          For="@(() => _registerModel.Email)" />
+
+            <MudTextField @bind-Value="_registerModel.ConfirmEmail"
+                          Label="Confirmar Email"
+                          Placeholder="Repite tu email institucional"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.MarkEmailRead"
+                          Class="auth-input"
+                          For="@(() => _registerModel.ConfirmEmail)" />
+
+            <MudTextField @bind-Value="_registerModel.Password"
+                          Label="Contraseña"
+                          Placeholder="Mínimo 6 caracteres"
+                          Variant="Variant.Outlined"
+                          InputType="@_passwordInput"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Lock"
+                          AdornmentEnd="Adornment.End"
+                          OnAdornmentClick="TogglePasswordVisibility"
+                          AdornmentIconEnd="@_passwordIcon"
+                          Class="auth-input register-password-input"
+                          For="@(() => _registerModel.Password)" />
+
+            <MudText Typo="Typo.caption" Class="password-hint">
+                Debe tener al menos 6 caracteres, incluir una mayúscula, un número y un carácter especial.
+            </MudText>
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="@_isLoading"
+                       Class="auth-button">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
+                    <span class="loading-text">Creando cuenta...</span>
+                }
+                else
+                {
+                    <span class="button-content">Crear cuenta <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
+                }
+            </MudButton>
+        </EditForm>
+
+        <div class="auth-bottom-section">
+            <MudText Typo="Typo.body2" Class="auth-bottom-text">¿Ya tienes cuenta?</MudText>
+            <MudLink Href="/login" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">Iniciar sesión</MudLink>
+        </div>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private class RegisterFormModel : RegisterRequestDto
+    {
+        [Required(ErrorMessage = "Por favor, confirma tu email.")]
+        [Compare(nameof(Email), ErrorMessage = "Los correos electrónicos no coinciden.")]
+        public string ConfirmEmail { get; set; } = string.Empty;
+    }
+
+    private RegisterFormModel _registerModel = new();
+    private bool _isLoading = false;
+
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+
+    private void TogglePasswordVisibility()
+    {
+        if (_passwordInput == InputType.Password)
+        {
+            _passwordInput = InputType.Text;
+            _passwordIcon = Icons.Material.Outlined.Visibility;
+        }
+        else
+        {
+            _passwordInput = InputType.Password;
+            _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+        }
+    }
+
+    private async Task HandleRegisterAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var requestDto = new RegisterRequestDto
+            {
+                Name = _registerModel.Name,
+                Surname = _registerModel.Surname,
+                Email = _registerModel.Email,
+                Password = _registerModel.Password
+            };
+
+            await Task.Delay(1000); // Aquí iría el Http.PostAsJsonAsync
+            Console.WriteLine($"Registro intento: {requestDto.Email}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

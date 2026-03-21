@@ -24,11 +24,13 @@ services:
       - ASPNETCORE_HTTP_PORTS=8080
 
   apigateway:
-    image: ${DOCKER_REGISTRY-}apigateway
-    build:
-      context: .
-      dockerfile: APIGateway/Dockerfile
-
+    image: nginx:alpine
+    ports:
+      - "5080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - authservice
 
   authservice:
     image: ${DOCKER_REGISTRY-}authservice

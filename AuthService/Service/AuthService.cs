@@ -19,27 +19,6 @@ namespace AuthService.Service
             _configuration = configuration;
         }
 
-        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
-        {
-            var user = await _authRepository.GetUserByEmailAsync(request.Email);
-            if (user == null || !await _authRepository.CheckPasswordAsync(user, request.Password))
-            {
-                return new LoginResponseDto
-                {
-                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid credentials." }
-                };
-            }
-
-            var token = GenerateJwtToken(user);
-
-            return new LoginResponseDto
-            {
-                AuthData = new AuthResultDto { IsSuccess = true, Token = token },
-                Name = user.Name,
-                Surname = user.Surname
-            };
-        }
-
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
         {
             var newUser = new MatchUser
@@ -60,31 +39,106 @@ namespace AuthService.Service
 
             return new RegisterResponseDto { IsSuccess = true };
         }
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
+        {
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
 
+            if (user == null || !await _authRepository.CheckPasswordAsync(user, request.Password))
+            {
+                return new LoginResponseDto
+                {
+                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid credentials." }
+                };
+            }
+
+            var authResult = await GenerateAndSaveTokensAsync(user);
+
+            return new LoginResponseDto
+            {
+                Name = user.Name,
+                Surname = user.Surname,
+                AuthData = authResult
+            };
+        }
+
+        public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        {
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return new RefreshTokenResponseDto
+                {
+                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." }
+                };
+            }
+
+            var storedRefreshToken = await _authRepository.GetRefreshTokenAsync(user);
+            if (storedRefreshToken != request.RefreshToken)
+            {
+                return new RefreshTokenResponseDto
+                {
+                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid or expired token." }
+                };
+            }
+
+            var authResult = await GenerateAndSaveTokensAsync(user);
+
+            return new RefreshTokenResponseDto
+            {
+                AuthData = authResult
+            };
+        }
+
+        private async Task<AuthResultDto> GenerateAndSaveTokensAsync(MatchUser user)
+        {
+            var jwtToken = GenerateJwtToken(user);
+
+            var newRefreshToken = Guid.NewGuid().ToString("N");
+
+            await _authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
+
+            return new AuthResultDto
+            {
+                IsSuccess = true,
+                Token = jwtToken,
+                RefreshToken = newRefreshToken,
+                ErrorMessage = string.Empty
+            };
+        }
         private string GenerateJwtToken(MatchUser user)
         {
-            var secretKey = _configuration["JwtSettings:Secret"];
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["Secret"];
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-
-            new Claim("name", user.Name),
-            new Claim("surname", user.Surname)
-        };
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
 
             var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:Issuer"],
-                audience: _configuration["JwtSettings:Audience"],
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task<bool> LogoutAsync(string email)
+        {
+            var user = await _authRepository.GetUserByEmailAsync(email);
+            if (user == null) return false;
+
+            await _authRepository.RemoveRefreshTokenAsync(user);
+            
+            return true;
         }
     }
 }

@@ -27,4 +27,18 @@ public class AuthRepository : IAuthRepository
     {
         return await _userManager.CreateAsync(user, password);
     }
+
+    public async Task SaveRefreshTokenAsync(MatchUser user, string refreshToken)
+    {
+        await _userManager.SetAuthenticationTokenAsync(user, "MatchTFE", "RefreshToken", refreshToken);
+    }
+
+    public async Task<string?> GetRefreshTokenAsync(MatchUser user)
+    {
+        return await _userManager.GetAuthenticationTokenAsync(user, "MatchTFE", "RefreshToken");
+    }
+    public async Task RemoveRefreshTokenAsync(MatchUser user)
+    {
+        await _userManager.RemoveAuthenticationTokenAsync(user, "MatchTFE", "RefreshToken");
+    }
 }

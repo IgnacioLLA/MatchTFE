@@ -1,5 +1,4 @@
 <Solution>
-  <Project Path="APIGateway/APIGateway.csproj" Id="240b5de9-0591-48ed-9eb7-45114a6d9014" />
   <Project Path="AuthService/AuthService.csproj" Id="d0f6b60e-a5df-4610-974a-4b07777c26cb" />
   <Project Path="docker-compose.dcproj">
     <Build />

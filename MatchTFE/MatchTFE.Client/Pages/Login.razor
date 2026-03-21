@@ -1,0 +1,104 @@
+﻿@page "/login"
+@using TFELibrary.Shared
+@layout AuthLayout
+
+<MudCard Class="auth-card">
+    <MudCardContent Class="auth-card-content">
+        <MudText Typo="Typo.h5" Class="auth-title">Bienvenido de nuevo</MudText>
+        <MudText Typo="Typo.body2" Class="auth-subtitle">Introduce tus credenciales universitarias</MudText>
+
+        <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
+            <DataAnnotationsValidator />
+
+            <MudTextField @bind-Value="_loginModel.Email"
+                          Label="Email Institucional"
+                          Placeholder="usuario@universidad.edu"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Email"
+                          Class="auth-input"
+                          For="@(() => _loginModel.Email)" />
+
+            <div class="password-header">
+                <MudText Typo="Typo.body2" Class="password-label">Contraseña</MudText>
+                <MudLink Href="/forgot-password" Typo="Typo.caption" Underline="Underline.Hover" Class="forgot-link">¿Has olvidado tu contraseña?</MudLink>
+            </div>
+
+            <MudTextField @bind-Value="_loginModel.Password"
+                          Placeholder="••••••••"
+                          Variant="Variant.Outlined"
+                          InputType="@_passwordInput"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Outlined.Lock"
+                          AdornmentEnd="Adornment.End"
+                          OnAdornmentClick="TogglePasswordVisibility"
+                          AdornmentIconEnd="@_passwordIcon"
+                          Class="auth-input login-password-input"
+                          For="@(() => _loginModel.Password)" />
+
+            <MudCheckBox @bind-Value="_rememberSession"
+                         Label="Recordar sesión"
+                         Color="Color.Primary"
+                         Class="remember-checkbox" />
+
+            <MudButton ButtonType="ButtonType.Submit"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Disabled="@_isLoading"
+                       Class="auth-button">
+                @if (_isLoading)
+                {
+                    <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
+                    <span class="loading-text">Cargando...</span>
+                }
+                else
+                {
+                    <span class="button-content">Entrar <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
+                }
+            </MudButton>
+        </EditForm>
+
+        <div class="auth-bottom-section">
+            <MudText Typo="Typo.body2" Class="auth-bottom-text">¿Aún no tienes cuenta?</MudText>
+            <MudLink Href="/register" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">Crear una cuenta</MudLink>
+        </div>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private LoginRequestDto _loginModel = new();
+    private bool _rememberSession = false;
+    private bool _isLoading = false;
+
+    private InputType _passwordInput = InputType.Password;
+    private string _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+
+    private void TogglePasswordVisibility()
+    {
+        if (_passwordInput == InputType.Password)
+        {
+            _passwordInput = InputType.Text;
+            _passwordIcon = Icons.Material.Outlined.Visibility;
+        }
+        else
+        {
+            _passwordInput = InputType.Password;
+            _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+        }
+    }
+
+    private async Task HandleLoginAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            await Task.Delay(1000);
+            Console.WriteLine($"Login intento: {_loginModel.Email}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

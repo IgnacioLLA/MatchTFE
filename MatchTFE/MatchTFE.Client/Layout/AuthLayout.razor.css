@@ -1,0 +1,210 @@
+﻿/* ==========================================
+   1. LAYOUT Y FONDOS (Global para Auth)
+   ========================================== */
+.auth-layout {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top left, #eef2f6 0%, #f8fafc 100%);
+    padding: 2rem;
+}
+
+.brand-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-box {
+    background-color: var(--app-primary-dark, #1d4ed8);
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem auto;
+    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+}
+
+.logo-icon {
+    width: 28px;
+    height: 28px;
+}
+
+::deep .brand-title {
+    font-weight: 800;
+    color: var(--app-text-main, #0f172a);
+}
+
+.auth-main-content {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* ==========================================
+   2. TARJETAS COMPARTIDAS (Login y Register)
+   ========================================== */
+::deep .auth-card {
+    width: 100%;
+    max-width: 440px;
+    border-radius: 16px;
+    border: 1px solid var(--app-border, #e2e8f0);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+    /* El registro necesita un poco más de ancho para la cuadrícula */
+    ::deep .auth-card.register-card {
+        max-width: 480px;
+    }
+
+::deep .auth-card-content {
+    padding: 2.5rem !important;
+}
+
+::deep .auth-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem !important;
+    color: var(--app-text-main, #0f172a);
+}
+
+::deep .auth-subtitle {
+    color: var(--app-text-muted, #64748b);
+    margin-bottom: 2rem !important;
+}
+
+/* ==========================================
+   3. FORMULARIOS E INPUTS GENÉRICOS
+   ========================================== */
+::deep .auth-input {
+    margin-bottom: 1.5rem !important;
+}
+
+    ::deep .auth-input .mud-input-control-input-container {
+        border-radius: 10px;
+    }
+
+::deep .auth-button {
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 0.8rem !important;
+}
+
+::deep .loading-spinner {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    margin-left: -4px;
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+}
+
+::deep .btn-icon {
+    font-size: 1.25rem;
+    margin-left: 8px;
+    margin-bottom: -2px;
+}
+
+/* ==========================================
+   4. ESPECÍFICOS DE LOGIN
+   ========================================== */
+.password-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+::deep .password-label {
+    font-weight: 700;
+    color: var(--app-text-main, #0f172a);
+}
+
+::deep .forgot-link {
+    color: var(--app-primary-dark, #1d4ed8);
+    font-weight: 500;
+}
+
+::deep .login-password-input {
+    margin-bottom: 0.5rem !important;
+}
+
+::deep .remember-checkbox {
+    margin-bottom: 2rem !important;
+    margin-left: -8px !important;
+}
+
+/* ==========================================
+   5. ESPECÍFICOS DE REGISTRO
+   ========================================== */
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+    .form-row-2 ::deep .auth-input {
+        margin-bottom: 0 !important;
+    }
+
+::deep .register-password-input {
+    margin-bottom: 0.25rem !important;
+}
+
+::deep .password-hint {
+    display: block;
+    color: var(--app-text-muted, #64748b);
+    font-size: 0.75rem;
+    font-style: italic;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: 1.75rem !important;
+    margin-left: 0.25rem;
+}
+
+/* ==========================================
+   6. SECCIÓN INFERIOR Y FOOTERS (Compartidos)
+   ========================================== */
+::deep .auth-bottom-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+::deep .auth-bottom-text {
+    color: var(--app-text-muted, #64748b);
+    margin-right: 0.5rem;
+}
+
+::deep .auth-bottom-link {
+    color: var(--app-primary-dark, #1d4ed8);
+    font-weight: 700;
+}
+
+.page-footer {
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+::deep .footer-links a {
+    color: var(--app-text-muted, #64748b);
+    font-weight: 500;
+}
+
+::deep .copyright-text {
+    color: var(--app-text-muted, #64748b);
+}

@@ -1,0 +1,31 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="auth-layout animate-fade-in">
+    <div class="brand-header">
+        <div class="logo-box">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-icon">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="white" />
+                <path d="M2 17L12 22L22 17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <MudText Typo="Typo.h5" Class="brand-title">MATCH-TFE</MudText>
+    </div>
+
+    <main class="auth-main-content">
+        @Body
+    </main>
+
+    <div class="page-footer">
+        <div class="footer-links">
+            <MudLink Href="/privacidad" Typo="Typo.caption" Underline="Underline.Hover">Privacidad</MudLink>
+            <MudLink Href="/terminos" Typo="Typo.caption" Underline="Underline.Hover">Términos de servicio</MudLink>
+            <MudLink Href="/ayuda" Typo="Typo.caption" Underline="Underline.Hover">Ayuda</MudLink>
+        </div>
+        <MudText Typo="Typo.caption" Class="copyright-text">© 2026 MATCH-TFE. Todos los derechos reservados.</MudText>
+    </div>
+</div>

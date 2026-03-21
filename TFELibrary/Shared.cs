@@ -45,13 +45,13 @@ namespace TFELibrary.Shared
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; } = string.Empty;
     }
-
     public class LoginResponseDto
     {
         public AuthResultDto AuthData { get; set; } = new AuthResultDto();
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
     }
+    
     public class RegisterRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
@@ -73,11 +73,26 @@ namespace TFELibrary.Shared
         public bool IsSuccess { get; set; }
         public string? ErrorMessage { get; set; }
     }
+
+    public class RefreshTokenRequestDto
+    {
+        [Required]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenResponseDto
+    {
+        public AuthResultDto AuthData { get; set; } = new AuthResultDto();
+    }
+
     public class AuthResultDto
     {
         public bool IsSuccess { get; set; }
         public string Token { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
         public string ErrorMessage { get; set; } = string.Empty;
     }
-
 }

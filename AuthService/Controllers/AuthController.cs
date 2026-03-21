@@ -1,5 +1,7 @@
 ﻿using AuthService.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TFELibrary.Shared;
 
 namespace AuthService.Controllers
@@ -43,6 +45,45 @@ namespace AuthService.Controllers
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _authService.RefreshTokenAsync(request);
+
+            if (!response.AuthData.IsSuccess)
+            {
+                return Unauthorized(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("logout")]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest(new { IsSuccess = false, ErrorMessage = "Token inválido." });
+            }
+
+            var result = await _authService.LogoutAsync(email);
+
+            if (!result)
+            {
+                return BadRequest(new { IsSuccess = false, ErrorMessage = "Error al cerrar sesión." });
+            }
+
+            return Ok(new { IsSuccess = true, Message = "Sesión cerrada correctamente." });
         }
     }
 }
