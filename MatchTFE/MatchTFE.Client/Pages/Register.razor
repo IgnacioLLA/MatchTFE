@@ -1,6 +1,11 @@
 ﻿@page "/register"
 @using System.ComponentModel.DataAnnotations
 @using TFELibrary.Shared
+
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
 @layout AuthLayout
 
 <MudCard Class="auth-card register-card">
@@ -128,8 +133,29 @@
                 Password = _registerModel.Password
             };
 
-            await Task.Delay(1000); // Aquí iría el Http.PostAsJsonAsync
-            Console.WriteLine($"Registro intento: {requestDto.Email}");
+            var http = ClientFactory.CreateClient("GatewayAPI");
+
+            var response = await http.PostAsJsonAsync("api/auth/register", requestDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
+
+                if (result != null && result.IsSuccess)
+                {
+                    Snackbar.Add("¡Cuenta creada con éxito! Ya puedes iniciar sesión.", Severity.Success);
+                    Navigation.NavigateTo("/login");
+                }
+                else
+                {
+                    Snackbar.Add(result?.ErrorMessage ?? "No se pudo registrar la cuenta.", Severity.Warning);
+                }
+            }
+            else
+            {
+                var errorResult = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
+                Snackbar.Add(errorResult?.ErrorMessage ?? "Error al procesar el registro.", Severity.Error);
+            }
         }
         finally
         {

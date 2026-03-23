@@ -14,14 +14,22 @@ var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
 builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseNpgsql(dbConnectionString));
 
-// Esta opción funciona en .NET pero habría que definirlo similar a como se definiría en el appsettings.json y hace solo la comprobación de mirar en las var de entorno y luego el appsettings. Debería definir la cadena así: ConnectionStrings__SharedDbConnection : ...
-// var dbConnectionString = builder.Configuration.GetConnectionString("SharedDbConnection");
-
 builder.Services.AddIdentityCore<MatchUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
 })
     .AddEntityFrameworkStores<AuthDbContext>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirBlazor", policy =>
+    {
+        policy.WithOrigins("http://localhost:5000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
@@ -47,21 +55,35 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
     };
-});
-builder.Services.AddAuthorization();
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.ContainsKey("AccessToken"))
+            {
+                context.Token = context.Request.Cookies["AccessToken"];
+            }
 
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization();
 builder.Services.AddControllers().AddControllersAsServices();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); 
+
+app.UseRouting();
+
+app.UseCors("PermitirBlazor");
 
 app.UseAuthentication();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())

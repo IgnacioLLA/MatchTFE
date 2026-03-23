@@ -1,6 +1,10 @@
 ﻿@inherits LayoutComponentBase
 @using MatchTFE.Client.Themes
 
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+
 <MudThemeProvider Theme="@MatchTheme.DefaultTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -34,7 +38,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Class="mr-2" />
 
         @* Perfil con nombre oculto en móvil (d-none) *@
-        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2">
+        <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2" OnClick=ProbarAutenticacionAsync>
             <MudAvatar Variant="Variant.Filled" Size="Size.Medium" Class="mr-sm-3">DR</MudAvatar>
             <div class="d-none d-sm-flex flex-column align-start">
                 <MudText Typo="Typo.body2" Style="text-transform: none; line-height: 1.2;"><b>Dr. Rodríguez</b></MudText>
@@ -43,7 +47,7 @@
         </MudButton>
     </MudAppBar>
 
-    @* CONTENIDO CENTRAL: Aquí está la magia de la simetría *@
+    @* CONTENIDO CENTRAL*@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-6 px-4 px-sm-12">
             @Body
@@ -54,4 +58,34 @@
 @code {
     private bool _drawerOpen = true;
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+
+    private async Task ProbarAutenticacionAsync()
+    {
+        try
+        {
+            var http = ClientFactory.CreateClient("GatewayAPI");
+
+            // Hacemos un simple GET al nuevo endpoint
+            var response = await http.GetAsync("api/auth/test-auth");
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Si da 200 OK, el token funciona
+                Snackbar.Add("¡Token válido! Tienes permiso.", Severity.Success);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Si da 401, el token caducó o no se envió
+                Snackbar.Add("Error 401: No tienes permiso (Token inválido o caducado).", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add($"Error inesperado: {response.StatusCode}", Severity.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error de red: {ex.Message}", Severity.Error);
+        }
+    }
 }

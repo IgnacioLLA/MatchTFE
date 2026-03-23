@@ -10,6 +10,8 @@ namespace AuthService.Service
 {
     public class AuthService : IAuthService
     {
+        public const int TokenLifetime = 1;
+
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
 
@@ -124,7 +126,7 @@ namespace AuthService.Service
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(15),
+                expires: DateTime.UtcNow.AddMinutes(TokenLifetime),
                 signingCredentials: creds
             );
 

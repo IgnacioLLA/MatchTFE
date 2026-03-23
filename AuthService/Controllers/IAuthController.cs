@@ -8,6 +8,6 @@ namespace AuthService.Controllers
         Task<IActionResult> Login(LoginRequestDto loginDto);
         Task<IActionResult> Register(RegisterRequestDto request);
         Task<IActionResult> Logout();
-        Task<IActionResult> RefreshToken(RefreshTokenRequestDto request);
+        Task<IActionResult> RefreshToken();
     }
 }

@@ -4,7 +4,10 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5283") });
+builder.Services.AddHttpClient("GatewayAPI", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5080/");
+});
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

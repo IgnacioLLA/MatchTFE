@@ -1,6 +1,11 @@
 ﻿@page "/login"
 @using TFELibrary.Shared
+@using System.Net.Http.Json
 @layout AuthLayout
+
+@inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
 
 <MudCard Class="auth-card">
     <MudCardContent Class="auth-card-content">
@@ -93,8 +98,27 @@
         _isLoading = true;
         try
         {
-            await Task.Delay(1000);
-            Console.WriteLine($"Login intento: {_loginModel.Email}");
+            var response = await ClientFactory.CreateClient("GatewayAPI").PostAsJsonAsync("api/auth/login", _loginModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+
+                Snackbar.Add($"¡Bienvenido {result?.Name}!", Severity.Success);
+
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+                var errorMessage = errorResult?.AuthData?.ErrorMessage ?? "Email o contraseña incorrectos.";
+
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("No se pudo conectar con el servidor. Revisa tu conexión.", Severity.Error);
         }
         finally
         {

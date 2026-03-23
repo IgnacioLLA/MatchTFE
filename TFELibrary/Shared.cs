@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace TFELibrary.Shared
 {
@@ -45,13 +46,14 @@ namespace TFELibrary.Shared
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; } = string.Empty;
     }
+
     public class LoginResponseDto
     {
         public AuthResultDto AuthData { get; set; } = new AuthResultDto();
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
     }
-    
+
     public class RegisterRequestDto
     {
         [Required(ErrorMessage = "Email is required.")]
@@ -91,8 +93,13 @@ namespace TFELibrary.Shared
     public class AuthResultDto
     {
         public bool IsSuccess { get; set; }
+
+        [JsonIgnore]
         public string Token { get; set; } = string.Empty;
+
+        [JsonIgnore]
         public string RefreshToken { get; set; } = string.Empty;
+
         public string ErrorMessage { get; set; } = string.Empty;
     }
 }
