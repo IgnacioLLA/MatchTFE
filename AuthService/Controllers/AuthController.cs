@@ -89,17 +89,17 @@ namespace AuthService.Controllers
 
             var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(expiredToken);
 
-            var email = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
-                        ?? jwtToken.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
+                 ?? jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid Token." });
             }
 
             var requestDto = new RefreshTokenRequestDto
             {
-                Email = email,
+                UserId = userId,
                 RefreshToken = refreshToken
             };
 

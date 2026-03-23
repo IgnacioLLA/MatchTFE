@@ -22,7 +22,7 @@ builder.Services.AddIdentityCore<MatchUser>(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirBlazor", policy =>
+    options.AddPolicy("AllowBlazor", policy =>
     {
         policy.WithOrigins("http://localhost:5000")
               .AllowAnyMethod()
@@ -53,7 +53,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)),
+        ClockSkew = TimeSpan.Zero
     };
     options.Events = new JwtBearerEvents
     {

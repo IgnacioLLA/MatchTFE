@@ -15,6 +15,7 @@ namespace AuthService.Service
 
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
+        private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
         public AuthService(IAuthRepository authRepository, IConfiguration configuration)
         {
@@ -67,15 +68,15 @@ namespace AuthService.Service
 
         public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var refreshSecret = jwtSettings["RefreshSecret"]!;
+            var refreshSecret = _configuration.GetSection("JwtSettings")["RefreshSecret"]!;
 
             if (!IsValidToken(request.RefreshToken, refreshSecret))
             {
                 return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token expirado, falso o incorrecto." } };
             }
 
-            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+            var user = await _authRepository.GetUserByIdAsync(request.UserId);
+
             if (user == null)
             {
                 return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." } };
@@ -140,7 +141,7 @@ namespace AuthService.Service
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return _tokenHandler.WriteToken(token);
         }
 
         public async Task<bool> LogoutAsync(string email)
@@ -156,8 +157,7 @@ namespace AuthService.Service
         private bool IsValidToken(string token, string secretKey)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
-
-            var tokenHandler = new JwtSecurityTokenHandler();
+            
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -172,7 +172,7 @@ namespace AuthService.Service
 
             try
             {
-                tokenHandler.ValidateToken(token, validationParameters, out _);
+                _tokenHandler.ValidateToken(token, validationParameters, out _);
                 return true;
             }
             catch

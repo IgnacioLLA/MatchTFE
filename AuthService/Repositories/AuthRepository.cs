@@ -41,4 +41,9 @@ public class AuthRepository : IAuthRepository
     {
         await _userManager.RemoveAuthenticationTokenAsync(user, "MatchTFE", "RefreshToken");
     }
+
+    public async Task<MatchUser?> GetUserByIdAsync(string userId)
+    {
+          return await _userManager.FindByIdAsync(userId);
+    }
 }

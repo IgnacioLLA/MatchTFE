@@ -79,7 +79,7 @@ namespace TFELibrary.Shared
     public class RefreshTokenRequestDto
     {
         [Required]
-        public string Email { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
 
         [Required]
         public string RefreshToken { get; set; } = string.Empty;
