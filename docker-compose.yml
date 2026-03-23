@@ -44,6 +44,7 @@ services:
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__RefreshSecret=${REFRESH_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService
       - JwtSettings__Audience=MatchTFE_Clients
     depends_on:

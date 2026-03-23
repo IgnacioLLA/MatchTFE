@@ -11,6 +11,7 @@ namespace AuthService.Service
     public class AuthService : IAuthService
     {
         public const int TokenLifetime = 1;
+        public const int RefreshTokenLifetime = 2;
 
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
@@ -41,6 +42,7 @@ namespace AuthService.Service
 
             return new RegisterResponseDto { IsSuccess = true };
         }
+
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
         {
             var user = await _authRepository.GetUserByEmailAsync(request.Email);
@@ -65,37 +67,45 @@ namespace AuthService.Service
 
         public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var refreshSecret = jwtSettings["RefreshSecret"]!;
+
+            if (!IsValidToken(request.RefreshToken, refreshSecret))
+            {
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token expirado, falso o incorrecto." } };
+            }
+
             var user = await _authRepository.GetUserByEmailAsync(request.Email);
             if (user == null)
             {
-                return new RefreshTokenResponseDto
-                {
-                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." }
-                };
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." } };
             }
 
-            var storedRefreshToken = await _authRepository.GetRefreshTokenAsync(user);
-            if (storedRefreshToken != request.RefreshToken)
+            if (await _authRepository.GetRefreshTokenAsync(user) != request.RefreshToken)
             {
-                return new RefreshTokenResponseDto
-                {
-                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid or expired token." }
-                };
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token revocado o reemplazado." } };
             }
 
             var authResult = await GenerateAndSaveTokensAsync(user);
 
-            return new RefreshTokenResponseDto
-            {
-                AuthData = authResult
-            };
+            return new RefreshTokenResponseDto { AuthData = authResult };
         }
 
         private async Task<AuthResultDto> GenerateAndSaveTokensAsync(MatchUser user)
         {
-            var jwtToken = GenerateJwtToken(user);
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var accessSecret = jwtSettings["Secret"]!;
+            var refreshSecret = jwtSettings["RefreshSecret"]!;
 
-            var newRefreshToken = Guid.NewGuid().ToString("N");
+            var jwtToken = GenerateJwtToken(
+                user,
+                accessSecret,
+                DateTime.UtcNow.AddMinutes(TokenLifetime));
+
+            var newRefreshToken = GenerateJwtToken(
+                user,
+                refreshSecret,
+                DateTime.UtcNow.AddMinutes(RefreshTokenLifetime));
 
             await _authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
 
@@ -107,12 +117,12 @@ namespace AuthService.Service
                 ErrorMessage = string.Empty
             };
         }
-        private string GenerateJwtToken(MatchUser user)
+
+        private string GenerateJwtToken(MatchUser user, string secretKey, DateTime expiration)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
-            var secretKey = jwtSettings["Secret"];
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey!));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -126,7 +136,7 @@ namespace AuthService.Service
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(TokenLifetime),
+                expires: expiration,
                 signingCredentials: creds
             );
 
@@ -139,8 +149,36 @@ namespace AuthService.Service
             if (user == null) return false;
 
             await _authRepository.RemoveRefreshTokenAsync(user);
-            
+
             return true;
+        }
+
+        private bool IsValidToken(string token, string secretKey)
+        {
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                ValidateIssuer = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidateAudience = true,
+                ValidAudience = jwtSettings["Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+
+            try
+            {
+                tokenHandler.ValidateToken(token, validationParameters, out _);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

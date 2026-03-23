@@ -9,7 +9,7 @@ namespace AuthService.Repositories
         Task<bool> CheckPasswordAsync(MatchUser user, string password);
         Task<IdentityResult> CreateUserAsync(MatchUser user, string password);
         Task SaveRefreshTokenAsync(MatchUser user, string refreshToken);
-        Task<string?> GetRefreshTokenAsync(MatchUser user);
+        Task<string> GetRefreshTokenAsync(MatchUser user);
         Task RemoveRefreshTokenAsync(MatchUser user);
     }
 }
