@@ -6,23 +6,24 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TFELibrary.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
                          ?? builder.Configuration.GetConnectionString("DbConnection");
-builder.Services.AddDbContext<AuthDbContext>(options =>
+builder.Services.AddDbContext<AuthService.Data.MatchDbContext>(options =>
     options.UseNpgsql(dbConnectionString));
 
 builder.Services.AddIdentityCore<MatchUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
 })
-    .AddEntityFrameworkStores<AuthDbContext>();
+    .AddEntityFrameworkStores<AuthService.Data.MatchDbContext>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowBlazor", policy =>
+    options.AddPolicy("PermitirBlazor", policy =>
     {
         policy.WithOrigins("http://localhost:5000")
               .AllowAnyMethod()
@@ -92,7 +93,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<AuthDbContext>();
+        var context = services.GetRequiredService<MatchDbContext>();
         context.Database.Migrate();
     }
     catch (Exception ex)

@@ -6,7 +6,8 @@
       "serviceActions": {
         "MatchTFE": "StartDebugging",
         "apigateway": "StartDebugging",
-        "authservice": "StartDebugging"
+        "authservice": "StartDebugging",
+        "userservice": "StartDebugging"
       }
     }
   }

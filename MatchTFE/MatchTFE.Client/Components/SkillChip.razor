@@ -1,0 +1,33 @@
+﻿@using MudBlazor
+
+<div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: var(--app-primary-light);">
+    <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: var(--app-primary-dark);">@Skill.Tag</MudText>
+
+    <div class="d-flex align-center gap-4">
+        @* Usamos SelectedValueChanged para actualizar el DTO en tiempo real *@
+        <MudRating SelectedValue="@Skill.Level" SelectedValueChanged="OnLevelChanged" MaxValue="5" Color="Color.Primary" Size="Size.Small" />
+
+        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" OnClick="RemoveSkill" />
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SkillDto Skill { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<SkillDto> OnRemoved { get; set; }
+
+    private async Task RemoveSkill()
+    {
+        if (OnRemoved.HasDelegate)
+        {
+            await OnRemoved.InvokeAsync(Skill);
+        }
+    }
+
+    private void OnLevelChanged(int newLevel)
+    {
+        Skill.Level = newLevel;
+    }
+}

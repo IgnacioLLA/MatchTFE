@@ -1,0 +1,83 @@
+﻿@using MudBlazor
+
+<MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Primary" />
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6" Class="font-weight-bold">Académico y Habilidades</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Class="mb-6">
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="Model.AcademicYear" Label="CURSO ACADÉMICO" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg">
+                    <MudSelectItem Value="@("3º Año")" />
+                    <MudSelectItem Value="@("4º Año")" />
+                    <MudSelectItem Value="@("Máster")" />
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+
+        <MudText Typo="Typo.caption" Style="color: var(--app-text-muted);" Class="d-block mb-2 font-weight-bold app-caption-uppercase">
+            HABILIDADES TÉCNICAS
+        </MudText>
+
+        <MudAutocomplete T="string"
+                         Placeholder="Buscar habilidades (ej. Java, Docker, React)..."
+                         SearchFunc="@SearchSkillsAsync"
+                         ValueChanged="@OnSkillSelected"
+                         Value="@_searchQuery"
+                         Variant="Variant.Outlined"
+                         Margin="Margin.Dense"
+                         AdornmentIcon="@Icons.Material.Filled.Build"
+                         Class="mb-4 rounded-lg"
+                         Clearable="true" />
+
+        @if (Model.Skills.Any())
+        {
+            <div class="d-flex flex-column gap-3 mb-6">
+                @foreach (var skill in Model.Skills)
+                {
+                    @* EL @key ES VITAL AQUÍ PARA QUE EL BOTÓN ELIMINAR FUNCIONE BIEN *@
+                    <SkillChip @key="skill.Tag" Skill="skill" OnRemoved="RemoveSkill" />
+                }
+            </div>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Class="mb-6">
+                Aún no has añadido ninguna habilidad técnica. ¡Los tutores las valoran mucho!
+            </MudAlert>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public ProfileDto Model { get; set; } = default!;
+
+    [Parameter]
+    public List<string> AvailableSkills { get; set; } = new();
+
+    private string _searchQuery = string.Empty;
+
+    private async Task<IEnumerable<string>> SearchSkillsAsync(string value, CancellationToken token)
+    {
+        await Task.Delay(100, token);
+        if (string.IsNullOrEmpty(value)) return AvailableSkills.Where(s => !Model.Skills.Any(ms => ms.Tag == s));
+        return AvailableSkills.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase) && !Model.Skills.Any(ms => ms.Tag == x));
+    }
+
+    private void OnSkillSelected(string selectedTag)
+    {
+        if (!string.IsNullOrEmpty(selectedTag) && !Model.Skills.Any(s => s.Tag == selectedTag))
+        {
+            Model.Skills.Add(new SkillDto { Tag = selectedTag, Level = 1 });
+        }
+        _searchQuery = string.Empty;
+    }
+
+    private void RemoveSkill(SkillDto skillToRemove) => Model.Skills.Remove(skillToRemove);
+}

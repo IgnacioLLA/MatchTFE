@@ -6,4 +6,5 @@
   <Project Path="MatchTFE/MatchTFE.Client/MatchTFE.Client.csproj" />
   <Project Path="MatchTFE/MatchTFE/MatchTFE.csproj" />
   <Project Path="TFELibrary/TFELibrary.csproj" />
+  <Project Path="UserService/UserService.csproj" Id="7bf751aa-e810-46a3-b79c-a7de7357d144" />
 </Solution>

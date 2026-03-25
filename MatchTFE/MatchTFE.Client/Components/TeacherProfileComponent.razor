@@ -1,0 +1,31 @@
+﻿@using MudBlazor
+
+<MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudIcon Icon="@Icons.Material.Filled.Work" Color="Color.Tertiary" />
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6" Class="font-weight-bold">Datos Académicos</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid Class="mb-6">
+            <MudItem xs="12" sm="6">
+                <MudSelect T="string" @bind-Value="Model.Department" Label="DEPARTAMENTO" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg">
+                    <MudSelectItem Value="@("Informática")" />
+                    <MudSelectItem Value="@("Matemáticas")" />
+                    <MudSelectItem Value="@("Ingeniería Eléctrica")" />
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="Model.OfficeLocation" Label="DESPACHO / UBICACIÓN" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" />
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public ProfileDto Model { get; set; } = default!;
+}

@@ -30,6 +30,35 @@ namespace TFELibrary.Shared
         public List<CompetencyDto> Competencies { get; set; } = new();
     }
 
+    public class ProfileDto
+    {
+        public string RoleType { get; set; } = string.Empty;
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+
+        public string Bio { get; set; } = string.Empty;
+        public List<string> Interests { get; set; } = new();
+
+        // ----------------------------------
+        // STUDENT
+        // ----------------------------------
+        public string AcademicYear { get; set; } = string.Empty;
+        public List<SkillDto> Skills { get; set; } = new();
+
+        // ----------------------------------
+        // TEACHER
+        // ----------------------------------
+        public string Department { get; set; } = string.Empty;
+        public string OfficeLocation { get; set; } = string.Empty;
+
+    }
+    public class SkillDto
+    {
+        public string Tag { get; set; } = string.Empty;
+        public int Level { get; set; } = 1;
+    }
+
     public class CompetencyDto
     {
         public string Name { get; set; } = string.Empty;

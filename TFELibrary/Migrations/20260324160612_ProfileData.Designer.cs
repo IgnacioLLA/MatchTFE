@@ -9,11 +9,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace AuthService.Migrations
+namespace TFELibrary.Migrations
 {
-    [DbContext(typeof(AuthDbContext))]
-    [Migration("20260316100243_InitialCreate")]
-    partial class InitialCreate
+    [DbContext(typeof(MatchDbContext))]
+    [Migration("20260324160612_ProfileData")]
+    partial class ProfileData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -50,7 +50,7 @@ namespace AuthService.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("NombreCompleto")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -72,6 +72,10 @@ namespace AuthService.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -225,6 +229,113 @@ namespace AuthService.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
+                {
+                    b.Property<string>("StudentProfileId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("StudentProfileId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("StudentSkills");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("StudentProfileUserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("TeacherProfileUserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentProfileUserId");
+
+                    b.HasIndex("TeacherProfileUserId");
+
+                    b.ToTable("Tags");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("MicrosoftUid")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("UserProfiles");
+
+                    b.UseTptMappingStrategy();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.StudentProfile", b =>
+                {
+                    b.HasBaseType("TFELibrary.Data.UserProfile");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.ToTable("StudentProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TeacherProfile", b =>
+                {
+                    b.HasBaseType("TFELibrary.Data.UserProfile");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("OfficeLocation")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.ToTable("TeacherProfiles", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -274,6 +385,75 @@ namespace AuthService.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
+                {
+                    b.HasOne("TFELibrary.Data.StudentProfile", "StudentProfile")
+                        .WithMany("Skills")
+                        .HasForeignKey("StudentProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("StudentProfile");
+
+                    b.Navigation("Tag");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.Tag", b =>
+                {
+                    b.HasOne("TFELibrary.Data.StudentProfile", null)
+                        .WithMany("InterestedTopics")
+                        .HasForeignKey("StudentProfileUserId");
+
+                    b.HasOne("TFELibrary.Data.TeacherProfile", null)
+                        .WithMany("ResearchLines")
+                        .HasForeignKey("TeacherProfileUserId");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
+                {
+                    b.HasOne("AuthService.Data.MatchUser", null)
+                        .WithOne()
+                        .HasForeignKey("TFELibrary.Data.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.StudentProfile", b =>
+                {
+                    b.HasOne("TFELibrary.Data.UserProfile", null)
+                        .WithOne()
+                        .HasForeignKey("TFELibrary.Data.StudentProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TeacherProfile", b =>
+                {
+                    b.HasOne("TFELibrary.Data.UserProfile", null)
+                        .WithOne()
+                        .HasForeignKey("TFELibrary.Data.TeacherProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.StudentProfile", b =>
+                {
+                    b.Navigation("InterestedTopics");
+
+                    b.Navigation("Skills");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TeacherProfile", b =>
+                {
+                    b.Navigation("ResearchLines");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,0 +1,209 @@
+﻿@page "/profile"
+
+@inject IHttpClientFactory ClientFactory
+@inject ISnackbar Snackbar
+
+@if (_isLoading || _profileDto == null)
+{
+    <div class="d-flex justify-center align-center" style="height: 50vh;">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        <MudText Typo="Typo.h6" Class="ml-4" Style="color: var(--app-text-muted);">Cargando perfil...</MudText>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-space-between align-center mb-6">
+        <MudText Typo="Typo.h5" Class="font-weight-extrabold" Style="color: var(--app-text-main);">
+            Mi Perfil
+        </MudText>
+        
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ToggleRoleMode" Class="rounded-lg font-weight-bold">
+            Cambiar a vista de @(_profileDto.RoleType == "Student" ? "Profesor" : "Estudiante")
+        </MudButton>
+    </div>
+
+    <div class="animate-fade-in">
+        @* TARJETA CABECERA *@
+        <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-4">
+            <MudCardContent Class="d-flex align-center flex-wrap gap-4">
+                <MudAvatar Class="avatar-xl">
+                    <MudImage Src="https://i.pravatar.cc/150?img=11" Alt="Foto de perfil" />
+                </MudAvatar>
+                <div class="flex-grow-1">
+                    <MudText Typo="Typo.h5" Class="app-title-tight mb-1">@_profileDto.FirstName @_profileDto.LastName</MudText>
+                    <MudText Typo="Typo.body2" Style="color: var(--app-text-muted);" Class="mb-4">
+                        @(_profileDto.RoleType == "Student" ? "Estudiante de Ingeniería Informática" : "Profesor Universitario")
+                    </MudText>
+                </div>
+            </MudCardContent>
+        </MudCard>
+
+        @* DATOS PERSONALES COMUNES *@
+        <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
+            <MudCardHeader>
+                <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" /></CardHeaderAvatar>
+                <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">Datos Personales</MudText></CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_profileDto.FirstName" Label="NOMBRE" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" Disabled="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="_profileDto.LastName" Label="APELLIDOS" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" Disabled="true" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_profileDto.Email" Label="EMAIL INSTITUCIONAL" Variant="Variant.Filled" Margin="Margin.Dense" Disabled="true" Class="rounded-lg" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_profileDto.Bio" Label="BIOGRAFÍA / SOBRE MÍ" Variant="Variant.Outlined" Lines="4" Class="rounded-lg" HelperText="Preséntate a posibles compañeros de proyecto o tutores." />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+
+        @* INTERESES *@
+        <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
+            <MudCardHeader>
+                <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" /></CardHeaderAvatar>
+                <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">Intereses</MudText></CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.caption" Style="color: var(--app-text-muted);" Class="d-block mb-2 font-weight-bold app-caption-uppercase">
+                    AÑADIR ETIQUETAS DE INTERÉS
+                </MudText>
+                
+                <MudAutocomplete T="string" 
+                                 Placeholder="Buscar intereses (Ej: IA, Ciberseguridad)..." 
+                                 SearchFunc="@SearchInterestsAsync" 
+                                 ValueChanged="@OnInterestSelected" 
+                                 Value="@_interestSearchQuery" 
+                                 Variant="Variant.Outlined" 
+                                 Margin="Margin.Dense" 
+                                 AdornmentIcon="@Icons.Material.Filled.Search"
+                                 Class="mb-4 rounded-lg" 
+                                 Clearable="true" />
+
+                <div class="d-flex flex-wrap mb-4">
+                    @foreach (var interest in _profileDto.Interests)
+                    {
+                        @* EL @key ES VITAL AQUÍ TAMBIÉN *@
+                        <ChipTag @key="interest" Text="@interest" OnRemoved="RemoveInterest" />
+                    }
+                </div>
+            </MudCardContent>
+        </MudCard>
+
+        @* COMPONENTES HIJOS *@
+        @if (_profileDto.RoleType == "Student")
+        {
+            <StudentProfileComponent Model="_profileDto" AvailableSkills="_availableBackendSkills" />
+        }
+        else if (_profileDto.RoleType == "Teacher")
+        {
+            <TeacherProfileComponent Model="_profileDto" />
+        }
+
+        @* BARRA DE ACCIONES *@
+        <div class="d-flex align-center justify-space-between mt-8 mb-4">
+            <MudText Typo="Typo.body2" Style="color: var(--app-text-muted);">Cargado de forma segura desde el servidor</MudText>
+            <div class="d-flex gap-4">
+                <MudButton Variant="Variant.Text" Color="Color.Dark" Class="font-weight-bold">Descartar</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="SaveChanges">
+                    Guardar Cambios
+                </MudButton>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private ProfileDto? _profileDto = null;
+    private bool _isLoading = true;
+    private string _interestSearchQuery = string.Empty;
+    
+    private List<string> _availableBackendSkills = new();
+    private List<string> _availableBackendInterests = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await Task.Delay(600); 
+            
+            _availableBackendSkills = new List<string> { "C#", "SQL Server", "Docker", "React", "Blazor", "Python", "Kubernetes", "AWS" };
+            _availableBackendInterests = new List<string> { "Machine Learning", "Cloud Architecture", "Cybersecurity", "IoT", "Microservicios" };
+            
+            // Mockup COMPLETO con todos los datos del DTO
+            _profileDto = new ProfileDto 
+            {
+                RoleType = "Student", 
+                FirstName = "Juan", 
+                LastName = "García Pérez", 
+                Email = "uo12345@uniovi.es",
+                Bio = "Estudiante de último año de Ingeniería Informática. Me apasiona el desarrollo backend y la arquitectura de sistemas distribuidos. Busco un TFE retador que me permita aplicar conocimientos de la nube.",
+                
+                Interests = new List<string> { "Microservicios", "Cloud Architecture" },
+                
+                // Datos de estudiante
+                AcademicYear = "4º Año",
+                Skills = new List<SkillDto> 
+                { 
+                    new SkillDto { Tag = "C#", Level = 4 },
+                    new SkillDto { Tag = "SQL Server", Level = 3 },
+                    new SkillDto { Tag = "Docker", Level = 2 }
+                },
+
+                // Datos de profesor (quedarán ocultos hasta que pulses el botón de alternar vista)
+                Department = "Informática",
+                OfficeLocation = "Edificio Polivalente, Planta 2, Despacho 2.14"
+            };
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar el perfil: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void ToggleRoleMode()
+    {
+        if (_profileDto != null)
+        {
+            _profileDto.RoleType = _profileDto.RoleType == "Student" ? "Teacher" : "Student";
+        }
+    }
+
+    private async Task<IEnumerable<string>> SearchInterestsAsync(string value, CancellationToken token)
+    {
+        await Task.Delay(100, token);
+        if (_profileDto == null) return Array.Empty<string>();
+        if (string.IsNullOrEmpty(value)) return _availableBackendInterests.Where(t => !_profileDto.Interests.Contains(t));
+        return _availableBackendInterests.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase) && !_profileDto.Interests.Contains(x));
+    }
+
+    private void OnInterestSelected(string selectedTag)
+    {
+        if (_profileDto != null && !string.IsNullOrEmpty(selectedTag) && !_profileDto.Interests.Contains(selectedTag))
+        {
+            _profileDto.Interests.Add(selectedTag);
+        }
+        _interestSearchQuery = string.Empty; 
+    }
+
+    private void RemoveInterest(string tagToRemove)
+    {
+        if (_profileDto != null)
+        {
+            _profileDto.Interests.Remove(tagToRemove);
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        Snackbar.Add("¡Cambios guardados correctamente!", Severity.Success);
+    }
+}

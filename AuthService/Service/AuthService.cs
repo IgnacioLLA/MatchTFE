@@ -10,8 +10,8 @@ namespace AuthService.Service
 {
     public class AuthService : IAuthService
     {
-        public const int TokenLifetime = 1;
-        public const int RefreshTokenLifetime = 2;
+        public const int TokenLifetime = 15;
+        public const int RefreshTokenLifetime = 25;
 
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
