@@ -5,6 +5,8 @@ namespace UserService.Controllers
 {
     public interface IUserController
     {
-        Task<ActionResult<ProfileDto>> GetCurrentProfile();
+        Task<ActionResult<ProfileResponse>> GetCurrentProfile();
+        Task<ActionResult> CreateInitialProfile(ProfileCreationRequest newProfile);
+        Task<IActionResult> UpdateProfile(ProfileUpdateRequest request);
     }
 }

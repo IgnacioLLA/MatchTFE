@@ -73,6 +73,20 @@ namespace AuthService.Controllers
                 return BadRequest(result);
             }
 
+            if (result.AuthData != null)
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    // Secure = true,
+                    SameSite = SameSiteMode.Strict,
+                    Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+                };
+
+                Response.Cookies.Append("AccessToken", result.AuthData.Token, cookieOptions);
+                Response.Cookies.Append("RefreshToken", result.AuthData.RefreshToken, cookieOptions);
+            }
+
             return Ok(result);
         }
 

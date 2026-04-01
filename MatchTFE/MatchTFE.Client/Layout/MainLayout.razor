@@ -1,5 +1,5 @@
 ﻿@inherits LayoutComponentBase
-@using MatchTFE.Client.Themes
+@using TFELibrary.Shared
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
@@ -11,7 +11,6 @@
 <MudPopoverProvider />
 
 <MudLayout>
-    @* BARRA LATERAL *@
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="@DrawerVariant.Responsive">
         <div class="pa-4 mt-2">
             <MudText Typo="Typo.overline" Style="color: #7a829a; font-weight: bold; letter-spacing: 1px;">
@@ -21,11 +20,9 @@
         <NavMenu />
     </MudDrawer>
 
-    @* BARRA SUPERIOR *@
     <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
-        
-        @* Logo que retorna a Home *@
+
         <MudLink Href="/" Underline="Underline.None" Color="Color.Inherit" Class="d-flex align-center">
             <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 800; letter-spacing: -0.5px;">
                 MATCH-TFE
@@ -35,22 +32,40 @@
         <MudSpacer />
 
         <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" />
-        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Inherit" Class="mr-2" OnClick=ProbarAutenticacionAsync />
 
-        @* Perfil con nombre oculto en móvil*@
+        @* BOTÓN DE PERFIL DINÁMICO *@
         <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2" Href="/profile">
-            <MudAvatar Variant="Variant.Filled" Size="Size.Medium" Class="mr-sm-3">DR</MudAvatar>
-            <div class="d-none d-sm-flex flex-column align-start">
-                <MudText Typo="Typo.body2" Style="text-transform: none; line-height: 1.2;"><b>Dr. Rodríguez</b></MudText>
-                <MudText Typo="Typo.caption" Style="text-transform: none;">Catedrático</MudText>
-            </div>
+            @if (_isLoading)
+            {
+                <MudProgressCircular Color="Color.Secondary" Size="Size.Small" Indeterminate="true" />
+            }
+            else if (_globalProfile != null)
+            {
+                <MudAvatar Variant="Variant.Filled" Size="Size.Medium" Class="mr-sm-3" Color="Color.Primary">
+                    @(_globalProfile.FirstName.FirstOrDefault())@(_globalProfile.LastName.FirstOrDefault())
+                </MudAvatar>
+                <div class="d-none d-sm-flex flex-column align-start">
+                    <MudText Typo="Typo.body2" Style="text-transform: none; line-height: 1.2;"><b>@_globalProfile.FirstName @_globalProfile.LastName</b></MudText>
+                    <MudText Typo="Typo.caption" Style="text-transform: none;">
+                        @(_globalProfile.Role == RoleType.Student ? "Estudiante" : "Profesor")
+                    </MudText>
+                </div>
+            }
         </MudButton>
     </MudAppBar>
 
-    @* CONTENIDO CENTRAL*@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-6 px-4 px-sm-12">
-            @Body
+            @if (_isLoading)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else
+            {
+                <CascadingValue Value="@_globalProfile">
+                    @Body
+                </CascadingValue>
+            }
         </MudContainer>
     </MudMainContent>
 </MudLayout>
@@ -59,29 +74,38 @@
     private bool _drawerOpen = true;
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 
-    private async Task ProbarAutenticacionAsync()
+    private ProfileDto? _globalProfile;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarPerfilGlobalAsync();
+    }
+
+    private async Task CargarPerfilGlobalAsync()
     {
         try
         {
             var http = ClientFactory.CreateClient("GatewayAPI");
-            var response = await http.GetAsync("api/auth/test-auth");
+            var response = await http.GetAsync("api/user/profile");
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("¡Token válido! Tienes permiso.", Severity.Success);
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                Snackbar.Add("Error 401: No tienes permiso (Token inválido o caducado).", Severity.Error);
+                var result = await response.Content.ReadFromJsonAsync<ProfileResponse>();
+                _globalProfile = result?.profile;
             }
             else
             {
-                Snackbar.Add($"Error inesperado: {response.StatusCode}", Severity.Warning);
+                Snackbar.Add("Error al cargar los datos del usuario en la cabecera.", Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Snackbar.Add($"Error de red: {ex.Message}", Severity.Error);
+            Snackbar.Add("Error de conexión al cargar el perfil.", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
         }
     }
 }

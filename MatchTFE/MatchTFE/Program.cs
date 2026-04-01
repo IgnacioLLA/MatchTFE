@@ -37,4 +37,5 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(MatchTFE.Client._Imports).Assembly);
 
+
 app.Run();

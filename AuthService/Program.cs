@@ -1,4 +1,3 @@
-using AuthService.Data;
 using AuthService.Infrastructure;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -6,24 +5,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using TFELibrary.Data;
+using AuthService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
-                         ?? builder.Configuration.GetConnectionString("DbConnection");
-builder.Services.AddDbContext<AuthService.Data.MatchDbContext>(options =>
-    options.UseNpgsql(dbConnectionString));
 
 builder.Services.AddIdentityCore<MatchUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
 })
-    .AddEntityFrameworkStores<AuthService.Data.MatchDbContext>();
+.AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirBlazor", policy =>
+    options.AddPolicy("AllowBlazor", policy =>
     {
         policy.WithOrigins("http://localhost:5000")
               .AllowAnyMethod()
@@ -33,6 +27,12 @@ builder.Services.AddCors(options =>
 });
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+builder.Services.AddHttpClient("UserServiceClient", client =>
+{
+    client.BaseAddress = new Uri("http://userservice:8080/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 {
@@ -74,15 +74,18 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers().AddControllersAsServices();
 
+// DbContext configuration
+var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
+                         ?? builder.Configuration.GetConnectionString("DbConnection");
+builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseNpgsql(dbConnectionString, x => 
+        x.MigrationsHistoryTable("__AuthMigrationsHistory")));
+
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-
-// app.UseHttpsRedirection(); 
 
 app.UseRouting();
 
-app.UseCors("PermitirBlazor");
+app.UseCors("AllowBlazor");
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -90,17 +93,8 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<MatchDbContext>();
-        context.Database.Migrate();
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ocurrió un error al migrar la base de datos.");
-    }
+    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    db.Database.Migrate();
 }
 
 app.Run();

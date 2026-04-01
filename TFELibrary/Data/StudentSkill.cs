@@ -8,7 +8,7 @@ namespace TFELibrary.Data
     public class StudentSkill
     {
         public string StudentProfileId { get; set; } = string.Empty;
-        public StudentProfile StudentProfile { get; set; } = null!;
+        public UserProfile StudentProfile { get; set; } = null!;
 
         public int TagId { get; set; }
         public Tag Tag { get; set; } = null!;

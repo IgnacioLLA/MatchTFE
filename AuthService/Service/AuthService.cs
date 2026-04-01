@@ -1,9 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using AuthService.Data;
+using AuthService.Repositories;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using AuthService.Data;
-using AuthService.Repositories;
 using TFELibrary.Shared;
 
 namespace AuthService.Service
@@ -15,12 +16,16 @@ namespace AuthService.Service
 
         private readonly IAuthRepository _authRepository;
         private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly ILogger<AuthService> _logger;
         private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AuthService> logger)
         {
             _authRepository = authRepository;
             _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -41,7 +46,44 @@ namespace AuthService.Service
                 return new RegisterResponseDto { IsSuccess = false, ErrorMessage = errors };
             }
 
-            return new RegisterResponseDto { IsSuccess = true };
+            // Generación de tokens para el nuevo usuario
+
+            var authResult = await GenerateAndSaveTokensAsync(newUser);
+            try
+            {
+                var client = _httpClientFactory.CreateClient("UserServiceClient");
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
+
+                ProfileCreationRequest profile = new ProfileCreationRequest(
+
+                    newUser.Id,
+                    new ProfileDto
+                    {
+                        FirstName = newUser.Name,
+                        LastName = newUser.Surname,
+                        Email = newUser.Email
+                    }
+                );
+
+                var response = await client.PostAsJsonAsync("api/user/profile", profile);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning($"Usuario {newUser.Id} registrado, pero falló la creación del perfil en UserService. StatusCode: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error crítico conectando con UserService durante el registro.");
+            }
+
+            return new RegisterResponseDto
+            {
+                IsSuccess = true,
+                ErrorMessage = string.Empty,
+                AuthData = authResult
+            };
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)

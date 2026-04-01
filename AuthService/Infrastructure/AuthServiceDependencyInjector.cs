@@ -1,8 +1,11 @@
 ﻿using AuthService.Controllers;
-using AuthService.Service;
+using AuthService.Data;
 using AuthService.Repositories;
+using AuthService.Service;
 using Autofac;
 using MatchTFE.AuthService.Repositories;
+using Microsoft.EntityFrameworkCore;
+using TFELibrary.Data;
 
 namespace AuthService.Infrastructure
 {
@@ -10,9 +13,9 @@ namespace AuthService.Infrastructure
     {
         public static void RegisterDependencies(ContainerBuilder builder)
         {
-            builder.RegisterType<AuthController>().As<IAuthController>().SingleInstance();
-            builder.RegisterType<Service.AuthService>().As<IAuthService>().SingleInstance();
-            builder.RegisterType<AuthRepository>().As<IAuthRepository>().SingleInstance();
+            builder.RegisterType<AuthController>().As<IAuthController>().InstancePerLifetimeScope();
+            builder.RegisterType<Service.AuthService>().As<IAuthService>().InstancePerLifetimeScope();
+            builder.RegisterType<AuthRepository>().As<IAuthRepository>().InstancePerLifetimeScope();
         }
     }
 }

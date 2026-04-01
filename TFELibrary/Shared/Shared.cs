@@ -4,6 +4,13 @@ using System.Text.Json.Serialization;
 
 namespace TFELibrary.Shared
 {
+    public enum RoleType
+    {
+        Student,
+        Teacher,
+        Admin
+    }
+
     public class TfeProposalDto
     {
         public int Id { get; set; }
@@ -32,13 +39,14 @@ namespace TFELibrary.Shared
 
     public class ProfileDto
     {
-        public string RoleType { get; set; } = string.Empty;
+        public RoleType Role { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
 
         public string Bio { get; set; } = string.Empty;
         public List<string> Interests { get; set; } = new();
+        public string AvatarUrl { get; set; } = string.Empty;
 
         // ----------------------------------
         // STUDENT
@@ -51,7 +59,6 @@ namespace TFELibrary.Shared
         // ----------------------------------
         public string Department { get; set; } = string.Empty;
         public string OfficeLocation { get; set; } = string.Empty;
-
     }
     public class SkillDto
     {
@@ -103,6 +110,7 @@ namespace TFELibrary.Shared
     {
         public bool IsSuccess { get; set; }
         public string? ErrorMessage { get; set; }
+        public AuthResultDto AuthData { get; set; } = new AuthResultDto();
     }
 
     public class RefreshTokenRequestDto

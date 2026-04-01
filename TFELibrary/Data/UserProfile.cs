@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using TFELibrary.Shared;
 
 namespace TFELibrary.Data
 {
-    public abstract class UserProfile
+    public class UserProfile
     {
+        public RoleType Role { get; set; } = RoleType.Student;
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string UserId { get; set; } = string.Empty;
@@ -26,9 +28,19 @@ namespace TFELibrary.Data
         public string LastName { get; set; } = string.Empty;
         [MaxLength(2000)]
         public string? Bio { get; set; }
+        [MaxLength(1000)]
+        public string AvatarUrl { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Tag> Interests { get; set; } = new List<Tag>();
+
+        // --- STUDENT ---
+        public string? AcademicYear { get; set; }
+        public ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
+
+        // --- TEACHER ---
+        public string? Department { get; set; }
+        public string? OfficeLocation { get; set; }
     }
 }

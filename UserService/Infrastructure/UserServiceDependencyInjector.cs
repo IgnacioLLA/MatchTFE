@@ -1,5 +1,7 @@
 ﻿using Autofac;
+using Microsoft.EntityFrameworkCore;
 using UserService.Controllers;
+using UserService.Data;
 using UserService.Repositories;
 using UserService.Service;
 
@@ -9,9 +11,9 @@ namespace UserService.Infrastructure
     {
         public static void RegisterDependencies(ContainerBuilder builder)
         {
-            builder.RegisterType<UserController>().As<IUserController>().SingleInstance();
-            builder.RegisterType<Service.UserService>().As<IUserService>().SingleInstance();
-            builder.RegisterType<UserRepository>().As<IUserRepository>().SingleInstance();
+            builder.RegisterType<UserController>().As<IUserController>().InstancePerLifetimeScope();
+            builder.RegisterType<Service.UserService>().As<IUserService>().InstancePerLifetimeScope();
+            builder.RegisterType<UserProfileRepository>().As<IUserProfileRepository>().InstancePerLifetimeScope();
         }
     }
 }
