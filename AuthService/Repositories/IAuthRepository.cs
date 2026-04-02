@@ -12,5 +12,8 @@ namespace AuthService.Repositories
         Task<string?> GetRefreshTokenAsync(MatchUser user);
         Task RemoveRefreshTokenAsync(MatchUser user);
         Task<MatchUser?> GetUserByIdAsync(string userId);
+        Task<IList<string>> GetUserRolesAsync(MatchUser user);
+        Task<IdentityResult> AddToRoleAsync(MatchUser user, string role);
+        Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role);
     }
 }

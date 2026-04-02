@@ -46,6 +46,11 @@ namespace AuthService.Service
                 return new RegisterResponseDto { IsSuccess = false, ErrorMessage = errors };
             }
 
+            var roleResult = await _authRepository.AddToRoleAsync(newUser, "User");
+            if (!roleResult.Succeeded)
+                _logger.LogWarning($"No se pudo asignar el rol 'User' al usuario {newUser.Id}.");
+
+
             // Generación de tokens para el nuevo usuario
 
             var authResult = await GenerateAndSaveTokensAsync(newUser);
@@ -140,15 +145,19 @@ namespace AuthService.Service
             var accessSecret = jwtSettings["Secret"]!;
             var refreshSecret = jwtSettings["RefreshSecret"]!;
 
+            var roles = await _authRepository.GetUserRolesAsync(user);
+
             var jwtToken = GenerateJwtToken(
                 user,
                 accessSecret,
-                DateTime.UtcNow.AddMinutes(TokenLifetime));
+                DateTime.UtcNow.AddMinutes(TokenLifetime),
+                roles);
 
             var newRefreshToken = GenerateJwtToken(
                 user,
                 refreshSecret,
-                DateTime.UtcNow.AddMinutes(RefreshTokenLifetime));
+                DateTime.UtcNow.AddMinutes(RefreshTokenLifetime),
+                roles);
 
             await _authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
 
@@ -161,19 +170,22 @@ namespace AuthService.Service
             };
         }
 
-        private string GenerateJwtToken(MatchUser user, string secretKey, DateTime expiration)
+        private string GenerateJwtToken(MatchUser user, string secretKey, DateTime expiration, IList<string> roles)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                //new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            foreach (var role in roles)
+                claims.Add(new Claim(ClaimTypes.Role, role));
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
@@ -221,6 +233,33 @@ namespace AuthService.Service
             {
                 return false;
             }
+        }
+
+        public async Task<bool> ChangeUserRoleAsync(string userId, string newRole)
+        {
+            var user = await _authRepository.GetUserByIdAsync(userId);
+            if (user == null) return false;
+
+            var currentRoles = await _authRepository.GetUserRolesAsync(user);
+
+            foreach (var role in currentRoles)
+            {
+                var removeResult = await _authRepository.RemoveFromRoleAsync(user, role);
+                if (!removeResult.Succeeded)
+                {
+                    _logger.LogWarning($"No se pudo quitar el rol '{role}' al usuario {userId}.");
+                    return false;
+                }
+            }
+
+            var addResult = await _authRepository.AddToRoleAsync(user, newRole);
+            if (!addResult.Succeeded)
+            {
+                _logger.LogWarning($"No se pudo asignar el rol '{newRole}' al usuario {userId}.");
+                return false;
+            }
+
+            return true;
         }
     }
 }

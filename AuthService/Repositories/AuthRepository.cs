@@ -44,6 +44,19 @@ public class AuthRepository : IAuthRepository
 
     public async Task<MatchUser?> GetUserByIdAsync(string userId)
     {
-          return await _userManager.FindByIdAsync(userId);
+        return await _userManager.FindByIdAsync(userId);
+    }
+    public async Task<IList<string>> GetUserRolesAsync(MatchUser user)
+    {
+        return await _userManager.GetRolesAsync(user);
+    }
+    public async Task<IdentityResult> AddToRoleAsync(MatchUser user, string role)
+    {
+        return await _userManager.AddToRoleAsync(user, role);
+    }
+
+    public async Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role)
+    {
+        return await _userManager.RemoveFromRoleAsync(user, role);
     }
 }

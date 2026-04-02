@@ -12,8 +12,8 @@ using UserService.Data;
 namespace UserService.Data.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20260401094543_InitialUser")]
-    partial class InitialUser
+    [Migration("20260401172341_UserUpdate01")]
+    partial class UserUpdate01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -38,8 +38,6 @@ namespace UserService.Data.Migrations
 
                     b.HasKey("StudentProfileId", "TagId");
 
-                    b.HasIndex("TagId");
-
                     b.ToTable("StudentSkill", (string)null);
                 });
 
@@ -63,7 +61,25 @@ namespace UserService.Data.Migrations
 
                     b.HasIndex("UserProfileUserId");
 
-                    b.ToTable("Tag", (string)null);
+                    b.ToTable("Tag", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
+                {
+                    b.Property<int>("InterestsId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserProfileUserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("InterestsId", "UserProfileUserId");
+
+                    b.HasIndex("UserProfileUserId");
+
+                    b.ToTable("UserInterest", (string)null);
                 });
 
             modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
@@ -122,20 +138,12 @@ namespace UserService.Data.Migrations
             modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
                 {
                     b.HasOne("TFELibrary.Data.UserProfile", "StudentProfile")
-                        .WithMany("StudentSkills")
+                        .WithMany()
                         .HasForeignKey("StudentProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TFELibrary.Data.Tag", "Tag")
-                        .WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("StudentProfile");
-
-                    b.Navigation("Tag");
                 });
 
             modelBuilder.Entity("TFELibrary.Data.Tag", b =>
@@ -145,11 +153,20 @@ namespace UserService.Data.Migrations
                         .HasForeignKey("UserProfileUserId");
                 });
 
+            modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
+                {
+                    b.HasOne("TFELibrary.Data.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserProfileUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserProfile");
+                });
+
             modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
                 {
                     b.Navigation("Interests");
-
-                    b.Navigation("StudentSkills");
                 });
 #pragma warning restore 612, 618
         }

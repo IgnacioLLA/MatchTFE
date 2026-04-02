@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-
 using TFELibrary.Data;
-
-
 
 namespace UserService.Data
 {
@@ -13,25 +10,53 @@ namespace UserService.Data
         public DbSet<UserProfile> UserProfile { get; set; }
         public DbSet<StudentSkill> StudentSkill { get; set; }
         public DbSet<Tag> Tag { get; set; }
+        public DbSet<UserInterest> UserInterest { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             builder.Entity<UserProfile>().ToTable("UserProfile");
             builder.Entity<StudentSkill>().ToTable("StudentSkill");
-            builder.Entity<Tag>().ToTable("Tag");
+            builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
+
+            builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
+            builder.Entity<StudentSkill>().Ignore(ss => ss.Tag);
 
             builder.Entity<UserProfile>()
                 .HasIndex(p => p.UserId)
                 .IsUnique();
 
-            // Foreign key relationship between UserProfile and MatchUser (from AuthService)
-            builder.Entity<StudentSkill>()
-                .HasKey(ss => new { ss.StudentProfileId, ss.TagId });
-
             builder.Entity<UserProfile>()
-               .Property(e => e.Role)
-               .HasConversion<string>();
+                .Property(e => e.Role)
+                .HasConversion<string>();
+
+            builder.Entity<StudentSkill>(ss =>
+            {
+                ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
+
+                // Comment this if rebuilding the BD (Cross context-error)
+                ss.HasOne<Tag>()
+                  .WithMany()
+                  .HasForeignKey(s => s.TagId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            });
+            builder.Entity<UserInterest>(j =>
+            {
+                j.ToTable("UserInterest");
+                j.HasKey(ui => new { ui.InterestsId, ui.UserProfileUserId });
+
+                j.HasOne(ui => ui.UserProfile)
+                 .WithMany()
+                 .HasForeignKey(ui => ui.UserProfileUserId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // Comment this if rebuilding the BD (Cross context-error)
+                j.HasOne(ui => ui.Interest)
+                 .WithMany()
+                 .HasForeignKey(ui => ui.InterestsId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

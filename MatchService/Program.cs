@@ -1,21 +1,13 @@
-using AuthService.Data;
-using AuthService.Infrastructure;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MatchService.Data;
+using MatchService.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddIdentityCore<MatchUser>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-})
-.AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<AuthDbContext>();
 
 builder.Services.AddCors(options =>
 {
@@ -30,15 +22,9 @@ builder.Services.AddCors(options =>
 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
-builder.Services.AddHttpClient("UserServiceClient", client =>
-{
-    client.BaseAddress = new Uri("http://userservice:8080/");
-    client.Timeout = TimeSpan.FromSeconds(10);
-});
-
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 {
-    AuthServiceDependencyInjector.RegisterDependencies(containerBuilder);
+    MatchServiceDependencyInjector.RegisterDependencies(containerBuilder);
 });
 
 builder.Services.AddAuthentication(options =>
@@ -76,40 +62,29 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers().AddControllersAsServices();
 
-// DbContext configuration
+
 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
                          ?? builder.Configuration.GetConnectionString("DbConnection");
-builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseNpgsql(dbConnectionString, x => 
-        x.MigrationsHistoryTable("__AuthMigrationsHistory")));
+
+builder.Services.AddDbContext<MatchDbContext>(options =>
+    options.UseNpgsql(dbConnectionString, x =>
+        x.MigrationsHistoryTable("__MatchMigrationsHistory")));
 
 var app = builder.Build();
 
-// Roles configuration
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    string[] roles = ["Admin", "User"];
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-            await roleManager.CreateAsync(new IdentityRole(role));
-    }
-}
-
-app.UseRouting();
+// Configure the HTTP request pipeline.
+// app.UseHttpsRedirection();
 
 app.UseCors("AllowBlazor");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    var db = scope.ServiceProvider.GetRequiredService<MatchDbContext>();
     db.Database.Migrate();
 }
-
 app.Run();

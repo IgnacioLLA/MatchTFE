@@ -7,6 +7,7 @@ namespace TFELibrary.Data
 {
     public class Tag
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]

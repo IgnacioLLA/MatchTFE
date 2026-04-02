@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+
+namespace TFELibrary.Data
+{
+    public class TFEProposal
+    {
+        public string OriginUserId { get; set; } = string.Empty;
+        public UserProfile OriginUser { get; set; } = null!;
+        public int TFEId { get; set; }
+        public TFE Tfe { get; set; } = null!;
+        [Required]
+        public ProposalStatus Status { get; set; } = ProposalStatus.Pending;
+        public DateOnly ExpirationDate { get; set; }
+    }
+
+    public enum ProposalStatus
+    {
+        Pending,
+        Accepted,
+        Rejected,
+        Expired
+    }
+}

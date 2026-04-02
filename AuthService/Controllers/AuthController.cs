@@ -180,5 +180,19 @@ namespace AuthService.Controllers
                 Email = email
             });
         }
+
+        [HttpPut("role/{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChangeRole(string userId, [FromBody] ChangeRoleDto dto)
+        {
+            var validRoles = new[] { "Admin", "User" };
+            if (!validRoles.Contains(dto.NewRole))
+                return BadRequest($"Rol no válido. Roles permitidos: {string.Join(", ", validRoles)}");
+
+            var result = await _authService.ChangeUserRoleAsync(userId, dto.NewRole);
+            if (!result) return NotFound("Usuario no encontrado o error al cambiar el rol.");
+
+            return NoContent();
+        }
     }
 }

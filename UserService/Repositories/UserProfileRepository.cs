@@ -17,10 +17,22 @@ namespace UserService.Repositories
 
         public async Task<UserProfile?> GetByUserIdAsync(string userId)
         {
-            return await _context.UserProfile
-                .Include(p => p.Interests)
-                .Include(p => (p as UserProfile)!.StudentSkills)
-                .FirstOrDefaultAsync(p => p.UserId == userId);
+            var profile = await _context.UserProfile
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (profile == null) return null;
+
+            profile.Interests = await _context.UserInterest
+                .Where(ui => ui.UserProfileUserId == userId)
+                .Include(ui => ui.Interest)
+                .Select(ui => ui.Interest)
+                .ToListAsync();
+
+            profile.StudentSkills = await _context.StudentSkill
+                .Where(ss => ss.StudentProfileId == userId)
+                .ToListAsync();
+
+            return profile;
         }
 
         public async Task<UserProfile> CreateProfileAsync(UserProfile profile)

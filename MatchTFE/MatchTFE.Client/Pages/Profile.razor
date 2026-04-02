@@ -137,13 +137,12 @@ else
     private List<string> _availableBackendSkills = new();
     private List<string> _availableBackendInterests = new();
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         try
         {
             if (GlobalProfile != null)
             {
-                // Deep clone
                 var json = JsonSerializer.Serialize(GlobalProfile);
                 _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
             }
@@ -152,16 +151,34 @@ else
                 Snackbar.Add("No se encontraron los datos del perfil.", Severity.Warning);
             }
 
-            _availableBackendSkills = new List<string> { "C#", "SQL Server", "Docker", "React", "Blazor", "AWS" };
-            _availableBackendInterests = new List<string> { "Machine Learning", "Cloud Architecture", "Cybersecurity", "IoT" };
+            await LoadTagsAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar el perfil: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error al cargar el perfil.", Severity.Error);
         }
         finally
         {
             _isLoading = false;
+        }
+    }
+
+    private async Task LoadTagsAsync()
+    {
+        try
+        {
+            var client = ClientFactory.CreateClient("GatewayAPI");
+            var tags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
+
+            if (tags != null)
+            {
+                _availableBackendInterests = tags.Select(t => t.Name).ToList();
+                _availableBackendSkills = tags.Select(t => t.Name).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar los tags: {ex.Message}", Severity.Warning);
         }
     }
 

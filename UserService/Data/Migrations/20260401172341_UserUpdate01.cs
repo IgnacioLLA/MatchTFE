@@ -1,13 +1,12 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace UserService.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialUser : Migration
+    public partial class UserUpdate01 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,25 +33,6 @@ namespace UserService.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tag",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    UserProfileUserId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tag", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Tag_UserProfile_UserProfileUserId",
-                        column: x => x.UserProfileUserId,
-                        principalTable: "UserProfile",
-                        principalColumn: "UserId");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "StudentSkill",
                 columns: table => new
                 {
@@ -64,12 +44,6 @@ namespace UserService.Data.Migrations
                 {
                     table.PrimaryKey("PK_StudentSkill", x => new { x.StudentProfileId, x.TagId });
                     table.ForeignKey(
-                        name: "FK_StudentSkill_Tag_TagId",
-                        column: x => x.TagId,
-                        principalTable: "Tag",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_StudentSkill_UserProfile_StudentProfileId",
                         column: x => x.StudentProfileId,
                         principalTable: "UserProfile",
@@ -77,14 +51,27 @@ namespace UserService.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_StudentSkill_TagId",
-                table: "StudentSkill",
-                column: "TagId");
+            migrationBuilder.CreateTable(
+                name: "UserInterest",
+                columns: table => new
+                {
+                    InterestsId = table.Column<int>(type: "integer", nullable: false),
+                    UserProfileUserId = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserInterest", x => new { x.InterestsId, x.UserProfileUserId });
+                    table.ForeignKey(
+                        name: "FK_UserInterest_UserProfile_UserProfileUserId",
+                        column: x => x.UserProfileUserId,
+                        principalTable: "UserProfile",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tag_UserProfileUserId",
-                table: "Tag",
+                name: "IX_UserInterest_UserProfileUserId",
+                table: "UserInterest",
                 column: "UserProfileUserId");
 
             migrationBuilder.CreateIndex(
@@ -101,7 +88,7 @@ namespace UserService.Data.Migrations
                 name: "StudentSkill");
 
             migrationBuilder.DropTable(
-                name: "Tag");
+                name: "UserInterest");
 
             migrationBuilder.DropTable(
                 name: "UserProfile");
