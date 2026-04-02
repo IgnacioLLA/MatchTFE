@@ -57,13 +57,13 @@ namespace UserService.Service
 
         private ProfileDto GetProfileDto(UserProfile profile)
         {
-            var dto = new ProfileDto
+            return new ProfileDto
             {
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 Email = profile.Email,
                 Bio = profile.Bio ?? string.Empty,
-                Interests = profile.Interests?.Select(t => t.Name).ToList() ?? new List<string>(),
+                Interests = profile.UserInterests?.Select(ui => ui.Tag.Name).ToList() ?? new List<string>(),
                 Role = profile.Role,
                 AcademicYear = profile.AcademicYear ?? string.Empty,
                 Skills = profile.StudentSkills?.Select(s => new SkillDto
@@ -73,10 +73,7 @@ namespace UserService.Service
                 }).ToList() ?? new List<SkillDto>(),
                 Department = profile.Department ?? string.Empty,
                 OfficeLocation = profile.OfficeLocation ?? string.Empty
-
             };
-
-            return dto;
         }
 
 

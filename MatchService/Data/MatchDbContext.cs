@@ -21,6 +21,7 @@ namespace MatchService.Data
         //  FOREIGN ENTITIES
         // ==========================================
         public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<UserInterest> UserInterest { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -32,9 +33,14 @@ namespace MatchService.Data
                 .IsUnique();
 
             builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
-
-            builder.Entity<UserProfile>().Ignore(u => u.Interests);
+            builder.Entity<UserProfile>().Ignore(u => u.UserInterests);
             builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
+
+            builder.Entity<UserInterest>(j =>
+            {
+                j.ToTable("UserInterest", t => t.ExcludeFromMigrations());
+                j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
+            });
 
             // EF needs to know about the table between UserProfile and Tag, even if it's not responsible for managing it
             builder.Entity<TFE>()

@@ -20,8 +20,8 @@ namespace UserService.Data
             builder.Entity<StudentSkill>().ToTable("StudentSkill");
             builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
 
-            builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
-            builder.Entity<StudentSkill>().Ignore(ss => ss.Tag);
+            //builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
+            //builder.Entity<StudentSkill>().Ignore(ss => ss.Tag);
 
             builder.Entity<UserProfile>()
                 .HasIndex(p => p.UserId)
@@ -36,25 +36,26 @@ namespace UserService.Data
                 ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
 
                 // Comment this if rebuilding the BD (Cross context-error)
-                ss.HasOne<Tag>()
+                ss.HasOne(s => s.Tag)
                   .WithMany()
                   .HasForeignKey(s => s.TagId)
                   .OnDelete(DeleteBehavior.Restrict);
             });
+
             builder.Entity<UserInterest>(j =>
             {
                 j.ToTable("UserInterest");
-                j.HasKey(ui => new { ui.InterestsId, ui.UserProfileUserId });
+                j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
 
                 j.HasOne(ui => ui.UserProfile)
-                 .WithMany()
-                 .HasForeignKey(ui => ui.UserProfileUserId)
+                 .WithMany(u => u.UserInterests) 
+                 .HasForeignKey(ui => ui.UserProfileId)
                  .OnDelete(DeleteBehavior.Cascade);
 
                 // Comment this if rebuilding the BD (Cross context-error)
-                j.HasOne(ui => ui.Interest)
+                j.HasOne(ui => ui.Tag)
                  .WithMany()
-                 .HasForeignKey(ui => ui.InterestsId)
+                 .HasForeignKey(ui => ui.TagId)
                  .OnDelete(DeleteBehavior.Cascade);
             });
         }
