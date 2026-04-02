@@ -1,6 +1,7 @@
 ﻿using MatchService.Repositories;
 using Microsoft.EntityFrameworkCore;
 using TFELibrary.Data;
+using TFELibrary.Shared;
 
 namespace MatchService.Services
 {
@@ -13,24 +14,24 @@ namespace MatchService.Services
             _tagRepository = tagRepository;
         }
 
-        public async Task<IEnumerable<Tag>> GetAllTagsAsync()
+        public async Task<IEnumerable<TagDto>> GetAllTagsAsync()
         {
-            return await _tagRepository.GetAllAsync();
+            return (await _tagRepository.GetAllAsync()).Select(CreateTagDto);
         }
 
-        public async Task<Tag?> GetTagByIdAsync(int id)
+        public async Task<TagDto?> GetTagByIdAsync(int id)
         {
-            return await _tagRepository.GetByIdAsync(id);
+            return CreateTagDto(await _tagRepository.GetByIdAsync(id));
         }
 
-        public async Task<Tag> CreateTagAsync(Tag tag)
+        public async Task<TagDto> CreateTagAsync(TagCreationRequest dto)
         {
-            if (string.IsNullOrWhiteSpace(tag.Name))
+            if (string.IsNullOrWhiteSpace(dto.Tag.Name))
                 throw new ArgumentException("El nombre del tag no puede estar vacío.");
-
+            var tag = new Tag { Name = dto.Tag.Name };
             try
             {
-                return await _tagRepository.CreateAsync(tag);
+                return CreateTagDto(await _tagRepository.CreateAsync(tag));
             }
             catch (DbUpdateException)
             {
@@ -47,5 +48,13 @@ namespace MatchService.Services
             await _tagRepository.DeleteAsync(tag);
             return true;
         }
+
+        private TagDto CreateTagDto(Tag? tag)
+        {
+            return new TagDto
+            {
+                Name = tag?.Name
+            };
+        }   
     }
 }

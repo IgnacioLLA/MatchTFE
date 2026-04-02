@@ -72,10 +72,8 @@ namespace TFELibrary.Shared
         public int Score { get; set; }
         public int MaxScore { get; set; } = 5;
     }
-
     public class TagDto
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 

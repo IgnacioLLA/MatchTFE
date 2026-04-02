@@ -76,10 +76,8 @@ var app = builder.Build();
 // app.UseHttpsRedirection();
 
 app.UseCors("AllowBlazor");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
