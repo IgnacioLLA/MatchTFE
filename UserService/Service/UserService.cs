@@ -41,18 +41,26 @@ namespace UserService.Service
         public async Task<ProfileUpdateResponse> UpdateProfileAsync(string userId, ProfileUpdateRequest request)
         {
             if (request?.Profile == null)
-            {
-                return new ProfileUpdateResponse(false, "Los datos del perfil no pueden estar vacíos.");
-            }
+                return new ProfileUpdateResponse(false, "Profile data cannot be empty.");
 
-            var isSaved = await _userRepository.UpdateUserProfileAsync(userId, request.Profile);
+            var entity = new UserProfile
+            {
+                UserId = userId,
+                FirstName = request.Profile.FirstName,
+                LastName = request.Profile.LastName,
+                Bio = request.Profile.Bio,
+                Role = request.Profile.Role,
+                AcademicYear = request.Profile.AcademicYear,
+                Department = request.Profile.Department,
+                OfficeLocation = request.Profile.OfficeLocation
+            };
+
+            var isSaved = await _userRepository.UpdateUserProfileAsync(entity, request.Profile.Interests, request.Profile.Skills);
 
             if (isSaved)
-            {
-                return new ProfileUpdateResponse(true, "Perfil actualizado correctamente.", request.Profile);
-            }
+                return new ProfileUpdateResponse(true, "Profile updated successfully.", request.Profile);
 
-            return new ProfileUpdateResponse(false, "No se pudo actualizar el perfil en la base de datos.");
+            return new ProfileUpdateResponse(false, "Could not update profile.");
         }
 
         private ProfileDto GetProfileDto(UserProfile profile)

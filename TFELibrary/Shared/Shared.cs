@@ -11,15 +11,15 @@ namespace TFELibrary.Shared
         Admin
     }
 
-    public class TfeProposalDto
+    public class TfeDto
     {
-        public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public string Department { get; set; } = string.Empty;
+        //public string Department { get; set; } = string.Empty;
         public string TutorName { get; set; } = string.Empty;
-        public List<string> Technologies { get; set; } = new();
-        public string EstimatedDuration { get; set; } = string.Empty;
+        public List<TagDto> Topics { get; set; } = new();
+        public List<SkillDto> RequiredSkills { get; set; } = new();
+        public DateTime EstimatedDelivery { get; set; }
         public DateTime ExpirationDate { get; set; }
         public string IconName { get; set; } = "Psychology";
     }

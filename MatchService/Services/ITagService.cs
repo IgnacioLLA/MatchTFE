@@ -7,7 +7,7 @@ namespace MatchService.Services
     {
         Task<IEnumerable<TagDto>> GetAllTagsAsync();
         Task<TagDto?> GetTagByIdAsync(int id);
-        Task<TagDto> CreateTagAsync(TagCreationRequest request);
+        Task<TagCreationResponse> CreateTagAsync(TagCreationRequest request);
         Task<bool> DeleteTagAsync(int id);
     }
 }

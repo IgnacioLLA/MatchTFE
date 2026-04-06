@@ -24,14 +24,14 @@ namespace MatchService.Services
             return CreateTagDto(await _tagRepository.GetByIdAsync(id));
         }
 
-        public async Task<TagDto> CreateTagAsync(TagCreationRequest dto)
+        public async Task<TagCreationResponse> CreateTagAsync(TagCreationRequest dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Tag.Name))
                 throw new ArgumentException("El nombre del tag no puede estar vacío.");
             var tag = new Tag { Name = dto.Tag.Name };
             try
             {
-                return CreateTagDto(await _tagRepository.CreateAsync(tag));
+                return new TagCreationResponse { Tag = CreateTagDto(await _tagRepository.CreateAsync(tag)), TagId = tag.Id };
             }
             catch (DbUpdateException)
             {

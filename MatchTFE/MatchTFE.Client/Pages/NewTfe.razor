@@ -1,0 +1,165 @@
+﻿@page "/tfe/create"
+@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="mb-8 animate-fade-in">
+    <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+        Nueva Propuesta de TFE
+    </MudText>
+    <MudText Typo="Typo.body1" Class="app-text-reading">
+        Define los detalles académicos para atraer a los estudiantes con mejor perfil para tu investigación.
+    </MudText>
+</div>
+
+<MudGrid Spacing="4" Class="animate-fade-in">
+    @* --- LEFT COLUMN --- *@
+    <MudItem xs="12" md="7" lg="7">
+        <MudPaper Elevation="0" Class="pa-8 rounded-xl border-all h-100">
+            <MudText Typo="Typo.subtitle2" Class="app-subtitle">Título del TFE</MudText>
+            <MudTextField @bind-Value="_title" T="string" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-8 rounded-lg" />
+
+            <MudText Typo="Typo.subtitle2" Class="app-subtitle">Descripción Detallada</MudText>
+            <MudTextField @bind-Value="_description" T="string" Variant="Variant.Outlined" Lines="15" Class="rounded-lg" />
+        </MudPaper>
+    </MudItem>
+
+    @* --- RIGHT COLUMN  --- *@
+    <MudItem xs="12" md="5" lg="5">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-3 app-text-muted" />
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
+                    Fecha de Caducidad de la Propuesta
+                </MudText>
+            </div>
+
+            <div class="d-flex justify-center mb-6">
+                <MudDatePicker PickerVariant="PickerVariant.Static"
+                               Rounded="true"
+                               Elevation="0"
+                               Color="Color.Primary"
+                               Date="@_expirationDate" 
+                               DateChanged="OnDateChanged" />
+            </div>
+
+            <MudText Typo="Typo.subtitle2" Class="app-subtitle">
+                Duración Estimada
+            </MudText>
+            <MudSelect T="string" 
+                       @bind-Value="_estimatedDuration"
+                       Variant="Variant.Outlined" 
+                       AnchorOrigin="Origin.BottomCenter" 
+                       Placeholder="Seleccione un rango..." 
+                       Margin="Margin.Dense"
+                       Class="rounded-lg">
+                <MudSelectItem Value="@("3 meses")" />
+                <MudSelectItem Value="@("6 meses")" />
+                <MudSelectItem Value="@("9 meses")" />
+                <MudSelectItem Value="@("12 meses")" />
+            </MudSelect>
+        </MudPaper>
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
+            <TagSelector @bind-SelectedTags="_selectedTopics"
+                         Title="Temática Principal"
+                         Icon="@Icons.Material.Filled.Category"
+                         Placeholder="Ej: Inteligencia Artificial, Web..." />
+        </MudPaper>
+
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
+            <SkillSelector @bind-SelectedSkills="_requiredSkills"
+                           Title="Requisitos Técnicos (Skills)"
+                           Icon="@Icons.Material.Filled.Build"
+                           Placeholder="Ej: C#, Python, React..." />
+        </MudPaper>
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" FullWidth="true" EndIcon="@Icons.Material.Filled.Send" Class="rounded-xl py-3 mt-2 btn-primary-shadow" 
+            OnClick="SubmitProposalAsync">
+            Publicar Propuesta
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private string _title = string.Empty;
+    private string _description = string.Empty;
+
+    private List<string> _selectedTopics = new();
+    private List<SkillDto> _requiredSkills = new();
+
+    private DateTime? _expirationDate = DateTime.Today.AddMonths(1);
+    private string _estimatedDuration = string.Empty;
+
+    private void OnDateChanged(DateTime? newDate)
+    {
+        _expirationDate = newDate;
+    }
+
+    private async Task SubmitProposalAsync()
+    {
+        if (!CheckForm()) return;
+
+        var request = new TfeCreationRequest
+        {
+            Tfe = new TfeDto
+        {
+                Title = _title.Trim(),
+                Description = _description.Trim(),
+                Topics = _selectedTopics.Select(topic => new TagDto { Name = topic }).ToList(),
+                EstimatedDelivery = DateTime.Today.AddMonths(ParseEstimatedMonths(_estimatedDuration)),
+                ExpirationDate = _expirationDate ?? DateTime.Today.AddMonths(1)
+            }
+        };
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PostAsJsonAsync("api/match/tfe", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Propuesta enviada correctamente.", Severity.Success);
+                Navigation.NavigateTo("/tfe/feed");
+                return;
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            Snackbar.Add($"No se pudo crear la propuesta ({(int)response.StatusCode}): {error}", Severity.Error);
+        }
+        catch
+        {
+            Snackbar.Add("Error al conectar con el backend al crear la propuesta.", Severity.Error);
+        }
+
+
+    }
+
+    private static int ParseEstimatedMonths(string estimatedDuration)
+    {
+        if (int.TryParse(estimatedDuration.Split(' ')[0], out int result))
+        {
+            return result;
+        }
+        return 12;
+    }
+
+    private bool CheckForm()
+    {
+        if (string.IsNullOrWhiteSpace(_title) || string.IsNullOrWhiteSpace(_description))
+        {
+            Snackbar.Add("El título y la descripción son obligatorios.", Severity.Warning);
+            return false;
+        }
+
+        if (string.IsNullOrWhiteSpace(_estimatedDuration))
+        {
+            Snackbar.Add("Debes seleccionar una duración estimada.", Severity.Warning);
+            return false;
+        }
+
+        return true;
+    }
+}

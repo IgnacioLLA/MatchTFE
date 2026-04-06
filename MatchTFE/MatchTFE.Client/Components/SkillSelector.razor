@@ -1,0 +1,106 @@
+﻿@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject IHttpClientFactory ClientFactory
+@inject ISnackbar Snackbar
+
+@if (!string.IsNullOrWhiteSpace(Title))
+{
+    <div class="d-flex align-center mb-4">
+        @if (!string.IsNullOrWhiteSpace(Icon))
+        {
+            <MudIcon Icon="@Icon" Size="Size.Small" Class="mr-3 app-text-muted" />
+        }
+        <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@Title</MudText>
+    </div>
+}
+
+<MudAutocomplete T="string"
+                 Placeholder="@Placeholder"
+                 SearchFunc="@SearchSkillsAsync"
+                 ValueChanged="@OnSkillSelected"
+                 Value="@_searchQuery"
+                 Variant="Variant.Outlined"
+                 Margin="Margin.Dense"
+                 AdornmentIcon="@Icons.Material.Filled.Search"
+                 Class="mb-4 rounded-lg"
+                 Clearable="true"
+                 Disabled="@_isLoading" />
+
+<div class="d-flex flex-column gap-3">
+    @foreach (var skill in SelectedSkills)
+    {
+        <MudPaper Elevation="0" Class="d-flex align-center pa-3 rounded-lg border-all">
+            <MudText Typo="Typo.body2" Class="font-weight-bold flex-grow-1">@skill.Tag</MudText>
+
+            <MudRating SelectedValue="@skill.Level"
+                       SelectedValueChanged="(int val) => UpdateSkillLevelAsync(skill, val)"
+                       MaxValue="5"
+                       Color="Color.Primary"
+                       Size="Size.Small"
+                       Class="mr-4" />
+
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error" OnClick="() => RemoveSkillAsync(skill)" />
+        </MudPaper>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Icon { get; set; } = string.Empty;
+    [Parameter] public string Placeholder { get; set; } = "Buscar requisitos...";
+
+    [Parameter] public List<SkillDto> SelectedSkills { get; set; } = new();
+    [Parameter] public EventCallback<List<SkillDto>> SelectedSkillsChanged { get; set; }
+
+    private string _searchQuery = string.Empty;
+    private List<string> _availableBackendTags = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = ClientFactory.CreateClient("GatewayAPI");
+            var tags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
+            if (tags != null) _availableBackendTags = tags.Select(t => t.Name).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error cargando habilidades: {ex.Message}", Severity.Warning);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task<IEnumerable<string>> SearchSkillsAsync(string value, CancellationToken token)
+    {
+        await Task.Delay(100, token);
+        if (string.IsNullOrEmpty(value)) return _availableBackendTags.Where(t => !SelectedSkills.Any(s => s.Tag == t));
+        return _availableBackendTags.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase) && !SelectedSkills.Any(s => s.Tag == x));
+    }
+
+    private async Task OnSkillSelected(string selectedTag)
+    {
+        if (!string.IsNullOrEmpty(selectedTag) && !SelectedSkills.Any(s => s.Tag == selectedTag))
+        {
+            SelectedSkills.Add(new SkillDto { Tag = selectedTag, Level = 1 }); // Nivel 1 por defecto
+            await SelectedSkillsChanged.InvokeAsync(SelectedSkills);
+        }
+        _searchQuery = string.Empty;
+    }
+
+    private async Task UpdateSkillLevelAsync(SkillDto skill, int newLevel)
+    {
+        skill.Level = newLevel;
+        await SelectedSkillsChanged.InvokeAsync(SelectedSkills);
+    }
+
+    private async Task RemoveSkillAsync(SkillDto skillToRemove)
+    {
+        SelectedSkills.Remove(skillToRemove);
+        await SelectedSkillsChanged.InvokeAsync(SelectedSkills);
+    }
+}

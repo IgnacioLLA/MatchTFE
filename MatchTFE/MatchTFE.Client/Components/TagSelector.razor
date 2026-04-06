@@ -1,0 +1,94 @@
+﻿@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject IHttpClientFactory ClientFactory
+@inject ISnackbar Snackbar
+
+@if (!string.IsNullOrWhiteSpace(Title))
+{
+    <div class="d-flex align-center mb-4">
+        @if (!string.IsNullOrWhiteSpace(Icon))
+        {
+            <MudIcon Icon="@Icon" Size="Size.Small" Class="mr-3 app-text-muted" />
+        }
+        <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@Title</MudText>
+    </div>
+}
+
+<MudAutocomplete T="string"
+                 Placeholder="@Placeholder"
+                 SearchFunc="@SearchTagsAsync"
+                 ValueChanged="@OnTagSelected"
+                 Value="@_searchQuery"
+                 Variant="Variant.Outlined"
+                 Margin="Margin.Dense"
+                 AdornmentIcon="@Icons.Material.Filled.Search"
+                 Class="mb-4 rounded-lg"
+                 Clearable="true"
+                 Disabled="@_isLoading" />
+
+<div class="d-flex flex-wrap gap-2">
+    @foreach (var tag in SelectedTags)
+    {
+        <MudChip T="string"
+                 Color="Color.Primary"
+                 Variant="Variant.Text"
+                 OnClose="() => RemoveTagAsync(tag)">
+            @tag
+        </MudChip>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Icon { get; set; } = string.Empty;
+    [Parameter] public string Placeholder { get; set; } = "Buscar...";
+
+    [Parameter] public List<string> SelectedTags { get; set; } = new();
+    [Parameter] public EventCallback<List<string>> SelectedTagsChanged { get; set; }
+
+    private string _searchQuery = string.Empty;
+    private List<string> _availableBackendTags = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = ClientFactory.CreateClient("GatewayAPI");
+            var tags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
+            if (tags != null) _availableBackendTags = tags.Select(t => t.Name).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error cargando etiquetas: {ex.Message}", Severity.Warning);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task<IEnumerable<string>> SearchTagsAsync(string value, CancellationToken token)
+    {
+        await Task.Delay(100, token);
+        if (string.IsNullOrEmpty(value)) return _availableBackendTags.Where(t => !SelectedTags.Contains(t));
+        return _availableBackendTags.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase) && !SelectedTags.Contains(x));
+    }
+
+    private async Task OnTagSelected(string selectedTag)
+    {
+        if (!string.IsNullOrEmpty(selectedTag) && !SelectedTags.Contains(selectedTag))
+        {
+            SelectedTags.Add(selectedTag);
+            await SelectedTagsChanged.InvokeAsync(SelectedTags);
+        }
+        _searchQuery = string.Empty;
+    }
+
+    private async Task RemoveTagAsync(string tagToRemove)
+    {
+        SelectedTags.Remove(tagToRemove);
+        await SelectedTagsChanged.InvokeAsync(SelectedTags);
+    }
+}

@@ -22,12 +22,12 @@
                     <MudAvatar Size="Size.Medium" Class="mr-3">@Proposal.TutorName[0]</MudAvatar>
                     <div>
                         <MudText Typo="Typo.body2" Class="font-weight-bold">@Proposal.TutorName</MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@Proposal.Department</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary"></MudText>
                     </div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-8">
-                    @foreach (var tech in Proposal.Technologies)
+                    @foreach (var tech in Proposal.Topics)
                     {
                         <MudChip T="string" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" Class="px-4 py-2 font-weight-bold">@tech</MudChip>
                     }
@@ -39,7 +39,7 @@
                             <MudIcon Icon="@Icons.Material.Outlined.Timer" Size="Size.Small" Class="mr-2 mud-text-secondary" />
                             <div>
                                 <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Duración</MudText>
-                                <MudText Typo="Typo.body2" Class="font-weight-bold">@Proposal.EstimatedDuration</MudText>
+                                <MudText Typo="Typo.body2" Class="font-weight-bold"></MudText>
                             </div>
                         </div>
                     </MudItem>
@@ -85,15 +85,8 @@
     </MudPaper>
 </div>
 
-<style>
-    .code-icon-badge {
-        bottom: 10px;
-        right: -10px;
-    }
-</style>
-
 @code {
-    [Parameter, EditorRequired] public TfeProposalDto Proposal { get; set; } = default!;
+    [Parameter, EditorRequired] public TfeDto Proposal { get; set; } = default!;
     [Parameter] public EventCallback<bool> OnDecision { get; set; }
 
     private string GetIcon(string iconName)

@@ -33,32 +33,26 @@ namespace UserService.Repositories
             return profile;
         }
 
-        public async Task<bool> UpdateUserProfileAsync(string userId, ProfileDto profileDto)
+        public async Task<bool> UpdateUserProfileAsync(UserProfile entity, List<string> interests, List<SkillDto> skills)
         {
-            var userEntity = await _context.UserProfile.FindAsync(userId);
+            var existing = await _context.UserProfile
+                .FirstOrDefaultAsync(u => u.UserId == entity.UserId);
 
-            if (userEntity == null)
-                return false;
+            if (existing == null) return false;
 
-            // 1. Actualizamos datos comunes
-            userEntity.FirstName = profileDto.FirstName;
-            userEntity.LastName = profileDto.LastName;
-            userEntity.Bio = profileDto.Bio;
+            existing.FirstName = entity.FirstName;
+            existing.LastName = entity.LastName;
+            existing.Bio = entity.Bio;
+            existing.AcademicYear = entity.AcademicYear;
+            existing.Department = entity.Department;
+            existing.OfficeLocation = entity.OfficeLocation;
+            existing.Role = entity.Role;
 
-            // 2. Lógica específica según el rol
-            if (profileDto.Role == RoleType.Student)
-            {
-                userEntity.AcademicYear = profileDto.AcademicYear;
-            }
-            else if (profileDto.Role == RoleType.Teacher)
-            {
-                userEntity.Department = profileDto.Department;
-                userEntity.OfficeLocation = profileDto.OfficeLocation;
-            }
+            await UpdateInterestsAsync(existing.UserId, interests);
+            await UpdateSkillsAsync(existing.UserId, skills);
 
             try
             {
-                _context.UserProfile.Update(userEntity);
                 await _context.SaveChangesAsync();
                 return true;
             }
@@ -66,6 +60,58 @@ namespace UserService.Repositories
             {
                 return false;
             }
+        }
+
+        private async Task UpdateInterestsAsync(string userId, List<string> interestNames)
+        {
+            var existingInterests = await _context.UserInterest
+                .Where(ui => ui.UserProfileId == userId)
+                .ToListAsync();
+            _context.UserInterest.RemoveRange(existingInterests);
+
+            var tagIds = await GetTagIdsByNamesAsync(interestNames);
+            await _context.UserInterest.AddRangeAsync(tagIds.Select(tagId => new UserInterest
+            {
+                UserProfileId = userId,
+                TagId = tagId
+            }));
+        }
+
+        private async Task UpdateSkillsAsync(string userId, List<SkillDto> skills)
+        {
+            var existingSkills = await _context.StudentSkill
+                .Where(ss => ss.StudentProfileId == userId)
+                .ToListAsync();
+            _context.StudentSkill.RemoveRange(existingSkills);
+
+            var tagMap = await GetTagMapByNamesAsync(skills.Select(s => s.Tag).ToList());
+            await _context.StudentSkill.AddRangeAsync(
+                skills
+                    .Where(s => tagMap.ContainsKey(s.Tag))
+                    .Select(s => new StudentSkill
+                    {
+                        StudentProfileId = userId,
+                        TagId = tagMap[s.Tag],
+                        Level = s.Level
+                    })
+            );
+        }
+
+        private async Task<List<int>> GetTagIdsByNamesAsync(List<string> tagNames)
+        {
+            if (tagNames == null || !tagNames.Any()) return new List<int>();
+            return await _context.Tag
+                .Where(t => tagNames.Contains(t.Name))
+                .Select(t => t.Id)
+                .ToListAsync();
+        }
+
+        private async Task<Dictionary<string, int>> GetTagMapByNamesAsync(List<string> tagNames)
+        {
+            if (tagNames == null || !tagNames.Any()) return new Dictionary<string, int>();
+            return await _context.Tag
+                .Where(t => tagNames.Contains(t.Name))
+                .ToDictionaryAsync(t => t.Name, t => t.Id);
         }
     }
 }

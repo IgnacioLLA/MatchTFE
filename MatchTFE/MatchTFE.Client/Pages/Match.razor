@@ -28,7 +28,7 @@
                                 </div>
 
                                 <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@proposal.Title</MudText>
-                                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">@proposal.TutorName • @proposal.Department</MudText>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">@proposal.TutorName • No department</MudText>
 
                                 <MudSpacer />
 
@@ -86,7 +86,7 @@
 </MudContainer>
 
 @code {
-    private List<TfeProposalDto> _savedProposals = new();
+    private List<TfeDto> _savedProposals = new();
     private List<CandidateProfileDto> _savedCandidates = new();
 
     protected override void OnInitialized()
@@ -96,10 +96,10 @@
 
     private void LoadMockMatches()
     {
-        _savedProposals = new List<TfeProposalDto>
+        _savedProposals = new List<TfeDto>
         {
-            new () { Id = 1, Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García", Department = "IA y Computación", IconName = "Psychology" },
-            new () { Id = 2, Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte", Department = "Criptografía", IconName = "Security" }
+            new () { Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García",  IconName = "Psychology" },
+            new () { Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte", IconName = "Security" }
         };
 
         _savedCandidates = new List<CandidateProfileDto>

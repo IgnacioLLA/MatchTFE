@@ -7,7 +7,7 @@ namespace UserService.Repositories
     {
         Task<UserProfile> CreateProfileAsync(UserProfile profile);
         Task<UserProfile?> GetByUserIdAsync(string userId);
-        Task<bool> UpdateUserProfileAsync(string userId, ProfileDto profileDto);
+        Task<bool> UpdateUserProfileAsync(UserProfile entity, List<string> interests, List<SkillDto> skills);
 
     }
 }

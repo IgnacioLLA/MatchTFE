@@ -21,12 +21,11 @@ else
         </MudText>
 
         <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ToggleRoleMode" Class="rounded-lg font-weight-bold">
-            Cambiar a vista de @(_profileDto.Role == RoleType.Student ? "Profesor" : "Estudiante")
+            Cambiar a vista de @(_profileDto.Role.ToString()))
         </MudButton>
     </div>
 
     <div class="animate-fade-in">
-        @* TARJETA CABECERA *@
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-4">
             <MudCardContent Class="d-flex align-center flex-wrap gap-4">
                 <MudAvatar Color="Color.Primary" Class="avatar-xl font-weight-bold">
@@ -48,7 +47,7 @@ else
             </MudCardContent>
         </MudCard>
 
-        @* DATOS PERSONALES COMUNES *@
+        @* COMMON PERSONAL DATA *@
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
             <MudCardHeader>
                 <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" /></CardHeaderAvatar>
@@ -72,38 +71,17 @@ else
             </MudCardContent>
         </MudCard>
 
-        @* INTERESES *@
+        @* INTERESTS *@
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
-            <MudCardHeader>
-                <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" /></CardHeaderAvatar>
-                <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">Intereses</MudText></CardHeaderContent>
-            </MudCardHeader>
             <MudCardContent>
-                <MudText Typo="Typo.caption" Style="color: var(--app-text-muted);" Class="d-block mb-2 font-weight-bold app-caption-uppercase">
-                    AÑADIR ETIQUETAS DE INTERÉS
-                </MudText>
-
-                <MudAutocomplete T="string"
-                                 Placeholder="Buscar intereses"
-                                 SearchFunc="@SearchInterestsAsync"
-                                 ValueChanged="@OnInterestSelected"
-                                 Value="@_interestSearchQuery"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 AdornmentIcon="@Icons.Material.Filled.Search"
-                                 Class="mb-4 rounded-lg"
-                                 Clearable="true" />
-
-                <div class="d-flex flex-wrap mb-4">
-                    @foreach (var interest in _profileDto.Interests)
-                    {
-                        <ChipTag @key="interest" Text="@interest" OnRemoved="RemoveInterest" />
-                    }
-                </div>
+                <TagSelector @bind-SelectedTags="_profileDto.Interests"
+                             Title="Intereses"
+                             Icon="@Icons.Material.Filled.LocalOffer"
+                             Placeholder="Buscar intereses..." />
             </MudCardContent>
         </MudCard>
 
-        @* COMPONENTES *@
+        @* COMPONENTS *@
         @if (_profileDto.Role == RoleType.Student)
         {
             <StudentProfileComponent Model="_profileDto" />
@@ -113,7 +91,7 @@ else
             <TeacherProfileComponent Model="_profileDto" />
         }
 
-        @* BARRA DE ACCIONES *@
+        @* ACTION BUTTONS*@
         <div class="d-flex align-center justify-space-between mt-8 mb-4">
             <MudText Typo="Typo.body2" Style="color: var(--app-text-muted);">Cargado de forma segura desde el servidor</MudText>
             <div class="d-flex gap-4">
@@ -137,7 +115,7 @@ else
     private List<string> _availableBackendSkills = new();
     private List<string> _availableBackendInterests = new();
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         try
         {
@@ -148,14 +126,14 @@ else
             }
             else
             {
-                Snackbar.Add("No se encontraron los datos del perfil.", Severity.Warning);
+                Snackbar.Add("Profile data not found.", Severity.Warning);
             }
 
             await LoadTagsAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar el perfil.", Severity.Error);
+            Snackbar.Add($"Error loading profile: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -178,7 +156,7 @@ else
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar los tags: {ex.Message}", Severity.Warning);
+            Snackbar.Add($"Error loading tags: {ex.Message}", Severity.Warning);
         }
     }
 
@@ -197,25 +175,20 @@ else
         await Task.Delay(100, token);
         if (_profileDto == null) return Array.Empty<string>();
         if (string.IsNullOrEmpty(value)) return _availableBackendInterests.Where(t => !_profileDto.Interests.Contains(t));
-
         return _availableBackendInterests.Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase) && !_profileDto.Interests.Contains(x));
     }
 
     private void OnInterestSelected(string selectedTag)
     {
         if (_profileDto != null && !string.IsNullOrEmpty(selectedTag) && !_profileDto.Interests.Contains(selectedTag))
-        {
             _profileDto.Interests.Add(selectedTag);
-        }
+
         _interestSearchQuery = string.Empty;
     }
 
     private void RemoveInterest(string tagToRemove)
     {
-        if (_profileDto != null)
-        {
-            _profileDto.Interests.Remove(tagToRemove);
-        }
+        _profileDto?.Interests.Remove(tagToRemove);
     }
 
     private void DiscardChanges()
@@ -224,7 +197,7 @@ else
         {
             var json = JsonSerializer.Serialize(GlobalProfile);
             _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
-            Snackbar.Add("Cambios descartados", Severity.Info);
+            Snackbar.Add("Changes discarded.", Severity.Info);
         }
     }
 
@@ -235,33 +208,30 @@ else
         {
             var client = ClientFactory.CreateClient("GatewayAPI");
             var request = new ProfileUpdateRequest(_profileDto!);
-
             var response = await client.PutAsJsonAsync("api/user/profile", request);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<ProfileUpdateResponse>();
-
                 if (result != null && result.Success && result.UpdatedProfile != null)
                 {
                     SyncGlobalProfile(result.UpdatedProfile);
                     _profileDto = result.UpdatedProfile;
-
-                    Snackbar.Add("¡Perfil actualizado!", Severity.Success);
+                    Snackbar.Add("Profile updated!", Severity.Success);
                 }
                 else
                 {
-                    Snackbar.Add(result?.Message ?? "Error al procesar la respuesta", Severity.Warning);
+                    Snackbar.Add(result?.Message ?? "Error processing response.", Severity.Warning);
                 }
             }
             else
             {
-                Snackbar.Add($"Error HTTP: {response.StatusCode}", Severity.Error);
+                Snackbar.Add($"HTTP error: {response.StatusCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error de conexión: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Connection error: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -271,23 +241,21 @@ else
 
     private void SyncGlobalProfile(ProfileDto updatedProfile)
     {
-        if (GlobalProfile != null)
+        if (GlobalProfile == null) return;
+
+        GlobalProfile.FirstName = updatedProfile.FirstName;
+        GlobalProfile.LastName = updatedProfile.LastName;
+        GlobalProfile.Email = updatedProfile.Email;
+        GlobalProfile.Bio = updatedProfile.Bio;
+        GlobalProfile.Role = updatedProfile.Role;
+        GlobalProfile.Department = updatedProfile.Department;
+        GlobalProfile.OfficeLocation = updatedProfile.OfficeLocation;
+        GlobalProfile.AcademicYear = updatedProfile.AcademicYear;
+        GlobalProfile.Interests = new List<string>(updatedProfile.Interests);
+        GlobalProfile.Skills = updatedProfile.Skills.Select(s => new SkillDto
         {
-            // Global profile update
-            GlobalProfile.FirstName = updatedProfile.FirstName;
-            GlobalProfile.LastName = updatedProfile.LastName;
-            GlobalProfile.Email = updatedProfile.Email;
-            GlobalProfile.Bio = updatedProfile.Bio;
-            GlobalProfile.Role = updatedProfile.Role;
-            GlobalProfile.Department = updatedProfile.Department;
-            GlobalProfile.OfficeLocation = updatedProfile.OfficeLocation;
-            GlobalProfile.AcademicYear = updatedProfile.AcademicYear;
-            GlobalProfile.Interests = new List<string>(updatedProfile.Interests);
-            GlobalProfile.Skills = updatedProfile.Skills.Select(s => new SkillDto
-            {
-                Tag = s.Tag,
-                Level = s.Level
-            }).ToList();
-        }
+            Tag = s.Tag,
+            Level = s.Level
+        }).ToList();
     }
 }

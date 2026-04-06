@@ -16,6 +16,8 @@ namespace MatchService.Data
         public DbSet<InterestProposal> InterestProposal { get; set; }
         public DbSet<Tag> Tag { get; set; }
         public DbSet<TfeTopic> TfeTopic { get; set; }
+        public DbSet<TfeRequiredSkill> TfeRequiredSkill { get; set; }
+
 
         // ==========================================
         //  FOREIGN ENTITIES
@@ -55,6 +57,22 @@ namespace MatchService.Data
                         j.HasKey(t => new { t.TFEId, t.TagId });
                     });
 
+            builder.Entity<TfeRequiredSkill>(j =>
+            {
+                j.ToTable("TfeRequiredSkill");
+                j.HasKey(rs => new { rs.TfeId, rs.TagId });
+
+                j.HasOne(rs => rs.Tfe)
+                 .WithMany()
+                 .HasForeignKey(rs => rs.TfeId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                j.HasOne(rs => rs.Tag)
+                 .WithMany()
+                 .HasForeignKey(rs => rs.TagId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
             builder.Entity<InterestProposal>()
                 .HasKey(ip => new { ip.OriginUserId, ip.DestinationUserId });
             builder.Entity<TFEProposal>()
@@ -69,7 +87,10 @@ namespace MatchService.Data
             builder.Entity<TFEProposal>()
                 .HasOne(tp => tp.OriginUser).WithMany().HasForeignKey(tp => tp.OriginUserId).OnDelete(DeleteBehavior.Restrict);
 
+
+
             // ENUM CONVERSIONS
+            builder.Entity<UserProfile>().Property(u => u.Role).HasConversion<string>();
             builder.Entity<TFE>().Property(t => t.Status).HasConversion<string>();
             builder.Entity<InterestProposal>().Property(ip => ip.Status).HasConversion<string>();
             builder.Entity<TFEProposal>().Property(tp => tp.Status).HasConversion<string>();
