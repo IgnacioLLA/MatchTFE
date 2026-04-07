@@ -19,6 +19,8 @@ namespace MatchService.Repositories
             return await _context.Tfe
                 .Include(t => t.Author)
                 .Include(t => t.Topics)
+                .Include(t => t.RequiredSkills)
+                    .ThenInclude(rs => rs.Tag)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -27,9 +29,22 @@ namespace MatchService.Repositories
             _context.Tfe.Add(Tfe);
             await _context.SaveChangesAsync();
 
+            foreach (var skill in Tfe.RequiredSkills)
+            {
+                skill.TfeId = Tfe.Id;
+                _context.TfeRequiredSkill.Add(skill);
+            }
+
+            if (Tfe.RequiredSkills.Count > 0)
+            {
+                await _context.SaveChangesAsync();
+            }
+
             return await _context.Tfe
                 .Include(x => x.Author)
                 .Include(x => x.Topics)
+                .Include(x => x.RequiredSkills)
+                    .ThenInclude(rs => rs.Tag)
                 .AsSingleQuery()
                 .FirstAsync(x => x.Id == Tfe.Id);
         }
@@ -38,6 +53,17 @@ namespace MatchService.Repositories
         {
             _context.Tfe.Remove(Tfe);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<TFE>> GetByAuthorIdAsync(string authorId)
+        {
+            return await _context.Tfe
+                .Where(t => t.AuthorId == authorId)
+                .Include(t => t.Author)
+                .Include(t => t.Topics)
+                .Include(t => t.RequiredSkills)
+                    .ThenInclude(rs => rs.Tag)
+                .ToListAsync();
         }
     }
 }

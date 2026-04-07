@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using TFELibrary.Data;
 
 namespace TFELibrary.Shared
 {
@@ -21,7 +22,22 @@ namespace TFELibrary.Shared
         public List<SkillDto> RequiredSkills { get; set; } = new();
         public DateTime EstimatedDelivery { get; set; }
         public DateTime ExpirationDate { get; set; }
+        public TFEStatus Status { get; set; }
         public string IconName { get; set; } = "Psychology";
+    }
+
+    public enum TFEStatus
+    {
+        Open,
+        Completed,
+        Cancelled
+    }
+    public enum ProposalStatus
+    {
+        Pending,
+        Accepted,
+        Rejected,
+        Expired
     }
 
     public class CandidateProfileDto

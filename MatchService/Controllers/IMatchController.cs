@@ -20,6 +20,10 @@ namespace MatchService.Controllers
         [HttpPost("tfe")]
         Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request);
 
+        [HttpGet("tfe/{id}")]
+        Task<IActionResult> GetTfeById(int id);
 
+        [HttpGet("tfe/author")]
+        Task<IActionResult> GetTfesByAuthor();
     }
 }

@@ -24,6 +24,11 @@ namespace MatchService.Repositories
             return await _context.Tag.FindAsync(id);
         }
 
+        public async Task<Tag?> GetByNameAsync(string name)
+        {
+            return await _context.Tag.FirstOrDefaultAsync(t => t.Name == name);
+        }
+
         public async Task<Tag> CreateAsync(Tag tag)
         {
             _context.Tag.Add(tag);

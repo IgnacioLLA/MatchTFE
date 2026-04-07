@@ -1,0 +1,197 @@
+﻿@page "/tfe/author"
+@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
+    <div>
+        <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+            Mis Publicaciones
+        </MudText>
+        <MudText Typo="Typo.body1" Class="app-text-reading">
+            Gestiona y supervisa tus propuestas de Trabajo de Fin de Grado.
+        </MudText>
+    </div>
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.AddCircleOutline"
+               Class="rounded-lg font-weight-bold px-4 py-2 btn-primary-shadow"
+               Href="/tfe/create">
+        Crear Nueva Propuesta
+    </MudButton>
+</div>
+
+<MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in">
+
+    @* FILTERS *@
+    <div class="pa-4 d-flex flex-wrap gap-4 align-center" style="border-bottom: 1px solid var(--mud-palette-lines-default); background-color: var(--mud-palette-background-grey);">
+        <MudTextField @bind-Value="SearchQuery"
+                      Placeholder="Buscar por título o etiqueta..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="bg-white rounded-lg flex-grow-1"
+                      Style="max-width: 400px;" />
+
+        <MudSelect T="string"
+                   MultiSelection="true"
+                   SelectedValues="SelectedFilterTags"
+                   SelectedValuesChanged="OnSelectedTagsChanged"
+                   Placeholder="Filtrar por tags..."
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Class="bg-white rounded-lg flex-grow-1"
+                   Style="max-width: 300px;">
+            @foreach (var tag in _availableTags)
+            {
+                <MudSelectItem Value="@tag.Name">@tag.Name</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudSpacer />
+
+        <div class="d-flex align-center">
+            <MudText Typo="Typo.body2" Class="app-text-muted mr-2">Ordenar por:</MudText>
+            <MudSelect T="string" @bind-Value="SelectedSort" Variant="Variant.Text" Margin="Margin.Dense" Class="font-weight-bold">
+                <MudSelectItem Value="@("Más reciente")" />
+                <MudSelectItem Value="@("Más antiguo")" />
+                <MudSelectItem Value="@("Estado")" />
+            </MudSelect>
+        </div>
+    </div>
+
+    @* HEADERS *@
+    <div class="px-6 py-3 app-text-muted font-weight-bold" style="border-bottom: 1px solid var(--mud-palette-lines-default); font-size: 0.75rem; letter-spacing: 1px;">
+        <MudGrid>
+            <MudItem xs="12" md="3">DETALLES DEL PROYECTO</MudItem>
+            <MudItem xs="6" md="2">ESTADO</MudItem>
+            <MudItem xs="6" md="2">VENCIMIENTO</MudItem>
+            <MudItem xs="6" md="2">INTERESADOS</MudItem>
+            <MudItem xs="12" md="2">TEMÁTICAS</MudItem>
+            <MudItem xs="12" md="1" Class="d-flex justify-end">ACCIONES</MudItem>
+        </MudGrid>
+    </div>
+
+    @* LIST *@
+    <div class="px-6">
+        @foreach (var proposal in GetPaginatedProposals())
+        {
+            <TfeListItem Model="proposal" />
+        }
+    </div>
+
+    @* FOOTER *@
+    <div class="pa-4 d-flex justify-space-between align-center" style="background-color: var(--mud-palette-background-grey); border-radius: 0 0 12px 12px;">
+        <MudText Typo="Typo.body2" Class="app-text-muted">
+            Mostrando @GetPaginatedProposals().Count() de @GetFilteredProposals().Count() publicaciones
+        </MudText>
+        <MudPagination Count="@GetTotalPages()"
+                       @bind-Selected="_currentPage"
+                       Color="Color.Primary"
+                       Variant="Variant.Outlined"
+                       Shape="Shape.Rounded" />
+    </div>
+
+</MudPaper>
+
+@code {
+    private List<TfeDto> _proposals = new();
+    private List<TagDto> _availableTags = new();
+
+    private int _currentPage = 1;
+    private int _pageSize = 5;
+
+    private string _searchQuery = string.Empty;
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        set
+        {
+            _searchQuery = value;
+            _currentPage = 1;
+        }
+    }
+
+    private IReadOnlyCollection<string> SelectedFilterTags { get; set; } = new HashSet<string>();
+
+    private string _selectedSort = "Más reciente";
+    public string SelectedSort
+    {
+        get => _selectedSort;
+        set
+        {
+            _selectedSort = value;
+            _currentPage = 1;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            _proposals = await client.GetFromJsonAsync<List<TfeDto>>("api/match/tfe/author") ?? new();
+            _availableTags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag") ?? new();
+        }
+        catch
+        {
+            Snackbar.Add("Error al conectar con el backend al obtener los datos.", Severity.Error);
+        }
+    }
+
+    private IEnumerable<TfeDto> GetFilteredProposals()
+    {
+        var result = _proposals.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            result = result.Where(p =>
+                (p.Title != null && p.Title.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (p.Topics != null && p.Topics.Any(t => t.Name.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)))
+            );
+        }
+
+        if (SelectedFilterTags != null && SelectedFilterTags.Any())
+        {
+            result = result.Where(p =>
+                p.Topics != null && p.Topics.Any(t => SelectedFilterTags.Contains(t.Name))
+            );
+        }
+
+        result = SelectedSort switch
+        {
+            "Más antiguo" => result.OrderBy(p => p.ExpirationDate),
+            "Estado" => result.OrderBy(p => p.Status),
+            _ => result.OrderByDescending(p => p.ExpirationDate)
+        };
+
+        return result;
+    }
+
+    private IEnumerable<TfeDto> GetPaginatedProposals()
+    {
+        return GetFilteredProposals()
+            .Skip((_currentPage - 1) * _pageSize)
+            .Take(_pageSize);
+    }
+
+    private int GetTotalPages()
+    {
+        var totalItems = GetFilteredProposals().Count();
+        if (totalItems == 0) return 1;
+        return (int)Math.Ceiling((double)totalItems / _pageSize);
+    }
+
+
+
+    private void OnSelectedTagsChanged(IReadOnlyCollection<string> values)
+    {
+        SelectedFilterTags = values ?? new HashSet<string>();
+        _currentPage = 1;
+        StateHasChanged();
+    }
+}

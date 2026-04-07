@@ -74,5 +74,18 @@ namespace MatchService.Controllers
             if (tfe == null) return NotFound();
             return Ok(tfe);
         }
+
+        [HttpGet("tfe/author")]
+        public async Task<IActionResult> GetTfesByAuthor()
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            var tfes = await _tfeService.GetTfesByAuthorIdAsync(authorId);
+
+            return Ok(tfes);
+        }
     }
 }

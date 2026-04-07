@@ -1,0 +1,106 @@
+﻿@using TFELibrary.Shared
+
+<div class="d-flex align-center py-4" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+    <MudGrid Class="align-center w-100" Spacing="2">
+
+        @* TITLE *@
+        <MudItem xs="12" md="3">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-main mb-1">
+                @Model.Title
+            </MudText>
+        </MudItem>
+
+        @* STATUS *@
+        <MudItem xs="6" md="2">
+            <MudChip T="string"
+                     Size="Size.Small"
+                     Color="@GetStatusColor(Model.Status)"
+                     Variant="@GetStatusVariant(Model.Status)"
+                     Class="font-weight-bold px-3">
+                @GetStatusText(Model.Status)
+            </MudChip>
+        </MudItem>
+
+        @* EXPDATE *@
+        <MudItem xs="6" md="2">
+            <div class="d-flex align-center app-text-muted">
+                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
+                <MudText Typo="Typo.body2">
+                    @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                </MudText>
+            </div>
+        </MudItem>
+
+        @* INTERETS *@
+        <MudItem xs="6" md="2">
+            <div class="d-flex align-center app-text-muted">
+                <MudIcon Icon="@Icons.Material.Filled.Group" Size="Size.Small" Class="mr-1" />
+                <MudText Typo="Typo.body2" Class="font-weight-bold">
+                    0
+                </MudText>
+            </div>
+        </MudItem>
+
+        @* TOPICS *@
+        <MudItem xs="12" md="2">
+            @if (Model.Topics != null && Model.Topics.Any())
+            {
+                <div class="d-flex flex-wrap gap-1">
+                    @foreach (var tag in Model.Topics)
+                    {
+                        <ChipTag Text="@tag.Name"
+                                 ShowCloseIcon="@ShowTagsCloseIcon"
+                                 OnRemoved="HandleTagRemoved" />
+                    }
+                </div>
+            }
+        </MudItem>
+
+        @* ACTIONS *@
+        <MudItem xs="12" md="1" Class="d-flex justify-end align-center gap-1">
+            @if (Model.Status != TFEStatus.Cancelled)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Default" />
+            }
+        </MudItem>
+
+    </MudGrid>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public TfeDto Model { get; set; } = default!;
+
+    [Parameter]
+    public bool ShowTagsCloseIcon { get; set; } = false;
+
+    private Color GetStatusColor(TFEStatus status) => status switch
+    {
+        TFEStatus.Completed => Color.Success,
+        TFEStatus.Open => Color.Default,
+        TFEStatus.Cancelled => Color.Info,
+        _ => Color.Default
+    };
+
+    private Variant GetStatusVariant(TFEStatus status) => status switch
+    {
+        TFEStatus.Completed => Variant.Filled,
+        TFEStatus.Open => Variant.Outlined,
+        TFEStatus.Cancelled => Variant.Filled,
+        _ => Variant.Filled
+    };
+
+    private string GetStatusText(TFEStatus status) => status switch
+    {
+        TFEStatus.Completed => "• Completado",
+        TFEStatus.Open => "• Abierto",
+        TFEStatus.Cancelled => "• Cancelado",
+        _ => status.ToString()
+    };
+
+    private void HandleTagRemoved(string tagName)
+    {
+        
+    }
+}

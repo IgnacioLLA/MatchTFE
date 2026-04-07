@@ -1,18 +1,34 @@
 ﻿@using MudBlazor
 
-<MudChip T="string"
-         Variant="Variant.Text"
-         Color="Color.Primary"
-         OnClose="RemoveTag"
-         CloseIcon="@Icons.Material.Filled.Close"
-         Size="Size.Medium"
-         Class="mr-2 mb-2">
-    @Text
-</MudChip>
+@if (ShowCloseIcon)
+{
+    <MudChip T="string"
+             Variant="Variant.Text"
+             Color="Color.Primary"
+             OnClose="RemoveTag"
+             CloseIcon="@Icons.Material.Filled.Close"
+             Size="Size.Medium"
+             Class="mr-2 mb-2">
+        @Text
+    </MudChip>
+}
+else
+{
+    <MudChip T="string"
+             Variant="Variant.Text"
+             Color="Color.Primary"
+             Size="Size.Medium"
+             Class="mr-2 mb-2">
+        @Text
+    </MudChip>
+}
 
 @code {
     [Parameter]
     public string Text { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool ShowCloseIcon { get; set; } = false;
 
     [Parameter]
     public EventCallback<string> OnRemoved { get; set; }

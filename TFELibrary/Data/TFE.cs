@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TFELibrary.Shared;
 
 namespace TFELibrary.Data
 {
@@ -16,14 +17,9 @@ namespace TFELibrary.Data
         [MaxLength(400)]
         public string Title { get; set; } = string.Empty;
         public DateOnly EstimatedDelivery { get; set; }
+        public DateOnly ExpirationDate { get; set; }
         public List<Tag> Topics { get; set; } = new List<Tag>();
+        public List<TfeRequiredSkill> RequiredSkills { get; set; } = new List<TfeRequiredSkill>();
         public TFEStatus Status { get; set; } = TFEStatus.Open;
-    }
-
-    public enum TFEStatus
-    {
-        Open,
-        Completed,
-        Cancelled
     }
 }

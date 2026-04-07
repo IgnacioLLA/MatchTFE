@@ -9,5 +9,6 @@ namespace MatchService.Repositories
         Task<TFE?> GetByIdAsync(int id);
         Task<TFE> CreateAsync(TFE tag);
         Task DeleteAsync(TFE tag);
+        Task<List<TFE>> GetByAuthorIdAsync(string authorId);
     }
 }
