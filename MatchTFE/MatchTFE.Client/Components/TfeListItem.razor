@@ -60,7 +60,11 @@
         <MudItem xs="12" md="1" Class="d-flex justify-end align-center gap-1">
             @if (Model.Status != TFEStatus.Cancelled)
             {
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Default" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Size="Size.Small"
+                               Color="Color.Default"
+                               Href="@($"/tfe/edit/{Model.Id}")" />
+
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Default" />
             }
         </MudItem>

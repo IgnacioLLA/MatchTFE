@@ -10,5 +10,6 @@ namespace MatchService.Repositories
         Task<TFE> CreateAsync(TFE tag);
         Task DeleteAsync(TFE tag);
         Task<List<TFE>> GetByAuthorIdAsync(string authorId);
+        Task UpdateAsync(TFE tfe);
     }
 }

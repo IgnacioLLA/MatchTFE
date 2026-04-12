@@ -25,38 +25,7 @@ namespace MatchService.Services
 
             try
             {
-                var tags = new List<Tag>();
-                if (request.Tfe.Topics != null && request.Tfe.Topics.Count > 0)
-                {
-                    foreach (var topicDto in request.Tfe.Topics)
-                    {
-                        var tag = await _tagRepository.GetByNameAsync(topicDto.Name);
-                        if (tag == null)
-                            throw new ArgumentException($"El tag '{topicDto.Name}' no existe. Debe ser creado previamente.");
-                        tags.Add(tag);
-                    }
-                    tfe.Topics = tags;
-                }
-
-                var requiredSkills = new List<TfeRequiredSkill>();
-                if (request.Tfe.RequiredSkills != null && request.Tfe.RequiredSkills.Count > 0)
-                {
-                    foreach (var skillDto in request.Tfe.RequiredSkills)
-                    {
-                        var skillTag = await _tagRepository.GetByNameAsync(skillDto.Tag);
-                        if (skillTag == null)
-                            throw new ArgumentException($"El tag de habilidad '{skillDto.Tag}' no existe. Debe ser creado previamente.");
-
-                        var requiredSkill = new TfeRequiredSkill
-                        {
-                            TagId = skillTag.Id,
-                            Tag = skillTag,
-                            Level = skillDto.Level
-                        };
-                        requiredSkills.Add(requiredSkill);
-                    }
-                }
-                tfe.RequiredSkills = requiredSkills;
+                await MapTagsAndSkillsAsync(tfe, request.Tfe);
 
                 var createdTfe = await _tfeRepository.CreateAsync(tfe);
                 var dto = CreateTfeDto(createdTfe);
@@ -84,7 +53,35 @@ namespace MatchService.Services
             return tfes.Select(CreateTfeDto).ToList()!;
         }
 
+        public async Task<bool> UpdateTfeAsync(int id, TfeUpdateRequest request, string authorId)
+        {
+            CheckTfe(request.Tfe);
+
+            var existingTfe = await _tfeRepository.GetByIdAsync(id);
+
+            if (existingTfe == null || existingTfe.AuthorId != authorId)
+            {
+                return false;
+            }
+
+            try
+            {
+                existingTfe.Title = request.Tfe.Title;
+                existingTfe.Description = request.Tfe.Description;
+                existingTfe.EstimatedDelivery = DateOnly.FromDateTime(request.Tfe.EstimatedDelivery);
+                existingTfe.ExpirationDate = DateOnly.FromDateTime(request.Tfe.ExpirationDate);
+                await MapTagsAndSkillsAsync(existingTfe, request.Tfe);
+                await _tfeRepository.UpdateAsync(existingTfe);
+                return true;
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new InvalidOperationException("Ocurrió un error al actualizar el TFE en la base de datos.", ex);
+            }
+        }
+
         // -------------------------------------------------------
+
         private void CheckTfe(TfeDto tfe)
         {
             if (tfe == null) throw new ArgumentNullException(nameof(tfe));
@@ -97,11 +94,15 @@ namespace MatchService.Services
             if (tfe == null) return null;
             return new TfeDto
             {
+                Id = tfe.Id,
                 Title = tfe.Title,
                 Description = tfe.Description,
                 TutorName = tfe.Author.FirstName + " " + tfe.Author.LastName,
                 Topics = tfe.Topics.Select(tag => new TagDto { Name = tag.Name }).ToList(),
-                RequiredSkills = tfe.RequiredSkills.Select(skill => new SkillDto { Tag = skill.Tag.Name, Level = skill.Level }).ToList(),
+                RequiredSkills = tfe.RequiredSkills
+                    .Where(skill => skill.Tag != null)
+                    .Select(skill => new SkillDto { Tag = skill.Tag.Name, Level = skill.Level })
+                    .ToList(),
                 EstimatedDelivery = tfe.EstimatedDelivery.ToDateTime(TimeOnly.MinValue),
                 ExpirationDate = tfe.ExpirationDate.ToDateTime(TimeOnly.MinValue),
                 Status = tfe.Status,
@@ -119,6 +120,39 @@ namespace MatchService.Services
                 ExpirationDate = DateOnly.FromDateTime(dto.ExpirationDate),
                 Status = dto.Status
             };
+        }
+
+        private async Task MapTagsAndSkillsAsync(TFE tfeEntity, TfeDto dto)
+        {
+            tfeEntity.Topics = new List<Tag>();
+            tfeEntity.RequiredSkills = new List<TfeRequiredSkill>();
+
+            if (dto.Topics != null)
+            {
+                foreach (var topicDto in dto.Topics)
+                {
+                    var tag = await _tagRepository.GetByNameAsync(topicDto.Name);
+                    if (tag == null)
+                        throw new ArgumentException($"Invalid '{topicDto.Name}' tag. Not found.");
+                    tfeEntity.Topics.Add(tag);
+                }
+            }
+
+            if (dto.RequiredSkills != null)
+            {
+                foreach (var skillDto in dto.RequiredSkills)
+                {
+                    var skillTag = await _tagRepository.GetByNameAsync(skillDto.Tag);
+                    if (skillTag == null)
+                        throw new ArgumentException($"Invalid '{skillDto.Tag}' tag. Not found.");
+
+                    tfeEntity.RequiredSkills.Add(new TfeRequiredSkill
+                    {
+                        TagId = skillTag.Id,
+                        Level = skillDto.Level
+                    });
+                }
+            }
         }
     }
 }

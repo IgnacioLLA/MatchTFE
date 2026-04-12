@@ -5,9 +5,9 @@ namespace TFELibrary.Data
     public class TfeTopic
     {
         [Required]
-        public int TFEId { get; set; }
+        public int TfeId { get; set; }
         [Required]
-        public TFE TFE { get; set; } = null!;
+        public TFE Tfe { get; set; } = null!;
         [Required]
         public int TagId { get; set; }
         [Required]

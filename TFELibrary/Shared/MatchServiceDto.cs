@@ -30,4 +30,9 @@ namespace TFELibrary.Shared
         public TfeDto Tfe { get; set; }
         public int TfeId { get; set; }
     }
+    public class TfeUpdateRequest
+    {
+        [Required]
+        public TfeDto Tfe { get; set; } = new TfeDto();
+    }
 }

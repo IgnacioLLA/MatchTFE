@@ -1,0 +1,79 @@
+﻿@page "/tfe/edit/{Id:int}" 
+@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IHttpClientFactory HttpClientFactory
+
+<div class="mb-8 animate-fade-in">
+    <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+        Editar Propuesta
+    </MudText>
+    <MudText Typo="Typo.body1" Class="app-text-reading">
+        Actualiza los detalles de tu propuesta de Trabajo de Fin de Grado.
+    </MudText>
+</div>
+
+@if (_isLoading)
+{
+    <div class="d-flex justify-center mt-10">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else if (_tfeToEdit != null)
+{
+    <TfeForm Tfe="@_tfeToEdit" OnValidSubmit="UpdateProposalAsync" />
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private TfeDto? _tfeToEdit;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            _tfeToEdit = await client.GetFromJsonAsync<TfeDto>($"api/match/tfe/{Id}");
+        }
+        catch
+        {
+            Snackbar.Add("Error al cargar los datos de la propuesta.", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task UpdateProposalAsync(TfeDto updatedTfe)
+    {
+        updatedTfe.Id = Id;
+
+        var request = new TfeUpdateRequest { Tfe = updatedTfe };
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PutAsJsonAsync($"api/match/tfe/{Id}", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Propuesta actualizada correctamente.", Severity.Success);
+                Navigation.NavigateTo("/tfe/author");
+                return;
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            Snackbar.Add($"No se pudo actualizar ({(int)response.StatusCode}): {error}", Severity.Error);
+        }
+        catch
+        {
+            Snackbar.Add("Error al conectar con el backend al actualizar.", Severity.Error);
+        }
+    }
+}

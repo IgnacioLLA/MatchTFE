@@ -74,6 +74,32 @@ namespace MatchService.Controllers
             if (tfe == null) return NotFound();
             return Ok(tfe);
         }
+        [HttpPut("tfe/{id}")]
+        public async Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            try
+            {
+                var isUpdated = await _tfeService.UpdateTfeAsync(id, request, authorId);
+
+                if (!isUpdated)
+                    return NotFound("La propuesta no existe o no tienes permisos para editarla.");
+
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
+            }
+        }
 
         [HttpGet("tfe/author")]
         public async Task<IActionResult> GetTfesByAuthor()

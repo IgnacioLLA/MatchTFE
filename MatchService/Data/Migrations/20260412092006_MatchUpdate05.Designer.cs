@@ -3,6 +3,7 @@ using System;
 using MatchService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MatchService.Data.Migrations
 {
     [DbContext(typeof(MatchDbContext))]
-    partial class MatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260412092006_MatchUpdate05")]
+    partial class MatchUpdate05
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -134,7 +137,12 @@ namespace MatchService.Data.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("TFEId")
+                        .HasColumnType("integer");
+
                     b.HasKey("TfeId", "TagId");
+
+                    b.HasIndex("TFEId");
 
                     b.HasIndex("TagId");
 
@@ -278,6 +286,10 @@ namespace MatchService.Data.Migrations
 
             modelBuilder.Entity("TFELibrary.Data.TfeRequiredSkill", b =>
                 {
+                    b.HasOne("TFELibrary.Data.TFE", null)
+                        .WithMany("RequiredSkills")
+                        .HasForeignKey("TFEId");
+
                     b.HasOne("TFELibrary.Data.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
@@ -285,7 +297,7 @@ namespace MatchService.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("TFELibrary.Data.TFE", "Tfe")
-                        .WithMany("RequiredSkills")
+                        .WithMany()
                         .HasForeignKey("TfeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

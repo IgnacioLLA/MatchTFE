@@ -7,7 +7,7 @@ namespace TFELibrary.Data
     {
         public string OriginUserId { get; set; } = string.Empty;
         public UserProfile OriginUser { get; set; } = null!;
-        public int TFEId { get; set; }
+        public int TfeId { get; set; }
         public TFE Tfe { get; set; } = null!;
         [Required]
         public ProposalStatus Status { get; set; } = ProposalStatus.Pending;

@@ -50,11 +50,11 @@ namespace MatchService.Data
                 .WithMany()
                 .UsingEntity<TfeTopic>(
                     j => j.HasOne(pt => pt.Tag).WithMany().HasForeignKey(pt => pt.TagId),
-                    j => j.HasOne(pt => pt.TFE).WithMany().HasForeignKey(pt => pt.TFEId),
+                    j => j.HasOne(pt => pt.Tfe).WithMany().HasForeignKey(pt => pt.TfeId),
                     j =>
                     {
                         j.ToTable("TfeTopic");
-                        j.HasKey(t => new { t.TFEId, t.TagId });
+                        j.HasKey(t => new { t.TfeId, t.TagId });
                     });
 
             builder.Entity<TfeRequiredSkill>(j =>
@@ -63,7 +63,7 @@ namespace MatchService.Data
                 j.HasKey(rs => new { rs.TfeId, rs.TagId });
 
                 j.HasOne(rs => rs.Tfe)
-                 .WithMany()
+                 .WithMany(t => t.RequiredSkills)
                  .HasForeignKey(rs => rs.TfeId)
                  .OnDelete(DeleteBehavior.Cascade);
 
@@ -76,7 +76,7 @@ namespace MatchService.Data
             builder.Entity<InterestProposal>()
                 .HasKey(ip => new { ip.OriginUserId, ip.DestinationUserId });
             builder.Entity<TFEProposal>()
-                .HasKey(tp => new { tp.OriginUserId, tp.TFEId });
+                .HasKey(tp => new { tp.OriginUserId, tp.TfeId });
 
             builder.Entity<InterestProposal>()
                 .HasOne(ip => ip.OriginUser).WithMany().HasForeignKey(ip => ip.OriginUserId).OnDelete(DeleteBehavior.Restrict);

@@ -6,7 +6,6 @@ namespace MatchService.Repositories
 {
     public class TfeRepository : ITfeRepository
     {
-
         private readonly MatchDbContext _context;
 
         public TfeRepository(MatchDbContext context)
@@ -24,21 +23,21 @@ namespace MatchService.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<TFE> CreateAsync(TFE Tfe)
+        public async Task<TFE> CreateAsync(TFE tfe)
         {
-            _context.Tfe.Add(Tfe);
+            var skills = tfe.RequiredSkills.ToList();
+            tfe.RequiredSkills.Clear();
+
+            _context.Tfe.Add(tfe);
             await _context.SaveChangesAsync();
 
-            foreach (var skill in Tfe.RequiredSkills)
+            foreach (var skill in skills)
             {
-                skill.TfeId = Tfe.Id;
+                skill.TfeId = tfe.Id;
                 _context.TfeRequiredSkill.Add(skill);
             }
 
-            if (Tfe.RequiredSkills.Count > 0)
-            {
-                await _context.SaveChangesAsync();
-            }
+            await _context.SaveChangesAsync();
 
             return await _context.Tfe
                 .Include(x => x.Author)
@@ -46,7 +45,7 @@ namespace MatchService.Repositories
                 .Include(x => x.RequiredSkills)
                     .ThenInclude(rs => rs.Tag)
                 .AsSingleQuery()
-                .FirstAsync(x => x.Id == Tfe.Id);
+                .FirstAsync(x => x.Id == tfe.Id);
         }
 
         public async Task DeleteAsync(TFE Tfe)
@@ -64,6 +63,33 @@ namespace MatchService.Repositories
                 .Include(t => t.RequiredSkills)
                     .ThenInclude(rs => rs.Tag)
                 .ToListAsync();
+        }
+
+        public async Task UpdateAsync(TFE tfe)
+        {
+            var skillsToSave = tfe.RequiredSkills?.ToList() ?? new List<TfeRequiredSkill>();
+
+            var oldSkills = _context.TfeRequiredSkill.Where(rs => rs.TfeId == tfe.Id);
+            _context.TfeRequiredSkill.RemoveRange(oldSkills);
+
+            tfe.RequiredSkills?.Clear();
+            _context.Tfe.Update(tfe);
+            await _context.SaveChangesAsync();
+
+            if (skillsToSave.Any())
+            {
+                foreach (var skill in skillsToSave)
+                {
+                    var newSkill = new TfeRequiredSkill
+                    {
+                        TfeId = tfe.Id,
+                        TagId = skill.TagId,
+                        Level = skill.Level
+                    };
+                    _context.TfeRequiredSkill.Add(newSkill);
+                }
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
