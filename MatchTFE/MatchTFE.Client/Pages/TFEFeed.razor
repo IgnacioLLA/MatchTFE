@@ -25,36 +25,46 @@
             <MudText Typo="Typo.body1" Class="mud-text-secondary mb-6">
                 Parece que has revisado todas las propuestas por ahora.<br />Vuelve más tarde para ver nuevos proyectos.
             </MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoadTfesAsync">Recargar Propuestas</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AppendTfesAsync(clearQueue: true)">Recargar Propuestas</MudButton>
         </div>
     }
 </DiscoverLayout>
 
 @code {
     private Queue<TfeDto> _proposalsQueue = new();
-    private bool _isLoading = true;
+    private bool _isLoading = false;
+
+    private const int LOAD_THRESHOLD = 2;
+    private const int BATCH_SIZE = 10;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadTfesAsync();
+        await AppendTfesAsync(clearQueue: true);
     }
 
-    private async Task LoadTfesAsync()
+    private async Task AppendTfesAsync(bool clearQueue = false)
     {
+        if (_isLoading) return;
+
         _isLoading = true;
         try
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
-            var response = await client.GetFromJsonAsync<TfeRecommendedResponse>("api/match/tfe/recommended?count=10");
+            var response = await client.GetFromJsonAsync<TfeRecommendedResponse>($"api/match/tfe/recommended?count={BATCH_SIZE}");
 
-            _proposalsQueue.Clear();
+            if (clearQueue)
+                _proposalsQueue.Clear();
+
             if (response?.Tfes != null)
                 foreach (var tfe in response.Tfes)
                     _proposalsQueue.Enqueue(tfe);
         }
         catch
         {
-            Snackbar.Add("Error al conectar con el backend al obtener los proyectos.", Severity.Error);
+            var errorMsg = clearQueue 
+                ? "Error al conectar con el backend al obtener los proyectos." 
+                : "Error al cargar más proyectos.";
+            Snackbar.Add(errorMsg, Severity.Error);
         }
         finally
         {
@@ -80,7 +90,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                
+
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
@@ -100,6 +110,11 @@
         {
             _proposalsQueue.Dequeue();
             StateHasChanged();
+
+            if (_proposalsQueue.Count < LOAD_THRESHOLD && _proposalsQueue.Count > 0 && !_isLoading)
+            {
+                _ = AppendTfesAsync();
+            }
         }
     }
 }
