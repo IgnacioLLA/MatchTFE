@@ -11,5 +11,6 @@ namespace MatchService.Repositories
         Task DeleteAsync(TFE tag);
         Task<List<TFE>> GetByAuthorIdAsync(string authorId);
         Task UpdateAsync(TFE tfe);
+        Task<bool> DeleteAsync(int id, string authorId);
     }
 }

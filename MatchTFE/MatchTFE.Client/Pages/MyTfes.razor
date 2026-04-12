@@ -80,7 +80,7 @@
     <div class="px-6">
         @foreach (var proposal in GetPaginatedProposals())
         {
-            <TfeListItem Model="proposal" />
+            <TfeListItem Model="proposal" OnDeleted="HandleDeleteProposal" />
         }
     </div>
 
@@ -185,13 +185,43 @@
         if (totalItems == 0) return 1;
         return (int)Math.Ceiling((double)totalItems / _pageSize);
     }
-
-
-
     private void OnSelectedTagsChanged(IReadOnlyCollection<string> values)
     {
         SelectedFilterTags = values ?? new HashSet<string>();
         _currentPage = 1;
         StateHasChanged();
+    }
+
+    private async Task HandleDeleteProposal(int tfeId)
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.DeleteAsync($"api/match/tfe/{tfeId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Propuesta eliminada correctamente.", Severity.Success);
+
+                _proposals.RemoveAll(p => p.Id == tfeId);
+
+                var maxPages = GetTotalPages();
+                if (_currentPage > maxPages && maxPages > 0)
+                {
+                    _currentPage = maxPages;
+                }
+
+                StateHasChanged();
+            }
+            else
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"No se pudo eliminar la propuesta: {error}", Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Error de conexión al intentar eliminar.", Severity.Error);
+        }
     }
 }

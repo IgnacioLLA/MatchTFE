@@ -27,5 +27,7 @@ namespace MatchService.Controllers
         Task<IActionResult> GetTfesByAuthor();
         [HttpPut("tfe/{id}")]
         Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request);
+        [HttpDelete("tfe/{id}")]
+        Task<IActionResult> DeleteTfe(int id);
     }
 }

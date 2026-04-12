@@ -91,5 +91,16 @@ namespace MatchService.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task<bool> DeleteAsync(int id, string authorId)
+        {
+            var tfe = await _context.Tfe
+                .FirstOrDefaultAsync(t => t.Id == id && t.AuthorId == authorId);
+
+            if (tfe == null) return false;
+
+            _context.Tfe.Remove(tfe);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

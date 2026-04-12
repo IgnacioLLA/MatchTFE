@@ -113,5 +113,17 @@ namespace MatchService.Controllers
 
             return Ok(tfes);
         }
+
+        [HttpDelete("tfe/{id}")]
+        public async Task<IActionResult> DeleteTfe(int id)
+        {
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            var deleted = await _tfeService.DeleteTfeAsync(id, authorId);
+            if (!deleted) return NotFound("TFE not found or you don't have permission to delete it.");
+
+            return NoContent();
+        }
     }
 }

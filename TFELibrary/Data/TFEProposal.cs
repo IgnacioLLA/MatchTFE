@@ -13,5 +13,4 @@ namespace TFELibrary.Data
         public ProposalStatus Status { get; set; } = ProposalStatus.Pending;
         public DateOnly ExpirationDate { get; set; }
     }
-
 }

@@ -65,10 +65,12 @@
                                Color="Color.Default"
                                Href="@($"/tfe/edit/{Model.Id}")" />
 
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Default" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                               Size="Size.Small"
+                               Color="Color.Error"
+                               OnClick="OnDeleteClicked" />
             }
         </MudItem>
-
     </MudGrid>
 </div>
 
@@ -78,6 +80,17 @@
 
     [Parameter]
     public bool ShowTagsCloseIcon { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<int> OnDeleted { get; set; }
+
+    private async Task OnDeleteClicked()
+    {
+        if (OnDeleted.HasDelegate)
+        {
+            await OnDeleted.InvokeAsync(Model.Id);
+        }
+    }
 
     private Color GetStatusColor(TFEStatus status) => status switch
     {
@@ -103,8 +116,6 @@
         _ => status.ToString()
     };
 
-    private void HandleTagRemoved(string tagName)
-    {
-        
-    }
+    private void HandleTagRemoved(string tagName){}
+
 }
