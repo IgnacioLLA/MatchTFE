@@ -27,15 +27,14 @@
 <MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in">
 
     @* FILTERS *@
-    <div class="pa-4 d-flex flex-wrap gap-4 align-center" style="border-bottom: 1px solid var(--mud-palette-lines-default); background-color: var(--mud-palette-background-grey);">
+    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section">
         <MudTextField @bind-Value="SearchQuery"
                       Placeholder="Buscar por título o etiqueta..."
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Variant="Variant.Outlined"
                       Margin="Margin.Dense"
-                      Class="bg-white rounded-lg flex-grow-1"
-                      Style="max-width: 400px;" />
+                      Class="bg-white rounded-lg flex-grow-1 tfe-search-input" />
 
         <MudSelect T="string"
                    MultiSelection="true"
@@ -44,8 +43,7 @@
                    Placeholder="Filtrar por tags..."
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
-                   Class="bg-white rounded-lg flex-grow-1"
-                   Style="max-width: 300px;">
+                   Class="bg-white rounded-lg flex-grow-1 tfe-filter-select">
             @foreach (var tag in _availableTags)
             {
                 <MudSelectItem Value="@tag.Name">@tag.Name</MudSelectItem>
@@ -66,7 +64,7 @@
     </div>
 
     @* HEADERS *@
-    <div class="px-6 py-3 app-text-muted font-weight-bold" style="border-bottom: 1px solid var(--mud-palette-lines-default); font-size: 0.75rem; letter-spacing: 1px;">
+    <div class="px-6 py-3 app-text-muted font-weight-bold tfe-column-headers">
         <MudGrid>
             <MudItem xs="12" md="3">DETALLES DEL PROYECTO</MudItem>
             <MudItem xs="6" md="2">ESTADO</MudItem>
@@ -86,7 +84,7 @@
     </div>
 
     @* FOOTER *@
-    <div class="pa-4 d-flex justify-space-between align-center" style="background-color: var(--mud-palette-background-grey); border-radius: 0 0 12px 12px;">
+    <div class="pa-4 d-flex justify-space-between align-center tfe-footer-section">
         <MudText Typo="Typo.body2" Class="app-text-muted">
             Mostrando @GetPaginatedProposals().Count() de @GetFilteredProposals().Count() publicaciones
         </MudText>
@@ -187,6 +185,7 @@
         if (totalItems == 0) return 1;
         return (int)Math.Ceiling((double)totalItems / _pageSize);
     }
+
     private void OnSelectedTagsChanged(IReadOnlyCollection<string> values)
     {
         SelectedFilterTags = values ?? new HashSet<string>();

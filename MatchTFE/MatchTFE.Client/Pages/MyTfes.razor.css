@@ -1,0 +1,23 @@
+﻿.tfe-filter-section {
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+    background-color: var(--mud-palette-background-grey);
+}
+
+.tfe-search-input {
+    max-width: 400px;
+}
+
+.tfe-filter-select {
+    max-width: 300px;
+}
+
+.tfe-column-headers {
+    border-bottom: 1px solid var(--mud-palette-lines-default);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.tfe-footer-section {
+    background-color: var(--mud-palette-background-grey);
+    border-radius: 0 0 12px 12px;
+}
