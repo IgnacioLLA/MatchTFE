@@ -17,6 +17,9 @@ namespace MatchService.Infrastructure
 
             builder.RegisterType<Services.TfeService>().As<ITfeService>().InstancePerLifetimeScope();
             builder.RegisterType<TfeRepository>().As<ITfeRepository>().InstancePerLifetimeScope();
+
+            builder.RegisterType<ProposalRepository>().As<IProposalRepository>().InstancePerLifetimeScope();
+            builder.RegisterType<ProposalService>().As<IProposalService>().InstancePerLifetimeScope();
         }
     }
 }

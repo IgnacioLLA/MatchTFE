@@ -17,14 +17,13 @@ namespace TFELibrary.Shared
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        //public string Department { get; set; } = string.Empty;
         public string TutorName { get; set; } = string.Empty;
         public List<TagDto> Topics { get; set; } = new();
         public List<SkillDto> RequiredSkills { get; set; } = new();
         public DateTime EstimatedDelivery { get; set; }
         public DateTime ExpirationDate { get; set; }
+        public DateTime CreationDate { get; set; }
         public TFEStatus Status { get; set; }
-        public string IconName { get; set; } = "Psychology";
     }
 
     public enum TFEStatus
@@ -91,6 +90,7 @@ namespace TFELibrary.Shared
     }
     public class TagDto
     {
+        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
     }
 

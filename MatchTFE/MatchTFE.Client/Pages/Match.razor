@@ -23,7 +23,6 @@
                         <MudItem xs="12" sm="6" md="4">
                             <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
                                 <div class="d-flex align-start justify-space-between mb-3">
-                                    <MudIcon Icon="@GetIcon(proposal.IconName)" Color="Color.Primary" Size="Size.Large" />
                                     <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match</MudChip>
                                 </div>
 
@@ -98,8 +97,8 @@
     {
         _savedProposals = new List<TfeDto>
         {
-            new () { Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García",  IconName = "Psychology" },
-            new () { Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte", IconName = "Security" }
+            new () { Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García"},
+            new () { Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte"}
         };
 
         _savedCandidates = new List<CandidateProfileDto>

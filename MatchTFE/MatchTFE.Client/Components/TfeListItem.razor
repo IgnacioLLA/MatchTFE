@@ -49,8 +49,7 @@
                     @foreach (var tag in Model.Topics)
                     {
                         <ChipTag Text="@tag.Name"
-                                 ShowCloseIcon="@ShowTagsCloseIcon"
-                                 OnRemoved="HandleTagRemoved" />
+                                 ShowCloseIcon="@ShowTagsCloseIcon"/>
                     }
                 </div>
             }
@@ -115,7 +114,4 @@
         TFEStatus.Cancelled => "• Cancelado",
         _ => status.ToString()
     };
-
-    private void HandleTagRemoved(string tagName){}
-
 }

@@ -41,5 +41,14 @@ namespace MatchService.Repositories
             _context.Tag.Remove(tag);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Tag>> GetUserInterestsAsync(string userId)
+        {
+            return await _context.UserInterest
+                .Where(ui => ui.UserProfileId == userId)
+                .Include(ui => ui.Tag)
+                .Select(ui => ui.Tag)
+                .ToListAsync();
+        }
     }
 }

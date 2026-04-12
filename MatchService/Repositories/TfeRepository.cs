@@ -1,6 +1,7 @@
 ﻿using MatchService.Data;
 using Microsoft.EntityFrameworkCore;
 using TFELibrary.Data;
+using TFELibrary.Shared;
 
 namespace MatchService.Repositories
 {
@@ -101,6 +102,59 @@ namespace MatchService.Repositories
             _context.Tfe.Remove(tfe);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count)
+        {
+            var excludedTfeIds = await _context.TfeProposal
+                .Where(tp => tp.OriginUserId == userId)
+                .Select(tp => tp.TfeId)
+                .ToListAsync();
+
+            var userRole = await _context.UserProfiles
+                .Where(u => u.UserId == userId)
+                .Select(u => u.Role)
+                .FirstOrDefaultAsync();
+
+            var baseQuery = _context.Tfe
+                .Include(t => t.Author)
+                .Include(t => t.Topics)
+                .Include(t => t.RequiredSkills).ThenInclude(rs => rs.Tag)
+                .Where(t => t.AuthorId != userId
+                         && t.Status == TFEStatus.Open
+                         && !excludedTfeIds.Contains(t.Id)
+                         && t.Author.Role != userRole);
+
+            List<TFE> result = new();
+
+            if (userInterestTagIds.Any())
+            {
+                var withMatches = await baseQuery
+                    .Select(t => new
+                    {
+                        Tfe = t,
+                        MatchCount = t.Topics.Count(topic => userInterestTagIds.Contains(topic.Id))
+                    })
+                    .OrderByDescending(x => x.MatchCount)
+                    .Take(count)
+                    .Select(x => x.Tfe)
+                    .ToListAsync();
+
+                result.AddRange(withMatches);
+            }
+
+            if (result.Count < count)
+            {
+                var alreadyIncludedIds = result.Select(t => t.Id).ToList();
+                var remaining = await baseQuery
+                    .Where(t => !alreadyIncludedIds.Contains(t.Id))
+                    .OrderBy(t => Guid.NewGuid())
+                    .Take(count - result.Count)
+                    .ToListAsync();
+                result.AddRange(remaining);
+            }
+
+            return result;
         }
     }
 }

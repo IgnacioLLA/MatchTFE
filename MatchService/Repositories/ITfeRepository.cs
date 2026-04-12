@@ -12,5 +12,7 @@ namespace MatchService.Repositories
         Task<List<TFE>> GetByAuthorIdAsync(string authorId);
         Task UpdateAsync(TFE tfe);
         Task<bool> DeleteAsync(int id, string authorId);
+
+        Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count);
     }
 }

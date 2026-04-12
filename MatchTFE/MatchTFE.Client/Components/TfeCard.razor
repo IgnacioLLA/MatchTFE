@@ -4,42 +4,48 @@
     <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
         <MudGrid Spacing="4">
 
+            @* --- ICON --- *@
             <MudItem xs="12" md="5" Class="d-flex justify-center align-center">
                 <MudPaper Elevation="0" Class="app-icon-box rounded-xl d-flex align-center justify-center">
                     <div class="relative d-flex align-center justify-center">
-                        <MudIcon Icon="@GetIcon(Proposal.IconName)" Class="icon-hero" Color="Color.Primary" />
-                        <MudPaper Elevation="0" Class="pa-2 absolute rounded-lg border-all bg-white code-icon-badge">
-                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary" />
-                        </MudPaper>
+                        <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="icon-hero" Color="Color.Primary" />
                     </div>
                 </MudPaper>
             </MudItem>
 
+            @* --- MAIN DETAILS --- *@
             <MudItem xs="12" md="7">
                 <MudText Typo="Typo.h5" Class="app-title-tight mb-4">@Proposal.Title</MudText>
 
                 <div class="d-flex align-center mb-6">
-                    <MudAvatar Size="Size.Medium" Class="mr-3">@Proposal.TutorName[0]</MudAvatar>
+                    <MudAvatar Size="Size.Medium" Class="mr-3" Color="Color.Primary">
+                        @(string.IsNullOrWhiteSpace(Proposal.TutorName) ? "T" : Proposal.TutorName[0].ToString())
+                    </MudAvatar>
                     <div>
                         <MudText Typo="Typo.body2" Class="font-weight-bold">@Proposal.TutorName</MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary"></MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Tutor del Proyecto</MudText>
                     </div>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2 mb-8">
-                    @foreach (var tech in Proposal.Topics)
-                    {
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" Class="px-4 py-2 font-weight-bold">@tech</MudChip>
-                    }
-                </div>
+                @* TOPICS *@
+                @if (Proposal.Topics != null && Proposal.Topics.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2 mb-8">
+                        @foreach (var topic in Proposal.Topics)
+                        {
+                            <ChipTag Text="@topic.Name" ShowCloseIcon="false" />
+                        }
+                    </div>
+                }
 
+                @* DATES *@
                 <MudGrid Spacing="3">
                     <MudItem xs="6">
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Outlined.Timer" Size="Size.Small" Class="mr-2 mud-text-secondary" />
                             <div>
-                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Duración</MudText>
-                                <MudText Typo="Typo.body2" Class="font-weight-bold"></MudText>
+                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Duración Estimada</MudText>
+                                <MudText Typo="Typo.body2" Class="font-weight-bold">@GetDurationText()</MudText>
                             </div>
                         </div>
                     </MudItem>
@@ -47,8 +53,10 @@
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Outlined.CalendarToday" Size="Size.Small" Class="mr-2 mud-text-secondary" />
                             <div>
-                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Fecha Caducidad</MudText>
-                                <MudText Typo="Typo.body2" Class="font-weight-bold">@Proposal.ExpirationDate.ToString("dd MMMM, yyyy")</MudText>
+                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Fecha Límite</MudText>
+                                <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                    @(Proposal.ExpirationDate != default ? Proposal.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                                </MudText>
                             </div>
                         </div>
                     </MudItem>
@@ -57,17 +65,39 @@
         </MudGrid>
     </MudPaper>
 
-    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-10">
+    @* --- DESCRIPTION --- *@
+    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
         <div class="d-flex align-center mb-6">
             <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Class="mr-3" />
             <MudText Typo="Typo.h6"><b>Descripción del Proyecto</b></MudText>
         </div>
-
         <MudText Typo="Typo.body1" Class="app-text-reading mb-4">
             @Proposal.Description
         </MudText>
     </MudPaper>
 
+    @* --- REQUIRED SKILLS --- *@
+    @if (Proposal.RequiredSkills != null && Proposal.RequiredSkills.Any())
+    {
+        <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-10">
+            <div class="d-flex align-center mb-6">
+                <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6"><b>Requisitos Técnicos</b></MudText>
+            </div>
+
+            <div class="d-flex flex-wrap gap-4">
+                @foreach (var skill in Proposal.RequiredSkills)
+                {
+                    <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: var(--app-primary-light, #f4f6f8); min-width: 200px;">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold mr-4" Style="color: var(--app-primary-dark);">@skill.Tag</MudText>
+                        <MudRating SelectedValue="@skill.Level" MaxValue="5" Color="Color.Primary" Size="Size.Small" ReadOnly="true" />
+                    </div>
+                }
+            </div>
+        </MudPaper>
+    }
+
+    @* --- ACTION BUTTONS --- *@
     <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all">
         <div class="d-flex flex-column flex-sm-row align-center justify-center gap-3">
             <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
@@ -86,16 +116,19 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public TfeDto Proposal { get; set; } = default!;
-    [Parameter] public EventCallback<bool> OnDecision { get; set; }
+    [Parameter, EditorRequired]
+    public TfeDto Proposal { get; set; } = default!;
 
-    private string GetIcon(string iconName)
+    [Parameter]
+    public EventCallback<bool> OnDecision { get; set; }
+
+    private string GetDurationText()
     {
-        return iconName switch
-        {
-            "Security" => Icons.Material.Filled.Security,
-            "LocalShipping" => Icons.Material.Filled.LocalShipping,
-            _ => Icons.Material.Filled.Psychology
-        };
+        if (Proposal.EstimatedDelivery == default) return "No especificada";
+
+        var months = ((Proposal.EstimatedDelivery.Year - DateTime.Today.Year) * 12) +
+                       Proposal.EstimatedDelivery.Month - DateTime.Today.Month;
+
+        return months > 0 ? $"{months} meses" : "Menos de 1 mes";
     }
 }

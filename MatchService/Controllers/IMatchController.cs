@@ -29,5 +29,9 @@ namespace MatchService.Controllers
         Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request);
         [HttpDelete("tfe/{id}")]
         Task<IActionResult> DeleteTfe(int id);
+        [HttpGet("tfe/recommended")]
+        Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request);
+        [HttpPost("proposal/tfe")]
+        Task<IActionResult> CreateTfeProposal(TfeProposalRequest request);
     }
 }

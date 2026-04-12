@@ -21,6 +21,7 @@ namespace MatchService.Services
             CheckTfe(request.Tfe);
 
             request.Tfe.Status = TFEStatus.Open;
+            request.Tfe.CreationDate = DateTime.UtcNow;
             var tfe = CreateTfeEntity(request.Tfe, authorId);
 
             try
@@ -88,13 +89,33 @@ namespace MatchService.Services
             return await _tfeRepository.DeleteAsync(id, authorId);
         }
 
+        public async Task<TfeRecommendedResponse> GetRecommendedTfesAsync(string userId, TfeRecommendedRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("User ID cannot be empty.");
+
+            if (request.Count <= 0) request.Count = 10;
+
+            var userInterests = await _tagRepository.GetUserInterestsAsync(userId);
+            var userInterestTagIds = userInterests.Select(t => t.Id).ToList();
+
+            var tfes = await _tfeRepository.GetRecommendedTfesAsync(userId, userInterestTagIds, request.Count);
+            var tfeDtos = tfes.Select(CreateTfeDto).ToList()!;
+
+            return new TfeRecommendedResponse
+            {
+                Tfes = tfeDtos,
+                TotalCount = tfeDtos.Count
+            };
+        }
+
         // -------------------------------------------------------
 
         private void CheckTfe(TfeDto tfe)
         {
             if (tfe == null) throw new ArgumentNullException(nameof(tfe));
-            if (string.IsNullOrWhiteSpace(tfe.Title)) throw new ArgumentException("El título es obligatorio.", nameof(tfe));
-            if (string.IsNullOrWhiteSpace(tfe.Description)) throw new ArgumentException("La descripción es obligatoria.", nameof(tfe));
+            if (string.IsNullOrWhiteSpace(tfe.Title)) throw new ArgumentException("Title is mandatory.", nameof(tfe));
+            if (string.IsNullOrWhiteSpace(tfe.Description)) throw new ArgumentException("Description is mandatory.", nameof(tfe));
         }
 
         private TfeDto? CreateTfeDto(TFE? tfe)

@@ -9,5 +9,6 @@ namespace MatchService.Repositories
         Task<Tag?> GetByNameAsync(string name);
         Task<Tag> CreateAsync(Tag tag);
         Task DeleteAsync(Tag tag);
+        Task<List<Tag>> GetUserInterestsAsync(string userId);
     }
 }

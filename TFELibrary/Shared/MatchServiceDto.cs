@@ -35,4 +35,28 @@ namespace TFELibrary.Shared
         [Required]
         public TfeDto Tfe { get; set; } = new TfeDto();
     }
+    public class TfeRecommendedRequest
+    {
+        public int Count { get; set; } = 10;
+    }
+    public class TfeRecommendedResponse
+    {
+        public List<TfeDto> Tfes { get; set; } = new();
+        public int TotalCount { get; set; }
+    }
+
+    // -- Proposals --
+    public class TfeProposalRequest
+    {
+        [Required]
+        public int TfeId { get; set; }
+        [Required]
+        public bool IsInterested { get; set; }
+    }
+
+    public class TfeProposalResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
 }

@@ -14,11 +14,13 @@ namespace MatchService.Controllers
     {
         private readonly ITagService _tagService;
         private readonly ITfeService _tfeService;
+        private readonly IProposalService _proposalService;
 
-        public MatchController(ITagService tagService, ITfeService tfeService)
+        public MatchController(ITagService tagService, ITfeService tfeService, IProposalService proposalService)
         {
             _tagService = tagService;
             _tfeService = tfeService;
+            _proposalService = proposalService;
         }
 
         [HttpGet("tag")]
@@ -124,6 +126,30 @@ namespace MatchService.Controllers
             if (!deleted) return NotFound("TFE not found or you don't have permission to delete it.");
 
             return NoContent();
+        }
+
+        [HttpGet("tfe/recommended")]
+        public async Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+            var response = await _tfeService.GetRecommendedTfesAsync(userId, request);
+            return Ok(response);
+        }
+
+        [HttpPost("proposal/tfe")]
+        public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+            var response = await _proposalService.CreateTfeProposalAsync(userId, request);
+
+            if (!response.Success) return Conflict(response.Message);
+            return Ok(response);
         }
     }
 }

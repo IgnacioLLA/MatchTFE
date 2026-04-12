@@ -9,5 +9,6 @@ namespace MatchService.Services
         Task<List<TfeDto>> GetTfesByAuthorIdAsync(string authorId);
         Task<bool> UpdateTfeAsync(int id, TfeUpdateRequest request, string authorId);
         Task<bool> DeleteTfeAsync(int id, string authorId);
+        Task<TfeRecommendedResponse> GetRecommendedTfesAsync(string userId, TfeRecommendedRequest request);
     }
 }

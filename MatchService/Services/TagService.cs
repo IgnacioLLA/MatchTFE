@@ -53,7 +53,8 @@ namespace MatchService.Services
         {
             return new TagDto
             {
-                Name = tag?.Name
+                Id = tag?.Id ?? 0,
+                Name = tag?.Name ?? string.Empty,
             };
         }   
     }

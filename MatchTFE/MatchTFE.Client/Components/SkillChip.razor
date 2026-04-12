@@ -4,7 +4,6 @@
     <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: var(--app-primary-dark);">@Skill.Tag</MudText>
 
     <div class="d-flex align-center gap-4">
-        @* Usamos SelectedValueChanged para actualizar el DTO en tiempo real *@
         <MudRating SelectedValue="@Skill.Level" SelectedValueChanged="OnLevelChanged" MaxValue="5" Color="Color.Primary" Size="Size.Small" />
 
         <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Error" Size="Size.Small" OnClick="RemoveSkill" />
