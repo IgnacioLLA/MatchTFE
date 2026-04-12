@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MatchService.Data;
 using TFELibrary.Data;
+using TFELibrary.Shared;
 
 namespace MatchService.Repositories
 {
@@ -23,6 +24,17 @@ namespace MatchService.Repositories
         {
             _context.TfeProposal.Add(proposal);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Dictionary<int, int>> GetInterestedCountsByTfeIdsAsync(List<int> tfeIds)
+        {
+            if (!tfeIds.Any()) return new Dictionary<int, int>();
+
+            return await _context.TfeProposal
+                .Where(tp => tfeIds.Contains(tp.TfeId) && tp.Status == ProposalStatus.Pending)
+                .GroupBy(tp => tp.TfeId)
+                .Select(g => new { TfeId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.TfeId, x => x.Count);
         }
     }
 }

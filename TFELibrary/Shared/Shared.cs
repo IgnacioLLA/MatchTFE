@@ -18,6 +18,7 @@ namespace TFELibrary.Shared
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string TutorName { get; set; } = string.Empty;
+        public int InterestedAmount { get; set; }
         public List<TagDto> Topics { get; set; } = new();
         public List<SkillDto> RequiredSkills { get; set; } = new();
         public DateTime EstimatedDelivery { get; set; }

@@ -9,11 +9,13 @@ namespace MatchService.Services
     {
         private readonly ITfeRepository _tfeRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly IProposalRepository _proposalRepository;
 
-        public TfeService(ITfeRepository repository, ITagRepository tagRepository)
+        public TfeService(ITfeRepository repository, ITagRepository tagRepository, IProposalRepository proposalRepository)
         {
             _tfeRepository = repository;
             _tagRepository = tagRepository;
+            _proposalRepository = proposalRepository;
         }
 
         public async Task<TfeCreationResponse> CreateTfeAsync(TfeCreationRequest request, string authorId)
@@ -51,7 +53,19 @@ namespace MatchService.Services
                 throw new ArgumentException("El ID del autor no puede estar vacío.", nameof(authorId));
 
             var tfes = await _tfeRepository.GetByAuthorIdAsync(authorId);
-            return tfes.Select(CreateTfeDto).ToList()!;
+            var tfeIds = tfes.Select(t => t.Id).ToList();
+
+            // Traer todos los contadores en una sola consulta
+            var interestedCounts = await _proposalRepository.GetInterestedCountsByTfeIdsAsync(tfeIds);
+
+            var dtos = tfes.Select(t => 
+            {
+                var dto = CreateTfeDto(t);
+                dto.InterestedAmount = interestedCounts.ContainsKey(t.Id) ? interestedCounts[t.Id] : 0;
+                return dto;
+            }).ToList();
+
+            return dtos!;
         }
 
         public async Task<bool> UpdateTfeAsync(int id, TfeUpdateRequest request, string authorId)
@@ -134,6 +148,7 @@ namespace MatchService.Services
                     .ToList(),
                 EstimatedDelivery = tfe.EstimatedDelivery.ToDateTime(TimeOnly.MinValue),
                 ExpirationDate = tfe.ExpirationDate.ToDateTime(TimeOnly.MinValue),
+                CreationDate = tfe.CreationDate.ToDateTime(TimeOnly.MinValue),
                 Status = tfe.Status,
             };
         }
