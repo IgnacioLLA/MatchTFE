@@ -19,7 +19,9 @@ namespace UserService.Data
             builder.Entity<UserProfile>().ToTable("UserProfile");
             builder.Entity<StudentSkill>().ToTable("StudentSkill");
             builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
+            builder.Entity<TFEProposal>().ToTable("TfeProposal", t => t.ExcludeFromMigrations());
 
+            builder.Entity<TFEProposal>().Ignore(tp => tp.Tfe);
             //builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
             //builder.Entity<StudentSkill>().Ignore(ss => ss.Tag);
 
@@ -58,6 +60,13 @@ namespace UserService.Data
                  .HasForeignKey(ui => ui.TagId)
                  .OnDelete(DeleteBehavior.Cascade);
             });
+
+            builder.Entity<TFEProposal>().HasKey(tp => new { tp.OriginUserId, tp.TfeId });
+            builder.Entity<TFEProposal>()
+                .HasOne(tp => tp.OriginUser)
+                .WithMany(u => u.TfeProposals)
+                .HasForeignKey(tp => tp.OriginUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

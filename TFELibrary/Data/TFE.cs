@@ -21,6 +21,7 @@ namespace TFELibrary.Data
         public DateOnly CreationDate { get; set; }
         public List<Tag> Topics { get; set; } = new List<Tag>();
         public List<TfeRequiredSkill> RequiredSkills { get; set; } = new List<TfeRequiredSkill>();
+        public List<TFEProposal> Proposals { get; set; } = new List<TFEProposal>();
         public TFEStatus Status { get; set; } = TFEStatus.Open;
     }
 }

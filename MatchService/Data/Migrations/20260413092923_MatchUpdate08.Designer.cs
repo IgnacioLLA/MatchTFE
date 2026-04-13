@@ -3,6 +3,7 @@ using System;
 using MatchService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MatchService.Data.Migrations
 {
     [DbContext(typeof(MatchDbContext))]
-    partial class MatchDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260413092923_MatchUpdate08")]
+    partial class MatchUpdate08
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

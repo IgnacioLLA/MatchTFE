@@ -35,6 +35,7 @@ namespace MatchService.Data
                 .IsUnique();
 
             builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
+
             builder.Entity<UserProfile>().Ignore(u => u.UserInterests);
             builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
 
@@ -57,6 +58,12 @@ namespace MatchService.Data
                         j.HasKey(t => new { t.TfeId, t.TagId });
                     });
 
+            builder.Entity<TFEProposal>()
+                .HasOne(tp => tp.Tfe)
+                .WithMany(t => t.Proposals)
+                .HasForeignKey(tp => tp.TfeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<TfeRequiredSkill>(j =>
             {
                 j.ToTable("TfeRequiredSkill");
@@ -75,6 +82,7 @@ namespace MatchService.Data
 
             builder.Entity<InterestProposal>()
                 .HasKey(ip => new { ip.OriginUserId, ip.DestinationUserId });
+
             builder.Entity<TFEProposal>()
                 .HasKey(tp => new { tp.OriginUserId, tp.TfeId });
 

@@ -34,6 +34,8 @@ namespace TFELibrary.Data
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<UserInterest> UserInterests { get; set; } = new List<UserInterest>();
 
+        public ICollection<TFEProposal> TfeProposals { get; set; } = new List<TFEProposal>();
+
         // --- STUDENT ---
         public string? AcademicYear { get; set; }
         public ICollection<StudentSkill> StudentSkills { get; set; } = new List<StudentSkill>();
