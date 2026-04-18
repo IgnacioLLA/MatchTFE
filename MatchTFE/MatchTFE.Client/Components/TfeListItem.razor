@@ -31,13 +31,31 @@
             </div>
         </MudItem>
 
-        @* INTERETS *@
+        @* INTEREST *@
         <MudItem xs="6" md="2">
-            <div class="d-flex align-center app-text-muted">
-                <MudIcon Icon="@Icons.Material.Filled.Group" Size="Size.Small" Class="mr-1" />
-                <MudText Typo="Typo.body2" Class="font-weight-bold">
-                    @Model.InterestedAmount
-                </MudText>
+            <div class="d-flex align-center gap-3">
+                <div class="d-flex align-center @(Model.InterestedAmount > 0 ? "text-main" : "app-text-muted")">
+                    <MudIcon Icon="@Icons.Material.Filled.Group" Size="Size.Small" Class="mr-1" />
+                    <MudText Typo="Typo.body2" Class="font-weight-bold">
+                        @Model.InterestedAmount
+                    </MudText>
+                </div>
+
+                @if (Model.InterestedAmount > 0)
+                {
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               Href="@($"/tfe/{Model.Id}/candidates")"
+                               Class="font-weight-bold px-2 py-0"
+                               Style="min-width: auto;">
+                        Ver
+                    </MudButton>
+                }
+                else
+                {
+                    
+                }
             </div>
         </MudItem>
 

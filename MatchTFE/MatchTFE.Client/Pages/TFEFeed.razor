@@ -6,7 +6,6 @@
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
 
-
 <DiscoverLayout ActiveIndex="0"
                 MobileTitle="Descubrir un proyecto"
                 MobileButtonText="Buscar perfiles"
@@ -15,7 +14,25 @@
     @if (_proposalsQueue.Any())
     {
         var current = _proposalsQueue.Peek();
-        <TfeCard Proposal="@current" OnDecision="HandleActionAsync" />
+
+        <TfeCard Proposal="@current" />
+
+        @* --- ACTION BUTTONS --- *@
+        <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all mb-10">
+            <div class="d-flex flex-column flex-sm-row align-center justify-center gap-3">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
+                           OnClick="@(() => HandleActionAsync(false))"
+                           Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Close">
+                    DESCARTAR
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
+                           OnClick="@(() => HandleActionAsync(true))"
+                           Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Favorite">
+                    ME INTERESA
+                </MudButton>
+            </div>
+        </MudPaper>
     }
     else
     {
@@ -61,8 +78,8 @@
         }
         catch
         {
-            var errorMsg = clearQueue 
-                ? "Error al conectar con el backend al obtener los proyectos." 
+            var errorMsg = clearQueue
+                ? "Error al conectar con el backend al obtener los proyectos."
                 : "Error al cargar más proyectos.";
             Snackbar.Add(errorMsg, Severity.Error);
         }

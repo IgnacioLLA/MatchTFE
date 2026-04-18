@@ -99,9 +99,9 @@ namespace MatchService.Data
 
             // ENUM CONVERSIONS
             builder.Entity<UserProfile>().Property(u => u.Role).HasConversion<string>();
-            builder.Entity<TFE>().Property(t => t.Status).HasConversion<string>();
-            builder.Entity<InterestProposal>().Property(ip => ip.Status).HasConversion<string>();
-            builder.Entity<TFEProposal>().Property(tp => tp.Status).HasConversion<string>();
+            //builder.Entity<TFE>().Property(t => t.Status).HasConversion<string>();
+            //builder.Entity<InterestProposal>().Property(ip => ip.Status).HasConversion<string>();
+            //builder.Entity<TFEProposal>().Property(tp => tp.Status).HasConversion<string>();
         }
     }
 }

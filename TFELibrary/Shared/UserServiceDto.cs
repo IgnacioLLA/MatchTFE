@@ -23,4 +23,11 @@ namespace TFELibrary.Shared
         ProfileDto? UpdatedProfile = null
     );
 
+    public record ProfileByTfeInterestRequest(
+        int TfeId
+    );
+
+    public record ProfileByTfeInterestResponse(
+        List<ProfileDto> Interested
+    );
 }

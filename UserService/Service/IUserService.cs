@@ -9,5 +9,6 @@ namespace UserService.Service
         Task<ProfileResponse?> GetProfileByUserIdAsync(string userId);
         Task<bool> CreateProfileAsync(ProfileCreationRequest request);
         Task<ProfileUpdateResponse> UpdateProfileAsync(string userId, ProfileUpdateRequest request);
+        Task<ProfileByTfeInterestResponse> GetProfileByTfeInterest(ProfileByTfeInterestRequest request);
     }
 }

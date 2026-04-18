@@ -113,5 +113,12 @@ namespace UserService.Repositories
                 .Where(t => tagNames.Contains(t.Name))
                 .ToDictionaryAsync(t => t.Name, t => t.Id);
         }
+
+        public async Task<List<UserProfile>> GetInterestedUsersByTfeIdInUserServiceAsync(int tfeId)
+        {
+            return await _context.UserProfile
+                .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId && tp.Status == ProposalStatus.Pending))
+                .ToListAsync();
+        }
     }
 }

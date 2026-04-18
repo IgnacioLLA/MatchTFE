@@ -61,12 +61,21 @@ namespace UserService.Service
                 return new ProfileUpdateResponse(true, "Profile updated successfully.", request.Profile);
 
             return new ProfileUpdateResponse(false, "Could not update profile.");
+
         }
+
+        public async Task<ProfileByTfeInterestResponse> GetProfileByTfeInterest(ProfileByTfeInterestRequest request)
+        {
+            return new ProfileByTfeInterestResponse((await _userRepository.GetInterestedUsersByTfeIdInUserServiceAsync(request.TfeId)).ConvertAll((p) => GetProfileDto(p)));
+        }
+
+        // --------------------------------------------------
 
         private ProfileDto GetProfileDto(UserProfile profile)
         {
             return new ProfileDto
             {
+                Id = profile.UserId,
                 FirstName = profile.FirstName,
                 LastName = profile.LastName,
                 Email = profile.Email,

@@ -1,0 +1,70 @@
+﻿@using TFELibrary.Shared
+
+<MudPaper Elevation="0" Class="pa-4 rounded-xl border-all mb-4 d-flex flex-column flex-md-row align-center justify-space-between gap-4 transition-all hover-shadow">
+
+    @* Datos del Candidato *@
+    <div class="d-flex align-center w-100">
+        <MudAvatar Size="Size.Large" Class="mr-4" Color="Color.Primary" Variant="Variant.Filled">
+            @if (!string.IsNullOrWhiteSpace(Candidate.AvatarUrl))
+            {
+                <MudImage Src="@Candidate.AvatarUrl" Alt="@Candidate.FirstName" />
+            }
+            else
+            {
+                <span class="font-weight-bold" style="font-size: 1.2rem;">@Candidate.FirstName.FirstOrDefault()</span>
+            }
+        </MudAvatar>
+
+        <div>
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main" Style="line-height: 1.2;">
+                @Candidate.FirstName @Candidate.LastName
+            </MudText>
+
+            <MudText Typo="Typo.body2" Class="app-text-muted mt-1">
+                @if (Candidate.Role == RoleType.Teacher)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" Style="vertical-align: sub;" />
+                    @Candidate.Department
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Small" Class="mr-1" Style="vertical-align: sub;" />
+                    @Candidate.AcademicYear
+                }
+            </MudText>
+        </div>
+    </div>
+
+    @* Botones de Acción *@
+    <div class="d-flex align-center gap-3 w-100 justify-md-end">
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Default"
+                   Class="rounded-lg font-weight-bold px-4"
+                   OnClick="() => OnViewProfile.InvokeAsync(Candidate)">
+            Ver Perfil
+        </MudButton>
+
+        <MudIconButton Icon="@Icons.Material.Filled.Close"
+                       Variant="Variant.Outlined"
+                       Color="Color.Error"
+                       Class="rounded-lg"
+                       Style="border-color: var(--mud-palette-error);"
+                       OnClick="() => OnReject.InvokeAsync(Candidate)" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Success"
+                   Class="rounded-lg font-weight-bold px-6"
+                   OnClick="() => OnAccept.InvokeAsync(Candidate)">
+            Me interesa
+        </MudButton>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public ProfileDto Candidate { get; set; } = default!;
+
+    [Parameter] public EventCallback<ProfileDto> OnViewProfile { get; set; }
+    [Parameter] public EventCallback<ProfileDto> OnReject { get; set; }
+    [Parameter] public EventCallback<ProfileDto> OnAccept { get; set; }
+}

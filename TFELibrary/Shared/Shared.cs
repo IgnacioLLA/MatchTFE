@@ -29,16 +29,16 @@ namespace TFELibrary.Shared
 
     public enum TFEStatus
     {
-        Open,
-        Completed,
-        Cancelled
+        Open = 1,
+        Completed = 2,
+        Cancelled = 0 
     }
     public enum ProposalStatus
     {
-        Pending,
-        Accepted,
-        Rejected,
-        Expired
+        Pending = 1,
+        Accepted = 2,
+        Rejected = 3,
+        Expired = 0
     }
 
     public class CandidateProfileDto
@@ -56,6 +56,7 @@ namespace TFELibrary.Shared
 
     public class ProfileDto
     {
+        public string Id { get; set; } = string.Empty;
         public RoleType Role { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

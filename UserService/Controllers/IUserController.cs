@@ -5,8 +5,13 @@ namespace UserService.Controllers
 {
     public interface IUserController
     {
+        [HttpGet("profile")]
         Task<ActionResult<ProfileResponse>> GetCurrentProfile();
+        [HttpPost("profile")]
         Task<ActionResult> CreateInitialProfile(ProfileCreationRequest newProfile);
+        [HttpPut("profile")]
         Task<IActionResult> UpdateProfile(ProfileUpdateRequest request);
+        [HttpGet("tfe/{request.TfeId}/candidates")]
+        Task<IActionResult> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
     }
 }

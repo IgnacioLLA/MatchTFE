@@ -69,5 +69,28 @@ namespace UserService.Controllers
 
             return BadRequest(response);
         }
+
+        [HttpGet("tfe/{request.TfeId}/candidates")]
+        public async Task<IActionResult> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request)
+        {
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            try
+            {
+                var interestedProfiles = await _profileService.GetProfileByTfeInterest(request);
+
+                if (interestedProfiles == null)
+                    return NotFound("Tfe not found.");
+
+                var response = interestedProfiles;
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal error: {ex.Message}");
+            }
+        }
     }
 }
