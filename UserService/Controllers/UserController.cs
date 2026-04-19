@@ -34,6 +34,24 @@ namespace UserService.Controllers
             return Ok(response);
         }
 
+        [HttpGet("profile/{userId}")]
+        public async Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return BadRequest("Invalid ID.");
+            }
+
+            var response = await _profileService.GetProfileByUserIdAsync(userId);
+
+            if (response == null || response.Profile == null)
+            {
+                return NotFound($"User not found: {userId}");
+            }
+
+            return Ok(response);
+        }
+
         [HttpPost("profile")]
         public async Task<ActionResult> CreateInitialProfile([FromBody] ProfileCreationRequest newProfile)
         {

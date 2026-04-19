@@ -5,7 +5,7 @@ using System.Text;
 namespace TFELibrary.Shared
 {
     public record ProfileResponse(
-        ProfileDto profile
+        ProfileDto Profile
     );
 
     public record ProfileCreationRequest(

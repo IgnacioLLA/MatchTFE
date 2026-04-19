@@ -1,0 +1,99 @@
+﻿@page "/profile/{UserId}"
+@using TFELibrary.Shared
+@using System.Net.Http.Json
+
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<div class="animate-fade-in max-w-5xl mx-auto pb-10">
+
+    @* Back *@
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack"
+               Color="Color.Default"
+               Class="mb-6 font-weight-bold"
+               OnClick="GoBack">
+        Volver
+    </MudButton>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center align-center mt-15">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+        </div>
+    }
+    else if (_profile == null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-4 rounded-lg">
+            No se ha podido cargar el perfil del usuario.
+        </MudAlert>
+    }
+    else
+    {
+        <ProfileCard Profile="_profile" OnDecision="HandleDecision" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string UserId { get; set; } = string.Empty;
+
+    private ProfileDto? _profile;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserProfileAsync();
+    }
+
+    private async Task LoadUserProfileAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+
+            var response = await client.GetFromJsonAsync<ProfileResponse>($"api/user/profile/{UserId}");
+
+            if (response != null && response.Profile != null)
+            {
+                _profile = response.Profile;
+            }
+            else
+            {
+                Snackbar.Add("El perfil devuelto está vacío.", Severity.Warning);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("No se encontró el perfil del usuario.", Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Error de conexión al servidor.", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task GoBack()
+    {
+        await JSRuntime.InvokeVoidAsync("history.back");
+    }
+
+    private async Task HandleDecision(bool isInterested)
+    {
+        if (isInterested)
+        {
+            Snackbar.Add($"Has aceptado a {_profile?.FirstName} para tu propuesta.", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add($"Has descartado a {_profile?.FirstName}.", Severity.Normal);
+        }
+
+        await GoBack();
+    }
+}

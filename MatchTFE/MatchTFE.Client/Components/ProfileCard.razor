@@ -4,71 +4,129 @@
     <MudGrid Spacing="4" Class="mb-6">
 
         <MudItem xs="12" md="4">
+
+            @* PROFILE *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4 text-center">
-                <MudAvatar Image="@Profile.AvatarUrl" Class="avatar-xl mb-4 mx-auto" />
-                <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FullName</MudText>
-                <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-4 font-weight-bold">@Profile.Degree</MudText>
+                <MudAvatar Size="Size.Large" Class="avatar-xl mb-4 mx-auto" Color="Color.Primary" Variant="Variant.Filled">
+                    @if (!string.IsNullOrWhiteSpace(Profile.AvatarUrl))
+                    {
+                        <MudImage Src="@Profile.AvatarUrl" Alt="@Profile.FirstName" />
+                    }
+                    else
+                    {
+                        <span class="font-weight-bold text-h4">@Profile.FirstName.FirstOrDefault()</span>
+                    }
+                </MudAvatar>
+
+                <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FirstName @Profile.LastName</MudText>
+
+                @* SUBTITLE *@
+                <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-4 font-weight-bold">
+                    @if (Profile.Role == RoleType.Teacher)
+                    {
+                        @(string.IsNullOrWhiteSpace(Profile.Department) ? "Departamento no establecido" : Profile.Department)
+                    }
+                    else
+                    {
+                        @(Profile.Role.ToString())
+                    }
+                </MudText>
 
                 <div class="d-flex justify-center align-center gap-4 mud-text-secondary">
-                    <div class="d-flex align-center">
-                        <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
-                        <MudText Typo="Typo.caption">@Profile.Location</MudText>
-                    </div>
-                    <div class="d-flex align-center">
-                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-1" />
-                        <MudText Typo="Typo.caption">@Profile.AcademicYear</MudText>
-                    </div>
-                </div>
-            </MudPaper>
-
-            <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all">
-                <div class="d-flex align-center mb-6">
-                    <MudIcon Icon="@Icons.Material.Filled.BarChart" Color="Color.Primary" Class="mr-2" />
-                    <MudText Typo="Typo.h6" Class="font-weight-bold">Competencias Técnicas</MudText>
-                </div>
-
-                @foreach (var comp in Profile.Competencies)
-                {
-                    <div class="mb-4">
-                        <div class="d-flex justify-space-between align-end mb-1">
-                            <MudText Typo="Typo.body2" Class="font-weight-bold">@comp.Name</MudText>
-                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@comp.Score/@comp.MaxScore</MudText>
+                    @if (Profile.Role == RoleType.Teacher)
+                    {
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
+                            <MudText Typo="Typo.caption">
+                                @(string.IsNullOrWhiteSpace(Profile.OfficeLocation) ? "Despacho no establecido" : Profile.OfficeLocation)
+                            </MudText>
                         </div>
-                        <MudProgressLinear Color="Color.Primary" Value="@comp.Score" Max="@comp.MaxScore" Size="Size.Medium" Rounded="true" />
-                    </div>
-                }
+                    }
+                    else if (Profile.Role == RoleType.Student)
+                    {
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Small" Class="mr-1" />
+                            <MudText Typo="Typo.caption">
+                                @(string.IsNullOrWhiteSpace(Profile.AcademicYear) ? "Año no establecido" : Profile.AcademicYear)
+                            </MudText>
+                        </div>
+                    }
+                </div>
             </MudPaper>
+
+            @* SKILLS *@
+            @if (Profile.Role == RoleType.Student)
+            {
+                <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all">
+                    <div class="d-flex align-center mb-6">
+                        <MudIcon Icon="@Icons.Material.Filled.BarChart" Color="Color.Primary" Class="mr-2" />
+                        <MudText Typo="Typo.h6" Class="font-weight-bold">Competencias Técnicas</MudText>
+                    </div>
+
+                    @if (Profile.Skills != null && Profile.Skills.Any())
+                    {
+                        @foreach (var skill in Profile.Skills)
+                        {
+                            <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg mb-3" style="background-color: var(--app-primary-light);">
+                                <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: var(--app-primary-dark);">@skill.Tag</MudText>
+                                <MudRating SelectedValue="@skill.Level" MaxValue="5" Color="Color.Primary" Size="Size.Small" ReadOnly="true" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">No tiene competencias establecidas.</MudText>
+                    }
+                </MudPaper>
+            }
         </MudItem>
 
         <MudItem xs="12" md="8">
+
+            @* INTERESTS *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4">
                 <div class="d-flex align-center mb-4">
                     <MudIcon Icon="@Icons.Material.Filled.Star" Color="Color.Primary" Class="mr-2" />
                     <MudText Typo="Typo.h6" Class="font-weight-bold">Áreas de Interés</MudText>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
-                    @foreach (var area in Profile.AreasOfInterest)
-                    {
-                        <MudChip T="string" Variant="Variant.Text" Color="Color.Primary" Size="Size.Medium" Class="px-4 py-2 font-weight-bold">
-                            @area
-                        </MudChip>
-                    }
-                </div>
+
+                @if (Profile.Interests != null && Profile.Interests.Any())
+                {
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var interest in Profile.Interests)
+                        {
+                            <ChipTag Text="@interest" ShowCloseIcon="false" />
+                        }
+                    </div>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">No tiene áreas de interés establecidas.</MudText>
+                }
             </MudPaper>
 
+            @* BIO *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all">
                 <div class="d-flex align-center mb-4">
                     <MudIcon Icon="@Icons.Material.Filled.MenuBook" Color="Color.Primary" Class="mr-2" />
                     <MudText Typo="Typo.h6" Class="font-weight-bold">Biografía y Motivación</MudText>
                 </div>
 
-                <MudText Typo="Typo.body1" Class="mud-text-secondary app-text-reading">
-                    @Profile.Biography
-                </MudText>
+                @if (!string.IsNullOrWhiteSpace(Profile.Bio))
+                {
+                    <MudText Typo="Typo.body1" Class="mud-text-secondary app-text-reading">
+                        @Profile.Bio
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">No tiene biografía establecida.</MudText>
+                }
             </MudPaper>
         </MudItem>
     </MudGrid>
 
+    @* ACTIONS *@
     <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all">
         <div class="d-flex flex-column flex-sm-row align-center justify-center gap-3">
             <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
@@ -87,6 +145,9 @@
 </div>
 
 @code {
-    [Parameter, EditorRequired] public CandidateProfileDto Profile { get; set; } = default!;
-    [Parameter] public EventCallback<bool> OnDecision { get; set; }
+    [Parameter, EditorRequired]
+    public ProfileDto Profile { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback<bool> OnDecision { get; set; }
 }

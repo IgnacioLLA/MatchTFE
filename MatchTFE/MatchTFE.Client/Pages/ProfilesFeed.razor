@@ -10,7 +10,6 @@
     @if (_candidatesQueue.Any())
     {
         var current = _candidatesQueue.Peek();
-        <ProfileCard @key="current.Id" Profile="@current" OnDecision="HandleAction" />
     }
     else
     {

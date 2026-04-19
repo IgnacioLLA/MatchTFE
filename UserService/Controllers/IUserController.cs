@@ -13,5 +13,7 @@ namespace UserService.Controllers
         Task<IActionResult> UpdateProfile(ProfileUpdateRequest request);
         [HttpGet("tfe/{request.TfeId}/candidates")]
         Task<IActionResult> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
+        [HttpGet("profile/{userId}")]
+        Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId);
     }
 }

@@ -92,7 +92,7 @@
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<ProfileResponse>();
-                _globalProfile = result?.profile;
+                _globalProfile = result?.Profile;
             }
             else
             {
