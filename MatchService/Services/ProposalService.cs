@@ -13,30 +13,46 @@ namespace MatchService.Services
             _proposalRepository = proposalRepository;
         }
 
-        public async Task<TfeProposalResponse> CreateTfeProposalAsync(string userId, TfeProposalRequest request)
+        public async Task<TfeProposalCreationResponse> CreateTfeProposalAsync(string userId, TfeProposalCreationRequest request)
         {
             if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentException("User ID cannot be empty.");
 
-            var alreadyExists = await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId);
-            if (alreadyExists)
-                return new TfeProposalResponse { Success = false, Message = "You already have a proposal for this TFE." };
+            var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(userId, request.TfeId);
 
-            var status = request.IsInterested
-                ? ProposalStatus.Pending
-                : ProposalStatus.Rejected;
+            if (!await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
+            {
+                return new TfeProposalCreationResponse { Success = false, Message = "TFE proposal created successfully." };
+            }
 
             var proposal = new TFEProposal
             {
                 OriginUserId = userId,
                 TfeId = request.TfeId,
-                Status = status,
+                Status = request.IsInterested
+                ? ProposalStatus.Pending
+                : ProposalStatus.Rejected,
                 CreationDate = DateOnly.FromDateTime(DateTime.UtcNow)
             };
 
             await _proposalRepository.CreateTfeProposalAsync(proposal);
 
-            return new TfeProposalResponse { Success = true, Message = "Proposal created successfully." };
+            return new TfeProposalCreationResponse { Success = true, Message = "TFE proposal created successfully." };
+        }
+
+        public async Task<TfeProposalUpdateResponse> UpdateTfeProposalAsync(TfeProposalUpdateRequest request)
+        {
+            var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(request.UserId, request.TfeId);
+            if(existingTfe == null)
+                return new TfeProposalUpdateResponse { Success = false, Message = "No preovious propose." };
+            if(existingTfe.Status.Equals(ProposalStatus.Pending))
+                return new TfeProposalUpdateResponse { Success = false, Message = "Invalid proposal status." };
+            if (request.IsInterested)
+                existingTfe.Status = ProposalStatus.Accepted;
+            else
+                existingTfe.Status = ProposalStatus.Rejected;
+            _proposalRepository.UpdateTfeProposalAsync(existingTfe);
+            return new TfeProposalUpdateResponse { Success = true, Message = "TFE proposal updated successfully." };
         }
     }
 }

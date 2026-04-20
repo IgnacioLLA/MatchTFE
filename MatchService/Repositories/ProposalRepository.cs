@@ -20,6 +20,14 @@ namespace MatchService.Repositories
                 .AnyAsync(tp => tp.OriginUserId == userId && tp.TfeId == tfeId);
         }
 
+        public async Task<TFEProposal?> GetTfeProposalByUserIdAsync(string userId, int tfeId)
+        {
+            return await _context.TfeProposal
+                .Include(t => t.OriginUser)
+                .Include(t => t.Tfe)
+                .FirstOrDefaultAsync(t => t.TfeId == tfeId && userId == t.OriginUserId); ;
+        }
+
         public async Task CreateTfeProposalAsync(TFEProposal proposal)
         {
             _context.TfeProposal.Add(proposal);
@@ -35,6 +43,12 @@ namespace MatchService.Repositories
                 .GroupBy(tp => tp.TfeId)
                 .Select(g => new { TfeId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.TfeId, x => x.Count);
+        }
+
+        public async Task UpdateTfeProposalAsync(TFEProposal proposal)
+        {
+            _context.TfeProposal.Update(proposal);
+            await _context.SaveChangesAsync();
         }
     }
 }

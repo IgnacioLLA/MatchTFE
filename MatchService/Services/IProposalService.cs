@@ -4,6 +4,7 @@ namespace MatchService.Services
 {
     public interface IProposalService
     {
-        Task<TfeProposalResponse> CreateTfeProposalAsync(string userId, TfeProposalRequest request);
+        Task<TfeProposalUpdateResponse> UpdateTfeProposalAsync(TfeProposalUpdateRequest request);
+        Task<TfeProposalCreationResponse> CreateTfeProposalAsync(string userId, TfeProposalCreationRequest request);
     }
 }

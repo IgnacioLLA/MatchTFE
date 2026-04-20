@@ -8,7 +8,6 @@
 
 <div class="animate-fade-in max-w-5xl mx-auto pb-10">
 
-    @* Back *@
     <MudButton StartIcon="@Icons.Material.Filled.ArrowBack"
                Color="Color.Default"
                Class="mb-6 font-weight-bold"
@@ -30,7 +29,23 @@
     }
     else
     {
-        <ProfileCard Profile="_profile" OnDecision="HandleDecision" />
+        <ProfileCard Profile="_profile" />
+
+        <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all mt-6">
+            <div class="d-flex flex-column flex-sm-row align-center justify-center gap-3">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
+                           OnClick="@(() => HandleDecision(false))"
+                           Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Close">
+                    DESCARTAR
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
+                           OnClick="@(() => HandleDecision(true))"
+                           Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Favorite">
+                    ME INTERESA
+                </MudButton>
+            </div>
+        </MudPaper>
     }
 </div>
 
@@ -66,11 +81,11 @@
         }
         catch (HttpRequestException)
         {
-            Snackbar.Add("No se encontró el perfil del usuario.", Severity.Error);
+            Snackbar.Add("User not found.", Severity.Error);
         }
         catch (Exception)
         {
-            Snackbar.Add("Error de conexión al servidor.", Severity.Error);
+            Snackbar.Add("Error.", Severity.Error);
         }
         finally
         {

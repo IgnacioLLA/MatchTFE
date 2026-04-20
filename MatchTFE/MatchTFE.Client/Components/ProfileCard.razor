@@ -5,7 +5,6 @@
 
         <MudItem xs="12" md="4">
 
-            @* PROFILE *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4 text-center">
                 <MudAvatar Size="Size.Large" Class="avatar-xl mb-4 mx-auto" Color="Color.Primary" Variant="Variant.Filled">
                     @if (!string.IsNullOrWhiteSpace(Profile.AvatarUrl))
@@ -20,7 +19,6 @@
 
                 <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FirstName @Profile.LastName</MudText>
 
-                @* SUBTITLE *@
                 <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-4 font-weight-bold">
                     @if (Profile.Role == RoleType.Teacher)
                     {
@@ -54,7 +52,6 @@
                 </div>
             </MudPaper>
 
-            @* SKILLS *@
             @if (Profile.Role == RoleType.Student)
             {
                 <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all">
@@ -83,7 +80,6 @@
 
         <MudItem xs="12" md="8">
 
-            @* INTERESTS *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4">
                 <div class="d-flex align-center mb-4">
                     <MudIcon Icon="@Icons.Material.Filled.Star" Color="Color.Primary" Class="mr-2" />
@@ -105,7 +101,6 @@
                 }
             </MudPaper>
 
-            @* BIO *@
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all">
                 <div class="d-flex align-center mb-4">
                     <MudIcon Icon="@Icons.Material.Filled.MenuBook" Color="Color.Primary" Class="mr-2" />
@@ -125,29 +120,9 @@
             </MudPaper>
         </MudItem>
     </MudGrid>
-
-    @* ACTIONS *@
-    <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all">
-        <div class="d-flex flex-column flex-sm-row align-center justify-center gap-3">
-            <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
-                       OnClick="@(() => OnDecision.InvokeAsync(false))"
-                       Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Close">
-                DESCARTAR
-            </MudButton>
-
-            <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
-                       OnClick="@(() => OnDecision.InvokeAsync(true))"
-                       Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Favorite">
-                ME INTERESA
-            </MudButton>
-        </div>
-    </MudPaper>
 </div>
 
 @code {
     [Parameter, EditorRequired]
     public ProfileDto Profile { get; set; } = default!;
-
-    [Parameter]
-    public EventCallback<bool> OnDecision { get; set; }
 }

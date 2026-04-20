@@ -139,7 +139,7 @@ namespace MatchService.Controllers
         }
 
         [HttpPost("proposal/tfe")]
-        public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalRequest request)
+        public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -147,6 +147,17 @@ namespace MatchService.Controllers
             if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 
             var response = await _proposalService.CreateTfeProposalAsync(userId, request);
+
+            if (!response.Success) return Conflict(response.Message);
+            return Ok(response);
+        }
+
+        [HttpPut("proposal/tfe")]
+        public async Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var response = await _proposalService.UpdateTfeProposalAsync(request);
 
             if (!response.Success) return Conflict(response.Message);
             return Ok(response);

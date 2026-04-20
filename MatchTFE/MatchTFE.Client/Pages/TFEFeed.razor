@@ -94,7 +94,7 @@
         if (!_proposalsQueue.Any()) return;
         var currentProposal = _proposalsQueue.Peek();
 
-        var request = new TfeProposalRequest
+        var request = new TfeProposalCreationRequest
         {
             TfeId = currentProposal.Id,
             IsInterested = isInterested

@@ -46,7 +46,7 @@ namespace TFELibrary.Shared
     }
 
     // -- Proposals --
-    public class TfeProposalRequest
+    public class TfeProposalCreationRequest
     {
         [Required]
         public int TfeId { get; set; }
@@ -54,7 +54,23 @@ namespace TFELibrary.Shared
         public bool IsInterested { get; set; }
     }
 
-    public class TfeProposalResponse
+    public class TfeProposalCreationResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class TfeProposalUpdateRequest
+    {
+        [Required]
+        public string UserId { get; set; }
+        [Required]
+        public int TfeId { get; set; }
+        [Required]
+        public bool IsInterested { get; set; }
+    }
+
+    public class TfeProposalUpdateResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;

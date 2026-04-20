@@ -32,6 +32,8 @@ namespace MatchService.Controllers
         [HttpGet("tfe/recommended")]
         Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request);
         [HttpPost("proposal/tfe")]
-        Task<IActionResult> CreateTfeProposal(TfeProposalRequest request);
+        Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request);
+        [HttpPut("proposal/tfe")]
+        Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request);
     }
 }
