@@ -19,11 +19,6 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.1) !important;
 }
 
-.mud-drawer {
-    border-right: 1px solid var(--app-border) !important;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.02) !important;
-}
-
 .mud-nav-link {
     font-weight: 500 !important;
     border-radius: 0 20px 20px 0 !important;
@@ -81,11 +76,12 @@ body {
 }
 
 .app-text-reading {
-    line-height: 1.8 !important;
-    white-space: pre-line;
-    color: var(--app-text-muted);
+    color: var(--mud-palette-text-secondary);
 }
-
+.mud-drawer {
+    border-right: 1px solid var(--mud-palette-lines-default) !important;
+    box-shadow: var(--mud-elevation-1) !important;
+}
 .app-caption-uppercase {
     text-transform: uppercase;
     font-weight: 700;
@@ -159,8 +155,8 @@ body {
 }
 
 .mud-chip.mud-chip-color-primary.mud-chip-variant-text {
-    background-color: var(--app-primary-light) !important;
-    color: var(--app-primary-dark) !important;
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.15) !important;
+    color: var(--mud-palette-primary) !important;
     font-weight: 600 !important;
     border-radius: 8px !important;
     padding: 0px 16px !important;

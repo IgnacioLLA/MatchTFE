@@ -1,0 +1,16 @@
+﻿.chip-multiline {
+    height: auto !important;
+    min-height: 32px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    max-width: 160px !important;
+}
+
+    .chip-multiline .mud-chip-content {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.2 !important;
+        text-align: center;
+        width: 100%;
+        display: inline-block;
+    }

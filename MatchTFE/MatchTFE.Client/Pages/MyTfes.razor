@@ -8,10 +8,10 @@
 
 <div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
     <div>
-        <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+        <MudText Typo="Typo.h4" Class="app-title-tight mb-2 font-weight-extrabold">
             Mis Publicaciones
         </MudText>
-        <MudText Typo="Typo.body1" Class="app-text-reading">
+        <MudText Typo="Typo.body1" Class="mud-text-secondary">
             Gestiona y supervisa tus propuestas de Trabajo de Fin de Grado.
         </MudText>
     </div>
@@ -34,7 +34,7 @@
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Variant="Variant.Outlined"
                       Margin="Margin.Dense"
-                      Class="bg-white rounded-lg flex-grow-1 tfe-search-input" />
+                      Class="rounded-lg flex-grow-1 tfe-search-input" />
 
         <MudSelect T="string"
                    MultiSelection="true"
@@ -43,7 +43,7 @@
                    Placeholder="Filtrar por tags..."
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
-                   Class="bg-white rounded-lg flex-grow-1 tfe-filter-select">
+                   Class="rounded-lg flex-grow-1 tfe-filter-select">
             @foreach (var tag in _availableTags)
             {
                 <MudSelectItem Value="@tag.Name">@tag.Name</MudSelectItem>
@@ -53,7 +53,7 @@
         <MudSpacer />
 
         <div class="d-flex align-center">
-            <MudText Typo="Typo.body2" Class="app-text-muted mr-2">Ordenar por:</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mr-2">Ordenar por:</MudText>
             <MudSelect T="string" @bind-Value="SelectedSort" Variant="Variant.Text" Margin="Margin.Dense" Class="font-weight-bold">
                 <MudSelectItem Value="@("Más reciente")" />
                 <MudSelectItem Value="@("Más antiguo")" />
@@ -63,19 +63,20 @@
         </div>
     </div>
 
-    @* HEADERS *@
-    <div class="px-6 py-3 app-text-muted font-weight-bold tfe-column-headers">
+    @* TABLE HEADERS *@
+    <div class="px-6 py-3 mud-text-secondary font-weight-bold tfe-column-headers d-none d-md-block">
         <MudGrid>
             <MudItem xs="12" md="3">DETALLES DEL PROYECTO</MudItem>
             <MudItem xs="6" md="2">ESTADO</MudItem>
             <MudItem xs="6" md="2">VENCIMIENTO</MudItem>
             <MudItem xs="6" md="2">INTERESADOS</MudItem>
-            <MudItem xs="12" md="2">TEMÁTICAS</MudItem>
+            <MudItem xs="12" md="2">CREACIÓN</MudItem>
             <MudItem xs="12" md="1" Class="d-flex justify-end">ACCIONES</MudItem>
         </MudGrid>
     </div>
+    <MudDivider Class="d-none d-md-block" />
 
-    @* LIST *@
+    @* ITEMS LIST *@
     <div class="px-6">
         @foreach (var proposal in GetPaginatedProposals())
         {
@@ -85,7 +86,7 @@
 
     @* FOOTER *@
     <div class="pa-4 d-flex justify-space-between align-center tfe-footer-section">
-        <MudText Typo="Typo.body2" Class="app-text-muted">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">
             Mostrando @GetPaginatedProposals().Count() de @GetFilteredProposals().Count() publicaciones
         </MudText>
         <MudPagination Count="@GetTotalPages()"
