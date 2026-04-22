@@ -23,6 +23,15 @@ namespace TFELibrary.Shared
         ProfileDto? UpdatedProfile = null
     );
 
+    public record ProfileLogoutRequest(
+
+    );
+
+    public record ProfileLogoutResponse(
+        bool Success,
+        string Message
+    );
+
     public record ProfileByTfeInterestRequest(
         int TfeId
     );

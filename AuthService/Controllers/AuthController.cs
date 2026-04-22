@@ -150,14 +150,10 @@ namespace AuthService.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
 
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest(new { IsSuccess = false, ErrorMessage = "Token inválido." });
-            }
-
-            var result = await _authService.LogoutAsync(email);
+            var result = await _authService.LogoutAsync(authorId);
 
             if (!result)
             {

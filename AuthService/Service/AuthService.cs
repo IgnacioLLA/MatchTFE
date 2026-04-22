@@ -198,9 +198,10 @@ namespace AuthService.Service
             return _tokenHandler.WriteToken(token);
         }
 
-        public async Task<bool> LogoutAsync(string email)
+        public async Task<bool> LogoutAsync(string id)
         {
-            var user = await _authRepository.GetUserByEmailAsync(email);
+            //var user = await _authRepository.GetUserByEmailAsync(email);
+            var user = await _authRepository.GetUserByIdAsync(id);
             if (user == null) return false;
 
             await _authRepository.RemoveRefreshTokenAsync(user);

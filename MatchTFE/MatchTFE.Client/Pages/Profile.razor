@@ -4,6 +4,7 @@
 @using System.Text.Json
 
 @inject IHttpClientFactory ClientFactory
+@inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
 @if (_isLoading || _profileDto == null)
@@ -98,6 +99,9 @@ else
                 <MudButton Variant="Variant.Text" Color="Color.Dark" Class="font-weight-bold" OnClick="DiscardChanges">Descartar</MudButton>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="SaveChanges">
                     Guardar Cambios
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Warning" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="Logout">
+                    Cerrar sesión
                 </MudButton>
             </div>
         </div>
@@ -223,6 +227,32 @@ else
                 {
                     Snackbar.Add(result?.Message ?? "Error processing response.", Severity.Warning);
                 }
+            }
+            else
+            {
+                Snackbar.Add($"HTTP error: {response.StatusCode}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Connection error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task Logout()
+    {
+        _isLoading = true;
+        try
+        {
+            var client = ClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PostAsJsonAsync("api/user/logout", new ProfileLogoutRequest());
+            if (response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateTo("/login");
             }
             else
             {
