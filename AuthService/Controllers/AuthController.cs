@@ -160,6 +160,15 @@ namespace AuthService.Controllers
                 return BadRequest(new { IsSuccess = false, ErrorMessage = "Error al cerrar sesión." });
             }
 
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+            };
+
+            Response.Cookies.Delete("AccessToken", cookieOptions);
+            Response.Cookies.Delete("RefreshToken", cookieOptions);
+
             return Ok(new { IsSuccess = true, Message = "Sesión cerrada correctamente." });
         }
 
