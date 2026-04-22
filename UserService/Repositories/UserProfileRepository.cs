@@ -21,6 +21,7 @@ namespace UserService.Repositories
                 .Include(u => u.UserInterests)
                     .ThenInclude(ui => ui.Tag)
                 .Include(u => u.StudentSkills)
+                    .ThenInclude(ss => ss.Tag)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 

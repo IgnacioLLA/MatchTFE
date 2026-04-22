@@ -37,10 +37,10 @@
 
             @if (!_candidates.Any())
             {
-                <MudPaper Elevation="0" Class="pa-8 text-center rounded-xl border-all app-text-muted" Style="background-color: var(--app-primary-light);">
+                <MudPaper Elevation="0" Class="pa-8 text-center rounded-xl border-all mud-text-secondary">
                     <MudIcon Icon="@Icons.Material.Filled.SearchOff" Class="icon-huge mb-4" />
-                    <MudText Typo="Typo.h6">Aún no hay candidatos</MudText>
-                    <MudText Typo="Typo.body2">Los estudiantes interesados aparecerán aquí.</MudText>
+                    <MudText Typo="Typo.h6" Color="Color.Inherit">Aún no hay candidatos</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Inherit">Los estudiantes interesados aparecerán aquí.</MudText>
                 </MudPaper>
             }
             else

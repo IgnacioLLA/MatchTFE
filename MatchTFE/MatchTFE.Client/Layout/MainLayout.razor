@@ -1,11 +1,11 @@
 ﻿@inherits LayoutComponentBase
 @using TFELibrary.Shared
+@using MatchTFE.Client.Themes
 
 @inject IHttpClientFactory ClientFactory
-@inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 
-<MudThemeProvider Theme="@MatchTheme.DefaultTheme" />
+<MudThemeProvider Theme="MatchTheme.DefaultTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
@@ -13,31 +13,37 @@
 <MudLayout>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="@DrawerVariant.Responsive">
         <div class="pa-4 mt-2">
-            <MudText Typo="Typo.overline" Style="color: #7a829a; font-weight: bold; letter-spacing: 1px;">
+            <MudText Typo="Typo.overline" Class="mud-text-secondary font-weight-bold">
                 MENÚ PRINCIPAL
             </MudText>
         </div>
         <NavMenu />
     </MudDrawer>
 
-    <MudAppBar Elevation="0">
+    <MudAppBar Elevation="0" Variant="Variant.Outlined">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
 
         <MudLink Href="/" Underline="Underline.None" Color="Color.Inherit" Class="d-flex align-center">
-            <MudText Typo="Typo.h6" Class="ml-3" Style="font-weight: 800; letter-spacing: -0.5px;">
+            <MudText Typo="Typo.h6" Class="ml-3 font-weight-extrabold">
                 MATCH-TFE
             </MudText>
         </MudLink>
 
         <MudSpacer />
 
-        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" />
+        <MudToggleIconButton @bind-Toggled="_isDarkMode"
+                             Icon="@Icons.Material.Filled.WbSunny"
+                             Color="Color.Inherit"
+                             ToggledIcon="@Icons.Material.Filled.DarkMode"
+                             ToggledColor="Color.Inherit"
+                             Title="Cambiar modo de luz" />
 
-        @* BOTÓN DE PERFIL DINÁMICO *@
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Class="mx-2" />
+
         <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2" Href="/profile">
             @if (_isLoading)
             {
-                <MudProgressCircular Color="Color.Secondary" Size="Size.Small" Indeterminate="true" />
+                <MudProgressCircular Color="Color.Inherit" Size="Size.Small" Indeterminate="true" />
             }
             else if (_globalProfile != null)
             {
@@ -45,9 +51,11 @@
                     @(_globalProfile.FirstName.FirstOrDefault())@(_globalProfile.LastName.FirstOrDefault())
                 </MudAvatar>
                 <div class="d-none d-sm-flex flex-column align-start">
-                    <MudText Typo="Typo.body2" Style="text-transform: none; line-height: 1.2;"><b>@_globalProfile.FirstName @_globalProfile.LastName</b></MudText>
-                    <MudText Typo="Typo.caption" Style="text-transform: none;">
-                        @(_globalProfile.Role == RoleType.Student ? "Estudiante" : "Profesor")
+                    <MudText Typo="Typo.body2" Color="Color.Inherit" Class="font-weight-bold">
+                        @_globalProfile.FirstName @_globalProfile.LastName
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Inherit" Class="app-caption-uppercase">
+                        @(_globalProfile.Role == RoleType.Student ? "ESTUDIANTE" : "PROFESOR")
                     </MudText>
                 </div>
             }
@@ -72,6 +80,8 @@
 
 @code {
     private bool _drawerOpen = true;
+    private bool _isDarkMode = false;
+
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 
     private ProfileDto? _globalProfile;
@@ -87,21 +97,12 @@
         try
         {
             var http = ClientFactory.CreateClient("GatewayAPI");
-            var response = await http.GetAsync("api/user/profile");
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<ProfileResponse>();
-                _globalProfile = result?.Profile;
-            }
-            else
-            {
-                Snackbar.Add("Error al cargar los datos del usuario en la cabecera.", Severity.Error);
-            }
+            var result = await http.GetFromJsonAsync<ProfileResponse>("api/user/profile");
+            _globalProfile = result?.Profile;
         }
         catch (Exception)
         {
-            Snackbar.Add("Error de conexión al cargar el perfil.", Severity.Error);
+            Snackbar.Add("Error al conectar con el servidor de perfil.", Severity.Error);
         }
         finally
         {

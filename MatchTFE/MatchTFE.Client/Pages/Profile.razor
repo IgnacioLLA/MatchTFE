@@ -10,19 +10,15 @@
 {
     <div class="d-flex justify-center align-center" style="height: 50vh;">
         <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
-        <MudText Typo="Typo.h6" Class="ml-4" Style="color: var(--app-text-muted);">Cargando perfil...</MudText>
+        <MudText Typo="Typo.h6" Class="ml-4 mud-text-secondary">Cargando perfil...</MudText>
     </div>
 }
 else
 {
     <div class="d-flex justify-space-between align-center mb-6">
-        <MudText Typo="Typo.h5" Class="font-weight-extrabold" Style="color: var(--app-text-main);">
+        <MudText Typo="Typo.h5" Class="font-weight-extrabold">
             Mi Perfil
         </MudText>
-
-        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ToggleRoleMode" Class="rounded-lg font-weight-bold">
-            Cambiar a vista de @(_profileDto.Role.ToString()))
-        </MudButton>
     </div>
 
     <div class="animate-fade-in">
@@ -40,14 +36,14 @@ else
                 </MudAvatar>
                 <div class="flex-grow-1">
                     <MudText Typo="Typo.h5" Class="app-title-tight mb-1">@_profileDto.FirstName @_profileDto.LastName</MudText>
-                    <MudText Typo="Typo.body2" Style="color: var(--app-text-muted);" Class="mb-4">
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
                         @(_profileDto.Role == RoleType.Student ? "Estudiante de Ingeniería Informática" : "Profesor Universitario")
                     </MudText>
                 </div>
             </MudCardContent>
         </MudCard>
 
-        @* COMMON PERSONAL DATA *@
+        @* PERSONAL DATA *@
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
             <MudCardHeader>
                 <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" /></CardHeaderAvatar>
@@ -81,7 +77,6 @@ else
             </MudCardContent>
         </MudCard>
 
-        @* COMPONENTS *@
         @if (_profileDto.Role == RoleType.Student)
         {
             <StudentProfileComponent Model="_profileDto" />
@@ -91,11 +86,12 @@ else
             <TeacherProfileComponent Model="_profileDto" />
         }
 
-        @* ACTION BUTTONS*@
+        @* ACTION BUTTONS *@
         <div class="d-flex align-center justify-space-between mt-8 mb-4">
-            <MudText Typo="Typo.body2" Style="color: var(--app-text-muted);">Cargado de forma segura desde el servidor</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Cargado de forma segura desde el servidor</MudText>
             <div class="d-flex gap-4">
-                <MudButton Variant="Variant.Text" Color="Color.Dark" Class="font-weight-bold" OnClick="DiscardChanges">Descartar</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Default" Class="font-weight-bold" OnClick="DiscardChanges">Descartar</MudButton>
+
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="SaveChanges">
                     Guardar Cambios
                 </MudButton>
@@ -157,16 +153,6 @@ else
         catch (Exception ex)
         {
             Snackbar.Add($"Error loading tags: {ex.Message}", Severity.Warning);
-        }
-    }
-
-    private void ToggleRoleMode()
-    {
-        if (_profileDto != null)
-        {
-            _profileDto.Role = _profileDto.Role == RoleType.Student
-                ? RoleType.Teacher
-                : RoleType.Student;
         }
     }
 
