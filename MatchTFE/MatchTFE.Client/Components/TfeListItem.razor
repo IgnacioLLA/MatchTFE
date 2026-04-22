@@ -5,7 +5,7 @@
 
         @* TITLE *@
         <MudItem xs="12" md="3">
-            <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-main mb-1">
+            <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-1">
                 @Model.Title
             </MudText>
         </MudItem>
@@ -22,8 +22,8 @@
         </MudItem>
 
         @* EXPDATE *@
-        <MudItem xs="6" md="2">
-            <div class="d-flex align-center app-text-muted">
+        <MudItem xs="12" md="2" Class="d-none d-md-flex align-center">
+            <div class="d-flex align-center mud-text-secondary">
                 <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
                 <MudText Typo="Typo.body2">
                     @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
@@ -32,9 +32,9 @@
         </MudItem>
 
         @* INTEREST *@
-        <MudItem xs="6" md="2">
+        <MudItem xs="12" md="2" Class="d-none d-md-flex align-center">
             <div class="d-flex align-center gap-3">
-                <div class="d-flex align-center @(Model.InterestedAmount > 0 ? "text-main" : "app-text-muted")">
+                <div class="d-flex align-center @(Model.InterestedAmount > 0 ? "mud-text-primary" : "mud-text-secondary")">
                     <MudIcon Icon="@Icons.Material.Filled.Group" Size="Size.Small" Class="mr-1" />
                     <MudText Typo="Typo.body2" Class="font-weight-bold">
                         @Model.InterestedAmount
@@ -52,29 +52,21 @@
                         Ver
                     </MudButton>
                 }
-                else
-                {
-                    
-                }
             </div>
         </MudItem>
 
-        @* TOPICS *@
-        <MudItem xs="12" md="2">
-            @if (Model.Topics != null && Model.Topics.Any())
-            {
-                <div class="d-flex flex-wrap gap-1">
-                    @foreach (var tag in Model.Topics)
-                    {
-                        <ChipTag Text="@tag.Name"
-                                 ShowCloseIcon="@ShowTagsCloseIcon"/>
-                    }
-                </div>
-            }
+        @* CREATION DATE *@
+        <MudItem xs="12" md="2" Class="d-none d-md-flex align-center">
+            <div class="d-flex align-center mud-text-secondary">
+                <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Size="Size.Small" Class="mr-2" />
+                <MudText Typo="Typo.body2">
+                    @(Model.CreationDate != default ? Model.CreationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                </MudText>
+            </div>
         </MudItem>
 
         @* ACTIONS *@
-        <MudItem xs="12" md="1" Class="d-flex justify-end align-center gap-1">
+        <MudItem xs="6" md="1" Class="d-flex justify-end align-center gap-1">
             @if (Model.Status != TFEStatus.Cancelled)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
@@ -94,9 +86,6 @@
 @code {
     [Parameter, EditorRequired]
     public TfeDto Model { get; set; } = default!;
-
-    [Parameter]
-    public bool ShowTagsCloseIcon { get; set; } = false;
 
     [Parameter]
     public EventCallback<int> OnDeleted { get; set; }

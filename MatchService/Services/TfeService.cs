@@ -162,6 +162,7 @@ namespace MatchService.Services
                 Description = dto.Description,
                 EstimatedDelivery = DateOnly.FromDateTime(dto.EstimatedDelivery),
                 ExpirationDate = DateOnly.FromDateTime(dto.ExpirationDate),
+                CreationDate = DateOnly.FromDateTime(dto.CreationDate),
                 Status = dto.Status
             };
         }
