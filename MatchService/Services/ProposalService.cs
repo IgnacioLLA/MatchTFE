@@ -20,9 +20,9 @@ namespace MatchService.Services
 
             var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(userId, request.TfeId);
 
-            if (!await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
+            if (await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
             {
-                return new TfeProposalCreationResponse { Success = false, Message = "TFE proposal created successfully." };
+                return new TfeProposalCreationResponse { Success = false, Message = "TFE already exists." };
             }
 
             var proposal = new TFEProposal

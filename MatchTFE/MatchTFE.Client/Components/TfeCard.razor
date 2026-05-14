@@ -1,10 +1,9 @@
 @using TFELibrary.Shared
 
 <div class="animate-fade-in tfe-card-container">
-    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
+    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
         <MudGrid Spacing="4">
 
-            @* --- ICON --- *@
             <MudItem xs="12" md="5" Class="d-flex justify-center align-center">
                 <MudPaper Elevation="0" Class="app-icon-box rounded-xl d-flex align-center justify-center">
                     <div class="relative d-flex align-center justify-center">
@@ -13,7 +12,6 @@
                 </MudPaper>
             </MudItem>
 
-            @* --- MAIN DETAILS --- *@
             <MudItem xs="12" md="7">
                 <MudText Typo="Typo.h5" Class="app-title-tight mb-4">@Proposal.Title</MudText>
 
@@ -27,7 +25,6 @@
                     </div>
                 </div>
 
-                @* TOPICS *@
                 @if (Proposal.Topics != null && Proposal.Topics.Any())
                 {
                     <div class="d-flex flex-wrap gap-2 mb-8">
@@ -38,7 +35,6 @@
                     </div>
                 }
 
-                @* DATES *@
                 <MudGrid Spacing="3">
                     <MudItem xs="6">
                         <div class="d-flex align-center">
@@ -65,8 +61,7 @@
         </MudGrid>
     </MudPaper>
 
-    @* --- DESCRIPTION --- *@
-    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
+    <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
         <div class="d-flex align-center mb-6">
             <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Class="mr-3" />
             <MudText Typo="Typo.h6"><b>Descripción del Proyecto</b></MudText>
@@ -76,10 +71,9 @@
         </MudText>
     </MudPaper>
 
-    @* --- REQUIRED SKILLS --- *@
     @if (Proposal.RequiredSkills != null && Proposal.RequiredSkills.Any())
     {
-        <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl bg-white border-all mb-6">
+        <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
             <div class="d-flex align-center mb-6">
                 <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Primary" Class="mr-3" />
                 <MudText Typo="Typo.h6"><b>Requisitos Técnicos</b></MudText>
@@ -88,8 +82,8 @@
             <div class="d-flex flex-wrap gap-4">
                 @foreach (var skill in Proposal.RequiredSkills)
                 {
-                    <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: var(--app-primary-light, #f4f6f8); min-width: 200px;">
-                        <MudText Typo="Typo.body2" Class="font-weight-bold mr-4" Style="color: var(--app-primary-dark);">@skill.Tag</MudText>
+                    <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1); min-width: 200px;">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold mr-4" Color="Color.Primary">@skill.Tag</MudText>
                         <MudRating SelectedValue="@skill.Level" MaxValue="5" Color="Color.Primary" Size="Size.Small" ReadOnly="true" />
                     </div>
                 }

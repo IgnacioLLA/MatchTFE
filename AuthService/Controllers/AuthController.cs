@@ -12,7 +12,7 @@ namespace AuthService.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase, IAuthController
     {
-        private const int TokenCookieLifetime = 20;
+        private int TokenCookieLifetime;
 
         private readonly IAuthService _authService;
         private readonly ILogger<AuthController> _logger;
@@ -21,6 +21,7 @@ namespace AuthService.Controllers
         {
             _authService = authService;
             _logger = logger;
+            TokenCookieLifetime = _authService.TokenLifetime;
         }
 
         [HttpPost("login")]
