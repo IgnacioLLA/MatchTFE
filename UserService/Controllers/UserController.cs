@@ -110,5 +110,38 @@ namespace UserService.Controllers
                 return StatusCode(500, $"Internal error: {ex.Message}");
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPut("profile/{userId}/role")]
+        public async Task<ActionResult<ChangeRoleResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return BadRequest(new ChangeRoleResponse(false, "Invalid user ID."));
+            }
+
+            if (!Enum.IsDefined(typeof(RoleType), request.NewRole))
+            {
+                return BadRequest(new ChangeRoleResponse(false, "Invalid role type."));
+            }
+
+            var result = await _profileService.UpdateUserRoleAsync(userId, request.NewRole);
+            if (!result) 
+            {
+                return NotFound(new ChangeRoleResponse(false, "User profile not found."));
+            }
+
+            return Ok(new ChangeRoleResponse(true, "Role updated successfully."));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("profiles")]
+        public async Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles()
+        {
+            var request = new GetAllProfilesRequest();
+            var response = await _profileService.GetAllProfilesAsync(request);
+
+            return Ok(response);
+        }
     }
 }

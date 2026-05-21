@@ -93,6 +93,17 @@ namespace UserService.Service
             };
         }
 
+        public async Task<bool> UpdateUserRoleAsync(string userId, RoleType newRole)
+        {
+            return await _userRepository.UpdateUserRoleAsync(userId, newRole);
+        }
 
+        public async Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request)
+        {
+            var entities = await _userRepository.GetAllProfilesAsync();
+            var dtos = entities.Select(e => GetProfileDto(e)).ToList();
+
+            return new GetAllProfilesResponse(dtos);
+        }
     }
 }

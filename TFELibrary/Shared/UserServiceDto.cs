@@ -39,4 +39,19 @@ namespace TFELibrary.Shared
     public record ProfileByTfeInterestResponse(
         List<ProfileDto> Interested
     );
+
+    public record ChangeRoleRequest(
+        RoleType NewRole
+    );
+
+    public record ChangeRoleResponse(
+        bool Success,
+        string Message
+    );
+
+    public record GetAllProfilesRequest();
+
+    public record GetAllProfilesResponse(
+        List<ProfileDto> Profiles
+    );
 }

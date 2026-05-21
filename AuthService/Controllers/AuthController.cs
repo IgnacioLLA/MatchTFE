@@ -186,18 +186,86 @@ namespace AuthService.Controllers
             });
         }
 
-        [HttpPut("role/{userId}")]
+        [HttpPut("role")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangeRole(string userId, [FromBody] ChangeRoleDto dto)
+        public async Task<IActionResult> ChangeRole([FromBody] UserRoleUpdateRequest request)
         {
-            var validRoles = new[] { "Admin", "User" };
-            if (!validRoles.Contains(dto.NewRole))
-                return BadRequest($"Rol no válido. Roles permitidos: {string.Join(", ", validRoles)}");
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new UserRoleUpdateResponse 
+                { 
+                    Success = false, 
+                    Message = "Invalid request format." 
+                });
+            }
 
-            var result = await _authService.ChangeUserRoleAsync(userId, dto.NewRole);
-            if (!result) return NotFound("Usuario no encontrado o error al cambiar el rol.");
+            var response = await _authService.ChangeUserRoleAsync(request);
 
-            return NoContent();
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
         }
+
+        [HttpPost("import")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> BulkImportUsers([FromBody] BulkUserImportRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new BulkUserImportResponse 
+                { 
+                    Success = false, 
+                    Message = "Invalid file or request format." 
+                });
+            }
+
+            //var response = await _authService.BulkImportUsersAsync(request);
+
+            var response = new BulkUserImportResponse
+            {
+                Success = false,
+                Message = "Invalid file or request format."
+            };
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
+        [HttpPost("bulk-action")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new BulkUserActionResponse 
+                { 
+                    Success = false, 
+                    Message = "Invalid request format." 
+                });
+            }
+
+            //var response = await _authService.ExecuteBulkActionAsync(request);
+
+            var response = new BulkUserActionResponse
+            {
+                Success = false,
+                Message = "Invalid request format."
+            };
+
+            if (!response.Success)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
     }
 }

@@ -25,6 +25,16 @@ namespace UserService.Repositories
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
+        public async Task<List<UserProfile>> GetAllProfilesAsync()
+        {
+            return await _context.UserProfile
+                .Include(u => u.UserInterests)
+                    .ThenInclude(ui => ui.Tag)
+                .Include(u => u.StudentSkills)
+                    .ThenInclude(ss => ss.Tag)
+                .ToListAsync();
+        }
+
         public async Task<UserProfile> CreateProfileAsync(UserProfile profile)
         {
             await _context.UserProfile.AddAsync(profile);
@@ -120,6 +130,16 @@ namespace UserService.Repositories
             return await _context.UserProfile
                 .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId && tp.Status == ProposalStatus.Pending))
                 .ToListAsync();
+        }
+
+        public async Task<bool> UpdateUserRoleAsync(string userId, RoleType newRole)
+        {
+            var profile = await _context.UserProfile.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (profile == null) return false;
+
+            profile.Role = newRole;
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

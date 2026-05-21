@@ -10,5 +10,7 @@ namespace UserService.Service
         Task<bool> CreateProfileAsync(ProfileCreationRequest request);
         Task<ProfileUpdateResponse> UpdateProfileAsync(string userId, ProfileUpdateRequest request);
         Task<ProfileByTfeInterestResponse> GetProfileByTfeInterest(ProfileByTfeInterestRequest request);
+        Task<bool> UpdateUserRoleAsync(string userId, RoleType newRole);
+        Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request);
     }
 }

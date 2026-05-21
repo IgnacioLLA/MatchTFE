@@ -15,5 +15,11 @@ namespace UserService.Controllers
         Task<IActionResult> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
         [HttpGet("profile/{userId}")]
         Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId);
+
+        [HttpPut("profile/{userId}/role")]
+        Task<ActionResult<ChangeRoleResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request);
+        
+        [HttpGet("profiles")]
+        Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();
     }
 }
