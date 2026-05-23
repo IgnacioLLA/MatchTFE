@@ -13,6 +13,27 @@ namespace MatchService.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "UserProfile",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    AvatarUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AcademicYear = table.Column<string>(type: "text", nullable: true),
+                    Department = table.Column<string>(type: "text", nullable: true),
+                    OfficeLocation = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfile", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "InterestProposal",
                 columns: table => new
                 {
@@ -161,6 +182,9 @@ namespace MatchService.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tfe");
+
+            migrationBuilder.DropTable(
+                name: "UserProfile");
         }
     }
 }

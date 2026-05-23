@@ -50,6 +50,7 @@ services:
       - JwtSettings__Audience=MatchTFE_Clients
     depends_on:
       - postgresdb
+      - userservice
 
   userservice:
     image: ${DOCKER_REGISTRY-}userservice
@@ -64,7 +65,8 @@ services:
       - JwtSettings__Issuer=MatchTFE_AuthService
       - JwtSettings__Audience=MatchTFE_Clients
     depends_on:
-      - authservice
+      - postgresdb
+      - matchservice
 
   matchservice:
     image: ${DOCKER_REGISTRY-}matchservice
@@ -79,8 +81,7 @@ services:
       - JwtSettings__Issuer=MatchTFE_AuthService
       - JwtSettings__Audience=MatchTFE_Clients
     depends_on:
-      - authservice
-      - userservice
+      - postgresdb
 
 volumes:
   postgres_data:

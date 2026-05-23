@@ -34,7 +34,7 @@ namespace MatchService.Data
                 .HasIndex(t => t.Name)
                 .IsUnique();
 
-            builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
+            builder.Entity<UserProfile>().ToTable("UserProfile");
 
             builder.Entity<UserProfile>().Ignore(u => u.UserInterests);
             builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);

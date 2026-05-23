@@ -85,6 +85,20 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseRouting();
+
+app.UseCors("AllowBlazor");
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    await MigrateDatabaseAsync(db);
+}
+
 // Roles configuration
 using (var scope = app.Services.CreateScope())
 {
@@ -98,18 +112,24 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseRouting();
+app.Run();
 
-app.UseCors("AllowBlazor");
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
+static async Task MigrateDatabaseAsync(AuthDbContext db)
 {
-    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    const int maxAttempts = 20;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            return;
+        }
+        catch when (attempt < maxAttempts)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
     db.Database.Migrate();
 }
-
-app.Run();

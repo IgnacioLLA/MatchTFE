@@ -85,9 +85,27 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<UserDbContext>();
-    db.Database.Migrate();
+    await MigrateDatabaseAsync(db);
 }
 
 app.Run();
 
-app.Run();
+static async Task MigrateDatabaseAsync(UserDbContext db)
+{
+    const int maxAttempts = 20;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            return;
+        }
+        catch when (attempt < maxAttempts)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    db.Database.Migrate();
+}

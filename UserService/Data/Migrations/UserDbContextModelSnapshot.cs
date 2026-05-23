@@ -126,7 +126,10 @@ namespace UserService.Data.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfile", (string)null);
+                    b.ToTable("UserProfile", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
