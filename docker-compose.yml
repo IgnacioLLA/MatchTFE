@@ -23,6 +23,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTP_PORTS=8080
+      - GATEWAY_BASE_URL=http://${BASE_HOST}:5080/
 
   apigateway:
     image: nginx:alpine
@@ -43,7 +44,9 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - FRONTEND_ORIGIN=http://${BASE_HOST}:5000
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
+      - USER_SERVICE_BASE_URL=http://userservice:8080/
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__RefreshSecret=${REFRESH_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService
@@ -60,6 +63,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - FRONTEND_ORIGIN=http://${BASE_HOST}:5000
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService
@@ -76,6 +80,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
+      - FRONTEND_ORIGIN=http://${BASE_HOST}:5000
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService

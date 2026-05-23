@@ -19,9 +19,11 @@ builder.Services.AddIdentityCore<MatchUser>(options =>
 
 builder.Services.AddCors(options =>
 {
+    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "http://localhost:5000");
+
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5000")
+        policy.WithOrigins(frontendOrigin)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -32,7 +34,7 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 builder.Services.AddHttpClient("UserServiceClient", client =>
 {
-    client.BaseAddress = new Uri("http://userservice:8080/");
+    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "http://userservice:8080/"));
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
@@ -113,6 +115,10 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.Run();
+
+static string GetConfiguredUrl(string environmentVariableName, string fallbackUrl)
+    => Environment.GetEnvironmentVariable(environmentVariableName)
+       ?? fallbackUrl;
 
 static async Task MigrateDatabaseAsync(AuthDbContext db)
 {

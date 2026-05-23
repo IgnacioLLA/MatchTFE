@@ -11,9 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
+    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "http://localhost:5000");
+
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5000")
+        policy.WithOrigins(frontendOrigin)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -86,6 +88,10 @@ using (var scope = app.Services.CreateScope())
     await MigrateDatabaseAsync(db);
 }
 app.Run();
+
+static string GetConfiguredUrl(string environmentVariableName, string fallbackUrl)
+    => Environment.GetEnvironmentVariable(environmentVariableName)
+       ?? fallbackUrl;
 
 static async Task MigrateDatabaseAsync(MatchDbContext db)
 {

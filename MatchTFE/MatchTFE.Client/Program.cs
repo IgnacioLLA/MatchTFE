@@ -9,15 +9,22 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddTransient<CookieHandler>();
 builder.Services.AddTransient<AuthInterceptor>();
 
+var gatewayBaseUrl = Environment.GetEnvironmentVariable("GATEWAY_BASE_URL");
+if (string.IsNullOrWhiteSpace(gatewayBaseUrl))
+{
+    var hostBaseUri = new Uri(builder.HostEnvironment.BaseAddress);
+    gatewayBaseUrl = $"{hostBaseUri.Scheme}://{hostBaseUri.Host}:5080/";
+}
+
 builder.Services.AddHttpClient("CleanAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5080/");
+    client.BaseAddress = new Uri(gatewayBaseUrl);
 })
 .AddHttpMessageHandler<CookieHandler>();
 
 builder.Services.AddHttpClient("GatewayAPI", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5080/");
+    client.BaseAddress = new Uri(gatewayBaseUrl);
 })
 .AddHttpMessageHandler<CookieHandler>()
 .AddHttpMessageHandler<AuthInterceptor>();
