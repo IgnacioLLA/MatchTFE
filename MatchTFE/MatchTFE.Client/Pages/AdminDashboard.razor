@@ -6,6 +6,7 @@
 
 @inject IHttpClientFactory HttpClientFactory
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
     <div>
@@ -238,6 +239,8 @@
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
             var response = await client.GetFromJsonAsync<GetAllProfilesResponse>("api/user/profiles");
+
+
             if (response != null && response.Profiles != null)
             {
                 _users = response.Profiles;
@@ -247,9 +250,13 @@
                 _users = new List<ProfileDto>();
             }
         }
-        catch (Exception)
+        catch (HttpRequestException e)
         {
             Snackbar.Add("Error loading users.", Severity.Error);
+            if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                Navigation.NavigateTo("");
+            }
         }
         finally
         {

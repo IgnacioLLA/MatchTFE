@@ -332,5 +332,35 @@ namespace AuthService.Service
 
             return response;
         }
+
+        public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request)
+        {
+            var response = new BulkUserActionResponse { Success = true, AffectedCount = 0 };
+
+            if (request.Action == BulkUserActionType.Delete)
+            {
+                foreach (var userId in request.UserIds)
+                {
+                    var user = await _authRepository.GetUserByIdAsync(userId);
+                    if (user != null)
+                    {
+                        var result = await _authRepository.DeleteUserAsync(user);
+                        if (result.Succeeded)
+                        {
+                            response.AffectedCount++;
+                        }
+                    }
+                }
+
+                response.Message = $"Successfully deleted {response.AffectedCount} user(s).";
+            }
+            else
+            {
+                response.Success = false;
+                response.Message = "Action not supported.";
+            }
+
+            return response;
+        }
     }
 }

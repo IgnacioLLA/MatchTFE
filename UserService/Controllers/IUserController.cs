@@ -18,7 +18,6 @@ namespace UserService.Controllers
 
         [HttpPut("profile/{userId}/role")]
         Task<ActionResult<ChangeRoleResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request);
-        
         [HttpGet("profiles")]
         Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();
     }

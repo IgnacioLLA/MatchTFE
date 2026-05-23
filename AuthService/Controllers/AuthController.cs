@@ -250,14 +250,7 @@ namespace AuthService.Controllers
                     Message = "Invalid request format." 
                 });
             }
-
-            //var response = await _authService.ExecuteBulkActionAsync(request);
-
-            var response = new BulkUserActionResponse
-            {
-                Success = false,
-                Message = "Invalid request format."
-            };
+            var response = await _authService.ExecuteBulkActionAsync(request);
 
             if (!response.Success)
             {
