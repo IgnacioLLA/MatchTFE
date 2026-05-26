@@ -19,9 +19,11 @@ builder.Services.AddIdentityCore<MatchUser>(options =>
 
 builder.Services.AddCors(options =>
 {
+    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "http://localhost:5000");
+
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5000")
+        policy.WithOrigins(frontendOrigin)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -32,7 +34,7 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 builder.Services.AddHttpClient("UserServiceClient", client =>
 {
-    client.BaseAddress = new Uri("http://userservice:8080/");
+    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "http://userservice:8080/"));
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
@@ -87,6 +89,20 @@ builder.Services.AddDbContext<AuthDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseRouting();
+
+app.UseCors("AllowBlazor");
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    await MigrateDatabaseAsync(db);
+}
+
 // Roles configuration
 using (var scope = app.Services.CreateScope())
 {
@@ -100,18 +116,28 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.UseRouting();
+app.Run();
 
-app.UseCors("AllowBlazor");
+static string GetConfiguredUrl(string environmentVariableName, string fallbackUrl)
+    => Environment.GetEnvironmentVariable(environmentVariableName)
+       ?? fallbackUrl;
 
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-
-using (var scope = app.Services.CreateScope())
+static async Task MigrateDatabaseAsync(AuthDbContext db)
 {
-    var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
+    const int maxAttempts = 20;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            return;
+        }
+        catch when (attempt < maxAttempts)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
     db.Database.Migrate();
 }
-
-app.Run();

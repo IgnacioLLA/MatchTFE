@@ -226,10 +226,7 @@ namespace MatchService.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserProfile", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("UserProfile");
                 });
 
             modelBuilder.Entity("TFELibrary.Data.InterestProposal", b =>

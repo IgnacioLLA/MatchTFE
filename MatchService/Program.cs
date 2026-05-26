@@ -11,9 +11,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
+    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "http://localhost:5000");
+
     options.AddPolicy("AllowBlazor", policy =>
     {
-        policy.WithOrigins("http://localhost:5000")
+        policy.WithOrigins(frontendOrigin)
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -83,6 +85,30 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MatchDbContext>();
-    db.Database.Migrate();
+    await MigrateDatabaseAsync(db);
 }
 app.Run();
+
+static string GetConfiguredUrl(string environmentVariableName, string fallbackUrl)
+    => Environment.GetEnvironmentVariable(environmentVariableName)
+       ?? fallbackUrl;
+
+static async Task MigrateDatabaseAsync(MatchDbContext db)
+{
+    const int maxAttempts = 20;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            db.Database.Migrate();
+            return;
+        }
+        catch when (attempt < maxAttempts)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2));
+        }
+    }
+
+    db.Database.Migrate();
+}

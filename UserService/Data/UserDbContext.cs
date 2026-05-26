@@ -24,6 +24,7 @@ namespace UserService.Data
             });
 
             builder.Entity<UserProfile>().ToTable("UserProfile");
+            builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
             builder.Entity<StudentSkill>().ToTable("StudentSkill");
             builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
             builder.Entity<TFEProposal>().ToTable("TfeProposal", t => t.ExcludeFromMigrations());
