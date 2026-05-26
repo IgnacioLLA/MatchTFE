@@ -18,14 +18,16 @@ namespace AuthService.Service
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<AuthService> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
 
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AuthService> logger)
+        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor)
         {
             _authRepository = authRepository;
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -236,31 +238,129 @@ namespace AuthService.Service
             }
         }
 
-        public async Task<bool> ChangeUserRoleAsync(string userId, string newRole)
+        public async Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request)
         {
-            var user = await _authRepository.GetUserByIdAsync(userId);
-            if (user == null) return false;
+            var response = new UserRoleUpdateResponse();
+            var user = await _authRepository.GetUserByEmailAsync(request.Email);
 
+            if (user == null)
+            {
+                response.Success = false;
+                response.Message = $"No user found with email '{request.Email}'.";
+                return response;
+            }
+
+            var newRoleString = request.NewRole.ToString();
             var currentRoles = await _authRepository.GetUserRolesAsync(user);
+
+            if (currentRoles.Count == 1 && currentRoles.Contains(newRoleString))
+            {
+                response.Success = true;
+                response.Message = "The user already has this role assigned.";
+                return response;
+            }
+
+            var isExecutionOk = true;
 
             foreach (var role in currentRoles)
             {
                 var removeResult = await _authRepository.RemoveFromRoleAsync(user, role);
                 if (!removeResult.Succeeded)
                 {
-                    _logger.LogWarning($"No se pudo quitar el rol '{role}' al usuario {userId}.");
-                    return false;
+                    response.Message = $"Failed to remove the previous role '{role}'.";
+                    isExecutionOk = false;
+                    break;
                 }
             }
 
-            var addResult = await _authRepository.AddToRoleAsync(user, newRole);
-            if (!addResult.Succeeded)
+            if (isExecutionOk)
             {
-                _logger.LogWarning($"No se pudo asignar el rol '{newRole}' al usuario {userId}.");
-                return false;
+                if (request.NewRole.Equals(RoleType.Teacher) || request.NewRole.Equals(RoleType.Student))
+                    newRoleString = "User";
+                var addResult = await _authRepository.AddToRoleAsync(user, newRoleString);
+                if (!addResult.Succeeded)
+                {
+                    response.Message = $"Failed to assign the new role '{newRoleString}'.";
+                    isExecutionOk = false;
+                }
             }
 
-            return true;
+            if (isExecutionOk)
+            {
+                response.Success = true;
+                response.Message = $"Role successfully updated to {newRoleString}.";
+
+                try
+                {
+                    var client = _httpClientFactory.CreateClient("UserServiceClient");
+
+                    var token = string.Empty;
+                    var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+                    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        token = authHeader.Substring("Bearer ".Length).Trim();
+                    }
+                    else
+                    {
+                        token = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+                    }
+
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    }
+
+                    var changeRoleReq = new ChangeRoleRequest(request.NewRole);
+                    var apiResponse = await client.PutAsJsonAsync($"api/user/profile/{user.Id}/role", changeRoleReq);
+
+                    if (!apiResponse.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning($"Role for user {user.Id} was locally updated but failed in UserService. StatusCode: {apiResponse.StatusCode}");
+                    }
+
+                    _logger.LogWarning($"Role for user {user.Id} was locally updated and in UserService. StatusCode: {apiResponse.StatusCode}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Crítical error connecting to UserService during role change.");
+                }
+            }
+            else
+            {
+                response.Success = false;
+            }
+
+            return response;
+        }
+
+        public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request)
+        {
+            var response = new BulkUserActionResponse { Success = true, AffectedCount = 0 };
+
+            if (request.Action == BulkUserActionType.Delete)
+            {
+                foreach (var userId in request.UserIds)
+                {
+                    var user = await _authRepository.GetUserByIdAsync(userId);
+                    if (user != null)
+                    {
+                        var result = await _authRepository.DeleteUserAsync(user);
+                        if (result.Succeeded)
+                        {
+                            response.AffectedCount++;
+                        }
+                    }
+                }
+
+                response.Message = $"Successfully deleted {response.AffectedCount} user(s).";
+            }
+            else
+            {
+                response.Success = false;
+                response.Message = "Action not supported.";
+            }
+
+            return response;
         }
     }
 }

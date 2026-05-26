@@ -7,8 +7,10 @@ namespace UserService.Service
     public interface IUserService
     {
         Task<ProfileResponse?> GetProfileByUserIdAsync(string userId);
-        Task<bool> CreateProfileAsync(ProfileCreationRequest request);
+        Task<ProfileCreationResponse> CreateProfileAsync(ProfileCreationRequest request);
         Task<ProfileUpdateResponse> UpdateProfileAsync(string userId, ProfileUpdateRequest request);
-        Task<ProfileByTfeInterestResponse> GetProfileByTfeInterest(ProfileByTfeInterestRequest request);
+        Task<ProfileByTfeInterestResponse> GetProfileByTfeInterestAsync(ProfileByTfeInterestRequest request);
+        Task<RoleUpdateResponse> UpdateUserRoleAsync(string userId, RoleType newRole);
+        Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request);
     }
 }

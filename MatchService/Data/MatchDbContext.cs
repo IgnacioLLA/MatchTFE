@@ -87,13 +87,13 @@ namespace MatchService.Data
                 .HasKey(tp => new { tp.OriginUserId, tp.TfeId });
 
             builder.Entity<InterestProposal>()
-                .HasOne(ip => ip.OriginUser).WithMany().HasForeignKey(ip => ip.OriginUserId).OnDelete(DeleteBehavior.Restrict);
+                .HasOne(ip => ip.OriginUser).WithMany().HasForeignKey(ip => ip.OriginUserId).OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<InterestProposal>()
-                .HasOne(ip => ip.DestinationUser).WithMany().HasForeignKey(ip => ip.DestinationUserId).OnDelete(DeleteBehavior.Restrict);
+                .HasOne(ip => ip.DestinationUser).WithMany().HasForeignKey(ip => ip.DestinationUserId).OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TFEProposal>()
-                .HasOne(tp => tp.OriginUser).WithMany().HasForeignKey(tp => tp.OriginUserId).OnDelete(DeleteBehavior.Restrict);
+                .HasOne(tp => tp.OriginUser).WithMany().HasForeignKey(tp => tp.OriginUserId).OnDelete(DeleteBehavior.Cascade);
 
 
 
