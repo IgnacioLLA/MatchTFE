@@ -15,5 +15,6 @@ namespace AuthService.Repositories
         Task<IList<string>> GetUserRolesAsync(MatchUser user);
         Task<IdentityResult> AddToRoleAsync(MatchUser user, string role);
         Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role);
+        Task<IdentityResult> DeleteUserAsync(MatchUser user);
     }
 }

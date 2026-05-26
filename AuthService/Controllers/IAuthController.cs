@@ -9,5 +9,9 @@ namespace AuthService.Controllers
         Task<IActionResult> Register(RegisterRequestDto request);
         Task<IActionResult> Logout();
         Task<IActionResult> RefreshToken();
+
+        Task<IActionResult> ChangeRole([FromBody] UserRoleUpdateRequest request);
+        Task<IActionResult> BulkImportUsers([FromBody] BulkUserImportRequest request);
+        Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request);
     }
 }
