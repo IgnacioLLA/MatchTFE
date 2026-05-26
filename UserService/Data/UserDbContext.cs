@@ -16,6 +16,14 @@ namespace UserService.Data
         {
             base.OnModelCreating(builder);
 
+            // Placeholder to create the foreign key constraint across boundaries
+            builder.Entity<AspNetUser>(b =>
+            {
+                b.ToTable("AspNetUsers", t => t.ExcludeFromMigrations());
+                b.HasKey(u => u.Id);
+            });
+
+            builder.Entity<UserProfile>().ToTable("UserProfile");
             builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
             builder.Entity<StudentSkill>().ToTable("StudentSkill");
             builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
@@ -32,6 +40,12 @@ namespace UserService.Data
             builder.Entity<UserProfile>()
                 .Property(e => e.Role)
                 .HasConversion<string>();
+
+            builder.Entity<UserProfile>()
+                .HasOne<AspNetUser>()
+                .WithOne()
+                .HasForeignKey<UserProfile>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<StudentSkill>(ss =>
             {
@@ -66,7 +80,13 @@ namespace UserService.Data
                 .HasOne(tp => tp.OriginUser)
                 .WithMany(u => u.TfeProposals)
                 .HasForeignKey(tp => tp.OriginUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        // Weak entity foreign constraint placeholder
+        public class AspNetUser
+        {
+            public string Id { get; set; } = string.Empty;
         }
     }
 }

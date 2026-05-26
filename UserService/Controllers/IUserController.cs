@@ -7,13 +7,23 @@ namespace UserService.Controllers
     {
         [HttpGet("profile")]
         Task<ActionResult<ProfileResponse>> GetCurrentProfile();
+
         [HttpPost("profile")]
-        Task<ActionResult> CreateInitialProfile(ProfileCreationRequest newProfile);
+        Task<ActionResult<ProfileCreationResponse>> CreateInitialProfile(ProfileCreationRequest newProfile);
+
         [HttpPut("profile")]
-        Task<IActionResult> UpdateProfile(ProfileUpdateRequest request);
-        [HttpGet("tfe/{request.TfeId}/candidates")]
-        Task<IActionResult> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
+        Task<ActionResult<ProfileUpdateResponse>> UpdateProfile(ProfileUpdateRequest request);
+
+        [HttpGet("tfe/{TfeId}/candidates")]
+        Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
+
         [HttpGet("profile/{userId}")]
         Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId);
+
+        [HttpPut("profile/{userId}/role")]
+        Task<ActionResult<RoleUpdateResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request);
+
+        [HttpGet("profiles")]
+        Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();
     }
 }

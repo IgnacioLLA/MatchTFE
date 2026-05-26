@@ -38,6 +38,8 @@ builder.Services.AddHttpClient("UserServiceClient", client =>
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
 {
     AuthServiceDependencyInjector.RegisterDependencies(containerBuilder);

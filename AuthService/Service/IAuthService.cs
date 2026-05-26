@@ -10,6 +10,7 @@ namespace AuthService.Service
         Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
         Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
         Task<bool> LogoutAsync(string id);
-        Task<bool> ChangeUserRoleAsync(string userId, string newRole);
+        Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request);
+        Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request);
     }
 }

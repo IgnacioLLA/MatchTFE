@@ -28,6 +28,11 @@ public class AuthRepository : IAuthRepository
         return await _userManager.CreateAsync(user, password);
     }
 
+    public async Task<IdentityResult> DeleteUserAsync(MatchUser user)
+    {
+        return await _userManager.DeleteAsync(user);
+    }
+
     public async Task SaveRefreshTokenAsync(MatchUser user, string refreshToken)
     {
         await _userManager.SetAuthenticationTokenAsync(user, "MatchTFE", "RefreshToken", refreshToken);

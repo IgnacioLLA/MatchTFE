@@ -1,0 +1,406 @@
+﻿@page "/admin"
+@using TFELibrary.Shared
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using System.IO
+
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
+    <div>
+        <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+            User Management
+        </MudText>
+        <MudText Typo="Typo.body1" Class="app-text-reading">
+            Manage system users, roles, and perform bulk actions.
+        </MudText>
+    </div>
+</div>
+
+<MudGrid Class="mb-6 animate-fade-in">
+    <MudItem xs="12" md="6">
+        <MudPaper Elevation="0" Class="pa-6 h-100 rounded-xl border-all d-flex flex-column">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Update User Role</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
+                Quickly change the system role of a specific user by their email address.
+            </MudText>
+            
+            <div class="d-flex flex-wrap gap-3 align-end mt-auto">
+                <MudTextField @bind-Value="_roleUpdateEmail"
+                              Label="User Email"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1" />
+
+                <MudSelect T="RoleType?"
+                           @bind-Value="_roleUpdateSelection"
+                           Label="New Role"
+                           Variant="Variant.Outlined"
+                           Margin="Margin.Dense"
+                           Style="min-width: 150px;">
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
+                </MudSelect>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleUpdateRoleAsync"
+                           Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
+                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
+                           Style="height: 40px;">
+                    UPDATE
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="6">
+        <MudPaper Elevation="0" Class="pa-6 h-100 rounded-xl border-all d-flex flex-column">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Bulk Import Profiles</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
+                Upload a structured file (.csv or .txt) to automatically generate new user profiles.
+            </MudText>
+
+            <div class="d-flex align-center gap-4 mt-auto">
+                <MudFileUpload T="IBrowserFile" FilesChanged="HandleFileSelected" Accept=".txt, .csv" Class="w-100">
+                    <ActivatorContent>
+                        <MudButton Variant="Variant.Outlined"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                                   Class="rounded-lg font-weight-bold w-100 py-2 border-all chip-dashed">
+                            @(_uploadedFile == null ? "BROWSE FILE (.CSV, .TXT)" : _uploadedFile.Name)
+                        </MudButton>
+                    </ActivatorContent>
+                </MudFileUpload>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleImportUsersAsync"
+                           Disabled="@(_uploadedFile == null)"
+                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
+                           Style="height: 40px;">
+                    IMPORT
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-6">
+    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+        <MudTextField @bind-Value="SearchQuery"
+                      Placeholder="Search by name or email..."
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="rounded-lg flex-grow-1" />
+
+        <MudSelect T="RoleType?"
+                   @bind-Value="SelectedRoleFilter"
+                   Placeholder="Filter by role..."
+                   Variant="Variant.Outlined"
+                   Margin="Margin.Dense"
+                   Clearable="true"
+                   Class="rounded-lg flex-grow-1"
+                   Style="max-width: 300px;">
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
+        </MudSelect>
+    </div>
+
+    <MudTable Items="@GetFilteredUsers()"
+              Hover="true"
+              MultiSelection="true"
+              @bind-SelectedItems="_selectedUsers"
+              SelectOnRowClick="false"
+              Elevation="0"
+              Loading="@_isLoading"
+              Class="transparent-bg">
+        <HeaderContent>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">USER</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">EMAIL</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ROLE</MudText></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="User">
+                <div class="d-flex align-center">
+                    <MudAvatar Size="Size.Small" Color="Color.Primary" Class="mr-3">
+                        @if (!string.IsNullOrWhiteSpace(context.AvatarUrl))
+                        {
+                            <MudImage Src="@context.AvatarUrl" />
+                        }
+                        else
+                        {
+                            @context.FirstName.FirstOrDefault()
+                        }
+                    </MudAvatar>
+                    <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.FirstName @context.LastName</MudText>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Email">
+                <MudText Typo="Typo.body2" Class="app-text-muted">@context.Email</MudText>
+            </MudTd>
+            <MudTd DataLabel="Role">
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@GetRoleColor(context.Role)"
+                         Class="font-weight-bold">
+                    @context.Role.ToString()
+                </MudChip>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="false" />
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+
+@if (_selectedUsers.Any())
+{
+    <div class="animate-fade-in">
+        <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all d-flex justify-space-between align-center">
+            <MudText Typo="Typo.body1" Class="font-weight-bold text-main">
+                @_selectedUsers.Count users selected
+            </MudText>
+            <div class="d-flex gap-3">
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Warning"
+                           StartIcon="@Icons.Material.Filled.Block"
+                           OnClick="HandleBulkSuspendAsync"
+                           Class="rounded-lg font-weight-bold px-6">
+                    SUSPEND
+                </MudButton>
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Delete"
+                           OnClick="HandleBulkDeleteAsync"
+                           Class="rounded-lg font-weight-bold px-6 btn-primary-shadow">
+                    DELETE
+                </MudButton>
+            </div>
+        </MudPaper>
+    </div>
+}
+
+@code {
+    private List<ProfileDto> _users = new();
+    private HashSet<ProfileDto> _selectedUsers = new();
+
+    private string _searchQuery = string.Empty;
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        set
+        {
+            _searchQuery = value;
+            StateHasChanged();
+        }
+    }
+
+    private RoleType? _selectedRoleFilter;
+    public RoleType? SelectedRoleFilter
+    {
+        get => _selectedRoleFilter;
+        set
+        {
+            _selectedRoleFilter = value;
+            StateHasChanged();
+        }
+    }
+
+    private string _roleUpdateEmail = string.Empty;
+    private RoleType? _roleUpdateSelection;
+
+    private IBrowserFile? _uploadedFile;
+
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAsync();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        _isLoading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.GetFromJsonAsync<GetAllProfilesResponse>("api/user/profiles");
+
+
+            if (response != null && response.Profiles != null)
+            {
+                _users = response.Profiles;
+            }
+            else
+            {
+                _users = new List<ProfileDto>();
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            Snackbar.Add("Error loading users.", Severity.Error);
+            if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                Navigation.NavigateTo("");
+            }
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private IEnumerable<ProfileDto> GetFilteredUsers()
+    {
+        var result = _users.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            result = result.Where(u =>
+                (u.FirstName != null && u.FirstName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (u.LastName != null && u.LastName.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) ||
+                (u.Email != null && u.Email.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase))
+            );
+        }
+
+        if (SelectedRoleFilter.HasValue)
+        {
+            result = result.Where(u => u.Role == SelectedRoleFilter.Value);
+        }
+
+        return result;
+    }
+
+    private async Task HandleUpdateRoleAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null) return;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var request = new UserRoleUpdateRequest
+            {
+                Email = _roleUpdateEmail,
+                NewRole = _roleUpdateSelection.Value
+            };
+
+            var response = await client.PutAsJsonAsync("api/auth/role", request);
+            var result = await response.Content.ReadFromJsonAsync<UserRoleUpdateResponse>();
+
+            if (result != null && result.Success)
+            {
+                Snackbar.Add(result.Message, Severity.Success);
+                await LoadUsersAsync(); 
+                _roleUpdateEmail = string.Empty;
+                _roleUpdateSelection = null;
+            }
+            else
+            {
+                Snackbar.Add(result?.Message ?? "Failed to update role.", Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Connection error while updating role.", Severity.Error);
+        }
+    }
+
+    private void HandleFileSelected(IBrowserFile file)
+    {
+        _uploadedFile = file;
+    }
+
+    private async Task HandleImportUsersAsync()
+    {
+        if (_uploadedFile == null) return;
+
+        try
+        {
+            using var ms = new MemoryStream();
+            await _uploadedFile.OpenReadStream(maxAllowedSize: 10485760).CopyToAsync(ms);
+
+            var request = new BulkUserImportRequest
+            {
+                FileName = _uploadedFile.Name,
+                FileContent = ms.ToArray()
+            };
+
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PostAsJsonAsync("api/auth/import", request);
+            var result = await response.Content.ReadFromJsonAsync<BulkUserImportResponse>();
+
+            if (result != null && result.Success)
+            {
+                Snackbar.Add($"{result.Message} ({result.ImportedCount} imported)", Severity.Success);
+                _uploadedFile = null;
+                await LoadUsersAsync();
+            }
+            else
+            {
+                Snackbar.Add(result?.Message ?? "Failed to import users.", Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Connection error while importing users.", Severity.Error);
+        }
+    }
+
+    private async Task HandleBulkActionAsync(BulkUserActionType actionType)
+    {
+        if (!_selectedUsers.Any()) return;
+
+        try
+        {
+            var request = new BulkUserActionRequest
+            {
+                UserIds = _selectedUsers.Select(u => u.Id).ToList(),
+                Action = actionType
+            };
+
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PostAsJsonAsync("api/auth/bulk-action", request);
+            var result = await response.Content.ReadFromJsonAsync<BulkUserActionResponse>();
+
+            if (result != null && result.Success)
+            {
+                Snackbar.Add(result.Message, actionType == BulkUserActionType.Delete ? Severity.Success : Severity.Warning);
+                _selectedUsers.Clear();
+                await LoadUsersAsync();
+            }
+            else
+            {
+                Snackbar.Add(result?.Message ?? "Bulk action failed.", Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Connection error while executing bulk action.", Severity.Error);
+        }
+    }
+
+    private async Task HandleBulkDeleteAsync() => await HandleBulkActionAsync(BulkUserActionType.Delete);
+    private async Task HandleBulkSuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Suspend);
+
+    private Color GetRoleColor(RoleType role) => role switch
+    {
+        RoleType.Admin => Color.Error,
+        RoleType.Teacher => Color.Info,
+        RoleType.Student => Color.Success,
+        _ => Color.Default
+    };
+}
