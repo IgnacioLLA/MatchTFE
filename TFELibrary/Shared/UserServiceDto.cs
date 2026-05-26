@@ -13,12 +13,18 @@ namespace TFELibrary.Shared
         ProfileDto Profile
     );
 
+    public record ProfileCreationResponse(
+        bool IsSuccess,
+        string Message, 
+        string? UserId = null
+    );
+
     public record ProfileUpdateRequest(
         ProfileDto Profile
     );
 
     public record ProfileUpdateResponse(
-        bool Success,
+        bool IsSuccess,
         string Message,
         ProfileDto? UpdatedProfile = null
     );
@@ -28,7 +34,7 @@ namespace TFELibrary.Shared
     );
 
     public record ProfileLogoutResponse(
-        bool Success,
+        bool IsSuccess,
         string Message
     );
 
@@ -45,7 +51,7 @@ namespace TFELibrary.Shared
     );
 
     public record ChangeRoleResponse(
-        bool Success,
+        bool IsSuccess,
         string Message
     );
 
@@ -54,4 +60,7 @@ namespace TFELibrary.Shared
     public record GetAllProfilesResponse(
         List<ProfileDto> Profiles
     );
+
+    public record RoleUpdateResponse(bool IsSuccess, string Message);
+
 }
