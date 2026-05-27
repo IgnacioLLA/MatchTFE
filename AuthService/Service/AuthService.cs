@@ -238,7 +238,7 @@ namespace AuthService.Service
             }
         }
 
-        public async Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request)
+        public async Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request, string currentUserId)
         {
             var response = new UserRoleUpdateResponse();
             var user = await _authRepository.GetUserByEmailAsync(request.Email);
@@ -247,6 +247,13 @@ namespace AuthService.Service
             {
                 response.Success = false;
                 response.Message = $"No user found with email '{request.Email}'.";
+                return response;
+            }
+
+            if (user.Id == currentUserId)
+            {
+                response.Success = false;
+                response.Message = "You cannot change your own role.";
                 return response;
             }
 
@@ -333,9 +340,16 @@ namespace AuthService.Service
             return response;
         }
 
-        public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request)
+        public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId)
         {
             var response = new BulkUserActionResponse { Success = true, AffectedCount = 0 };
+
+            if (request.UserIds.Contains(currentUserId))
+            {
+                response.Success = false;
+                response.Message = "You cannot perform actions on yourself.";
+                return response;
+            }
 
             if (request.Action == BulkUserActionType.Delete)
             {

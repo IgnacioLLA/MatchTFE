@@ -14,6 +14,9 @@ namespace MatchService.Controllers
         [HttpPost("tag")]
         Task<IActionResult> CreateTag([FromBody] TagCreationRequest request);
 
+        [HttpPut("tag/{id}")]
+        Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request);
+
         [HttpDelete("tag/{id}")]
         Task<IActionResult> DeleteTag(int id);
 

@@ -36,6 +36,13 @@ namespace MatchService.Repositories
             return tag;
         }
 
+        public async Task<Tag> UpdateAsync(Tag tag)
+        {
+            _context.Tag.Update(tag);
+            await _context.SaveChangesAsync();
+            return tag;
+        }
+
         public async Task DeleteAsync(Tag tag)
         {
             _context.Tag.Remove(tag);

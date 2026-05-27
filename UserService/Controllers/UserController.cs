@@ -23,7 +23,6 @@ namespace UserService.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<ProfileResponse>> GetCurrentProfile()
         {
-            // Standardized claim extraction
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 

@@ -8,15 +8,20 @@ namespace TFELibrary.Shared
 
     public class TagCreationRequest
     {
-        [MaxLength(50)]
         public TagDto Tag { get; set; }
     }
 
     public class TagCreationResponse
     {
-        [MaxLength(50)]
         public TagDto Tag { get; set; }
         public int TagId { get; set; }
+    }
+
+    public class TagUpdateRequest
+    {
+        [Required(ErrorMessage = "Tag's name is mandatory.")]
+        [MaxLength(50, ErrorMessage = "Message too long, max 50 characters.")]
+        public string Name { get; set; } = string.Empty;
     }
 
 

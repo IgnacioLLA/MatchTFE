@@ -193,14 +193,15 @@ namespace AuthService.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new UserRoleUpdateResponse 
-                { 
-                    Success = false, 
-                    Message = "Invalid request format." 
+                return BadRequest(new UserRoleUpdateResponse
+                {
+                    Success = false,
+                    Message = "Invalid request format."
                 });
             }
 
-            var response = await _authService.ChangeUserRoleAsync(request);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await _authService.ChangeUserRoleAsync(request, currentUserId);
 
             if (!response.Success)
             {
@@ -245,13 +246,15 @@ namespace AuthService.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new BulkUserActionResponse 
-                { 
-                    Success = false, 
-                    Message = "Invalid request format." 
+                return BadRequest(new BulkUserActionResponse
+                {
+                    Success = false,
+                    Message = "Invalid request format."
                 });
             }
-            var response = await _authService.ExecuteBulkActionAsync(request);
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var response = await _authService.ExecuteBulkActionAsync(request, currentUserId);
 
             if (!response.Success)
             {

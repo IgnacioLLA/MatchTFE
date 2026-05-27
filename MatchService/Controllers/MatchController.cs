@@ -44,8 +44,37 @@ namespace MatchService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var created = await _tagService.CreateTagAsync(request);
-            return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
+            try
+            {
+                var created = await _tagService.CreateTagAsync(request);
+                return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+        }
+
+        [HttpPut("tag/{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var updated = await _tagService.UpdateTagAsync(id, request);
+                if (!updated) return NotFound();
+                return NoContent();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpDelete("tag/{id}")]
@@ -55,8 +84,6 @@ namespace MatchService.Controllers
             if (!deleted) return NotFound();
             return NoContent();
         }
-
-        [HttpPost("tfe")]
         public async Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

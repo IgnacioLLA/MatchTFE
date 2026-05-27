@@ -51,11 +51,15 @@ namespace UserService.Data
             {
                 ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
 
-                // Comment this if rebuilding the BD (Cross context-error)
+                ss.HasOne(s => s.StudentProfile)
+                  .WithMany()
+                  .HasForeignKey(s => s.StudentProfileId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
                 ss.HasOne(s => s.Tag)
                   .WithMany()
                   .HasForeignKey(s => s.TagId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<UserInterest>(j =>
@@ -64,11 +68,10 @@ namespace UserService.Data
                 j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
 
                 j.HasOne(ui => ui.UserProfile)
-                 .WithMany(u => u.UserInterests) 
+                 .WithMany(u => u.UserInterests)
                  .HasForeignKey(ui => ui.UserProfileId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                // Comment this if rebuilding the BD (Cross context-error)
                 j.HasOne(ui => ui.Tag)
                  .WithMany()
                  .HasForeignKey(ui => ui.TagId)

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UserService.Data;
@@ -11,9 +12,11 @@ using UserService.Data;
 namespace UserService.Data.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260527101706_UserUpdate05")]
+    partial class UserUpdate05
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,14 +36,9 @@ namespace UserService.Data.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserProfileUserId")
-                        .HasColumnType("text");
-
                     b.HasKey("StudentProfileId", "TagId");
 
                     b.HasIndex("TagId");
-
-                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("StudentSkill", (string)null);
                 });
@@ -175,7 +173,7 @@ namespace UserService.Data.Migrations
             modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
                 {
                     b.HasOne("TFELibrary.Data.UserProfile", "StudentProfile")
-                        .WithMany()
+                        .WithMany("StudentSkills")
                         .HasForeignKey("StudentProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -185,10 +183,6 @@ namespace UserService.Data.Migrations
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TFELibrary.Data.UserProfile", null)
-                        .WithMany("StudentSkills")
-                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("StudentProfile");
 

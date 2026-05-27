@@ -39,19 +39,24 @@ namespace MatchService.Data
             builder.Entity<UserProfile>().Ignore(u => u.UserInterests);
             builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
 
+            builder.Entity<TFE>()
+                .HasOne(t => t.Author)
+                .WithMany()
+                .HasForeignKey(t => t.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             builder.Entity<UserInterest>(j =>
             {
                 j.ToTable("UserInterest", t => t.ExcludeFromMigrations());
                 j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
             });
 
-            // EF needs to know about the table between UserProfile and Tag, even if it's not responsible for managing it
             builder.Entity<TFE>()
                 .HasMany(t => t.Topics)
                 .WithMany()
                 .UsingEntity<TfeTopic>(
-                    j => j.HasOne(pt => pt.Tag).WithMany().HasForeignKey(pt => pt.TagId),
-                    j => j.HasOne(pt => pt.Tfe).WithMany().HasForeignKey(pt => pt.TfeId),
+                    j => j.HasOne(pt => pt.Tag).WithMany().HasForeignKey(pt => pt.TagId).OnDelete(DeleteBehavior.Cascade),
+                    j => j.HasOne(pt => pt.Tfe).WithMany().HasForeignKey(pt => pt.TfeId).OnDelete(DeleteBehavior.Cascade),
                     j =>
                     {
                         j.ToTable("TfeTopic");
@@ -77,7 +82,7 @@ namespace MatchService.Data
                 j.HasOne(rs => rs.Tag)
                  .WithMany()
                  .HasForeignKey(rs => rs.TagId)
-                 .OnDelete(DeleteBehavior.Restrict);
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<InterestProposal>()
