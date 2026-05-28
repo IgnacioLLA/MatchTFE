@@ -98,7 +98,10 @@ namespace MatchService.Data
                 .HasOne(ip => ip.DestinationUser).WithMany().HasForeignKey(ip => ip.DestinationUserId).OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<TFEProposal>()
-                .HasOne(tp => tp.OriginUser).WithMany().HasForeignKey(tp => tp.OriginUserId).OnDelete(DeleteBehavior.Cascade);
+                .HasOne(tp => tp.OriginUser)
+                .WithMany(u => u.TfeProposals)
+                .HasForeignKey(tp => tp.OriginUserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
 
 

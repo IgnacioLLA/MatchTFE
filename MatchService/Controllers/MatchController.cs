@@ -44,15 +44,8 @@ namespace MatchService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var created = await _tagService.CreateTagAsync(request);
-                return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var created = await _tagService.CreateTagAsync(request);
+            return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
         }
 
         [HttpPut("tag/{id}")]
@@ -73,7 +66,7 @@ namespace MatchService.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
 
@@ -84,6 +77,8 @@ namespace MatchService.Controllers
             if (!deleted) return NotFound();
             return NoContent();
         }
+
+        [HttpPost("tfe")]
         public async Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -103,6 +98,7 @@ namespace MatchService.Controllers
             if (tfe == null) return NotFound();
             return Ok(tfe);
         }
+
         [HttpPut("tfe/{id}")]
         public async Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request)
         {
@@ -124,7 +120,7 @@ namespace MatchService.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
             }
@@ -188,6 +184,30 @@ namespace MatchService.Controllers
 
             if (!response.Success) return Conflict(response.Message);
             return Ok(response);
+        }
+
+        [HttpGet("proposal/tfe/matches")]
+        [HttpGet("matches/accepted")]
+        public async Task<IActionResult> GetAcceptedMatches()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized(new { message = "Usuario no autenticado." });
+
+            try
+            {
+                var response = await _proposalService.GetAcceptedMatchesForUserAsync(userId);
+
+                if (!response.Success)
+                    return BadRequest(response);
+
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error al obtener los matches." });
+            }
         }
     }
 }

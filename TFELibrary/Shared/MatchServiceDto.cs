@@ -80,4 +80,29 @@ namespace TFELibrary.Shared
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
     }
+
+    // -- Accepted Matches --
+    public class AcceptedMatchDto
+    {
+        public string MatchedUserId { get; set; } = string.Empty;
+        public string MatchedUserFullName { get; set; } = string.Empty;
+        public string MatchedUserEmail { get; set; } = string.Empty;
+        public RoleType MatchedUserRole { get; set; }
+        public string MatchedUserAvatarUrl { get; set; } = string.Empty;
+        public string? MatchedUserAcademicYear { get; set; }
+        public string? MatchedUserDepartment { get; set; }
+        public int TfeId { get; set; }
+        public string TfeTitle { get; set; } = string.Empty;
+        public string TfeTutorName { get; set; } = string.Empty;
+        public DateTime MatchDate { get; set; }
+        public ProposalStatus Status { get; set; } = ProposalStatus.Accepted;
+    }
+
+    public class GetAcceptedMatchesResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int TotalMatches { get; set; }
+        public List<AcceptedMatchDto> Matches { get; set; } = new();
+    }
 }

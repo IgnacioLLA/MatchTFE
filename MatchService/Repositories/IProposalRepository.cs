@@ -1,4 +1,5 @@
 ﻿using TFELibrary.Data;
+using TFELibrary.Shared;
 
 namespace MatchService.Repositories
 {
@@ -9,5 +10,6 @@ namespace MatchService.Repositories
         Task<Dictionary<int, int>> GetInterestedCountsByTfeIdsAsync(List<int> tfeIds);
         Task<TFEProposal?> GetTfeProposalByUserIdAsync(string userId, int tfeId);
         Task UpdateTfeProposalAsync(TFEProposal proposal);
+        Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId);
     }
 }

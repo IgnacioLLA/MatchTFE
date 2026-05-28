@@ -38,5 +38,8 @@ namespace MatchService.Controllers
         Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request);
         [HttpPut("proposal/tfe")]
         Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request);
+
+        [HttpGet("proposal/tfe/matches")]
+        Task<IActionResult> GetAcceptedMatches();
     }
 }

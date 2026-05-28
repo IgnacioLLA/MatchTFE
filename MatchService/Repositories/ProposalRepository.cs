@@ -50,5 +50,44 @@ namespace MatchService.Repositories
             _context.TfeProposal.Update(proposal);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId)
+        {
+            var matches = await _context.TfeProposal
+                .Where(tp => (tp.Tfe.AuthorId == userId || tp.OriginUserId == userId)
+                          && tp.Status == ProposalStatus.Accepted)
+                .Include(tp => tp.OriginUser)
+                .Include(tp => tp.Tfe)
+                .ThenInclude(t => t.Author)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var result = new List<AcceptedMatchDto>();
+
+            foreach (var proposal in matches)
+            {
+                var matchedUser = proposal.Tfe.AuthorId == userId
+                    ? proposal.OriginUser
+                    : proposal.Tfe.Author;
+
+                result.Add(new AcceptedMatchDto
+                {
+                    MatchedUserId = matchedUser.UserId,
+                    MatchedUserFullName = $"{matchedUser.FirstName} {matchedUser.LastName}",
+                    MatchedUserEmail = matchedUser.Email,
+                    MatchedUserRole = matchedUser.Role,
+                    MatchedUserAvatarUrl = matchedUser.AvatarUrl ?? string.Empty,
+                    MatchedUserAcademicYear = matchedUser.AcademicYear,
+                    MatchedUserDepartment = matchedUser.Department,
+                    TfeId = proposal.Tfe.Id,
+                    TfeTitle = proposal.Tfe.Title,
+                    TfeTutorName = $"{proposal.Tfe.Author.FirstName} {proposal.Tfe.Author.LastName}",
+                    MatchDate = proposal.CreationDate.ToDateTime(TimeOnly.MinValue),
+                    Status = ProposalStatus.Accepted
+                });
+            }
+
+            return result.DistinctBy(m => new { m.MatchedUserId, m.TfeId }).ToList();
+        }
     }
 }

@@ -18,8 +18,6 @@ namespace MatchService.Services
             if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentException("User ID cannot be empty.");
 
-            var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(userId, request.TfeId);
-
             if (await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
             {
                 return new TfeProposalCreationResponse { Success = false, Message = "TFE already exists." };
@@ -42,17 +40,55 @@ namespace MatchService.Services
 
         public async Task<TfeProposalUpdateResponse> UpdateTfeProposalAsync(TfeProposalUpdateRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.UserId))
+                return new TfeProposalUpdateResponse { Success = false, Message = "User ID cannot be empty." };
+
             var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(request.UserId, request.TfeId);
-            if(existingTfe == null)
-                return new TfeProposalUpdateResponse { Success = false, Message = "No preovious propose." };
-            if(existingTfe.Status.Equals(ProposalStatus.Pending))
+            if (existingTfe == null)
+                return new TfeProposalUpdateResponse { Success = false, Message = "No previous proposal exists." };
+
+            if (!existingTfe.Status.Equals(ProposalStatus.Pending))
                 return new TfeProposalUpdateResponse { Success = false, Message = "Invalid proposal status." };
+
             if (request.IsInterested)
                 existingTfe.Status = ProposalStatus.Accepted;
             else
                 existingTfe.Status = ProposalStatus.Rejected;
-            _proposalRepository.UpdateTfeProposalAsync(existingTfe);
+
+            await _proposalRepository.UpdateTfeProposalAsync(existingTfe);
+
             return new TfeProposalUpdateResponse { Success = true, Message = "TFE proposal updated successfully." };
+        }
+
+        public async Task<GetAcceptedMatchesResponse> GetAcceptedMatchesForUserAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId))
+                return new GetAcceptedMatchesResponse
+                {
+                    Success = false,
+                    Message = "Usuario no especificado."
+                };
+
+            try
+            {
+                var matches = await _proposalRepository.GetAcceptedMatchesForUserAsync(userId);
+
+                return new GetAcceptedMatchesResponse
+                {
+                    Success = true,
+                    Matches = matches,
+                    TotalMatches = matches.Count,
+                    Message = $"Se encontraron {matches.Count} matches."
+                };
+            }
+            catch (Exception)
+            {
+                return new GetAcceptedMatchesResponse
+                {
+                    Success = false,
+                    Message = "Error al obtener los matches."
+                };
+            }
         }
     }
 }
