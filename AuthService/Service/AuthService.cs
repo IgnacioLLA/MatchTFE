@@ -53,7 +53,7 @@ namespace AuthService.Service
                 _logger.LogWarning($"No se pudo asignar el rol 'User' al usuario {newUser.Id}.");
 
 
-            // Generación de tokens para el nuevo usuario
+            // New user token generation
 
             var authResult = await GenerateAndSaveTokensAsync(newUser);
             try
@@ -282,8 +282,7 @@ namespace AuthService.Service
 
             if (isExecutionOk)
             {
-                if (request.NewRole.Equals(RoleType.Teacher) || request.NewRole.Equals(RoleType.Student))
-                    newRoleString = "User";
+                newRoleString = getAspNetRole(request.NewRole);
                 var addResult = await _authRepository.AddToRoleAsync(user, newRoleString);
                 if (!addResult.Succeeded)
                 {
@@ -338,6 +337,17 @@ namespace AuthService.Service
             }
 
             return response;
+        }
+
+        private string getAspNetRole(RoleType Role)
+        {
+
+            if (Role.Equals(RoleType.Admin))
+                return "Admin";
+            if (Role.Equals(RoleType.Teacher) || Role.Equals(RoleType.Student))
+                return "User";
+            else
+                throw new ArgumentException("Invalid role.");
         }
 
         public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId)

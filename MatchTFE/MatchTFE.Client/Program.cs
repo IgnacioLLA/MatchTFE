@@ -8,6 +8,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 builder.Services.AddTransient<CookieHandler>();
 builder.Services.AddTransient<AuthInterceptor>();
+builder.Services.AddTransient<ForbiddenInterceptor>();
 
 var gatewayBaseUrl = Environment.GetEnvironmentVariable("GATEWAY_BASE_URL");
 if (string.IsNullOrWhiteSpace(gatewayBaseUrl))
@@ -27,7 +28,8 @@ builder.Services.AddHttpClient("GatewayAPI", client =>
     client.BaseAddress = new Uri(gatewayBaseUrl);
 })
 .AddHttpMessageHandler<CookieHandler>()
-.AddHttpMessageHandler<AuthInterceptor>();
+.AddHttpMessageHandler<AuthInterceptor>()
+.AddHttpMessageHandler<ForbiddenInterceptor>();
 
 builder.ConfigureContainer(new AutofacServiceProviderFactory(containerBuilder =>
 {

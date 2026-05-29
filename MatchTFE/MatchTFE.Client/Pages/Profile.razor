@@ -38,7 +38,7 @@ else
                 <div class="flex-grow-1">
                     <MudText Typo="Typo.h5" Class="app-title-tight mb-1">@_profileDto.FirstName @_profileDto.LastName</MudText>
                     <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
-                        @(_profileDto.Role == RoleType.Student ? "Estudiante de Ingeniería Informática" : "Profesor Universitario")
+                        @GetRoleDescription(_profileDto.Role)
                     </MudText>
                 </div>
             </MudCardContent>
@@ -68,23 +68,26 @@ else
             </MudCardContent>
         </MudCard>
 
-        @* INTERESTS *@
-        <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
-            <MudCardContent>
-                <TagSelector @bind-SelectedTags="_profileDto.Interests"
-                             Title="Intereses"
-                             Icon="@Icons.Material.Filled.LocalOffer"
-                             Placeholder="Buscar intereses..." />
-            </MudCardContent>
-        </MudCard>
+        @if (!IsAdmin)
+        {
+            @* INTERESTS *@
+            <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
+                <MudCardContent>
+                    <TagSelector @bind-SelectedTags="_profileDto.Interests"
+                                 Title="Intereses"
+                                 Icon="@Icons.Material.Filled.LocalOffer"
+                                 Placeholder="Buscar intereses..." />
+                </MudCardContent>
+            </MudCard>
 
-        @if (_profileDto.Role == RoleType.Student)
-        {
-            <StudentProfileComponent Model="_profileDto" />
-        }
-        else if (_profileDto.Role == RoleType.Teacher)
-        {
-            <TeacherProfileComponent Model="_profileDto" />
+            @if (IsStudent)
+            {
+                <StudentProfileComponent Model="_profileDto" />
+            }
+            else if (IsTeacher)
+            {
+                <TeacherProfileComponent Model="_profileDto" />
+            }
         }
 
         @* ACTION BUTTONS *@
@@ -110,6 +113,10 @@ else
     private ProfileDto? _profileDto = null;
     private bool _isLoading = true;
     private string _interestSearchQuery = string.Empty;
+
+    private bool IsAdmin => _profileDto?.Role == RoleType.Admin;
+    private bool IsStudent => _profileDto?.Role == RoleType.Student;
+    private bool IsTeacher => _profileDto?.Role == RoleType.Teacher;
 
     private List<string> _availableBackendSkills = new();
     private List<string> _availableBackendInterests = new();
@@ -273,4 +280,12 @@ else
             Level = s.Level
         }).ToList();
     }
+
+    private static string GetRoleDescription(RoleType role) => role switch
+    {
+        RoleType.Student => "Estudiante de Ingeniería Informática",
+        RoleType.Teacher => "Profesor Universitario",
+        RoleType.Admin => "Administrador del sistema",
+        _ => "Usuario"
+    };
 }

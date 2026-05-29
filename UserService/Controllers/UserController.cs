@@ -93,6 +93,7 @@ namespace UserService.Controllers
         }
 
         [HttpGet("tfe/{TfeId}/candidates")]
+        [Authorize(Roles = "User")]
         public async Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request)
         {
             var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -20,14 +20,7 @@
                 <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FirstName @Profile.LastName</MudText>
 
                 <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-4 font-weight-bold">
-                    @if (Profile.Role == RoleType.Teacher)
-                    {
-                        @(string.IsNullOrWhiteSpace(Profile.Department) ? "Departamento no establecido" : Profile.Department)
-                    }
-                    else
-                    {
-                        @(Profile.Role.ToString())
-                    }
+                    @GetRoleSubtitle(Profile)
                 </MudText>
 
                 <div class="d-flex justify-center align-center gap-4 mud-text-secondary">
@@ -47,6 +40,13 @@
                             <MudText Typo="Typo.caption">
                                 @(string.IsNullOrWhiteSpace(Profile.AcademicYear) ? "Año no establecido" : Profile.AcademicYear)
                             </MudText>
+                        </div>
+                    }
+                    else if (Profile.Role == RoleType.Admin)
+                    {
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Small" Class="mr-1" />
+                            <MudText Typo="Typo.caption">Administrador del sistema</MudText>
                         </div>
                     }
                 </div>
@@ -125,4 +125,12 @@
 @code {
     [Parameter, EditorRequired]
     public ProfileDto Profile { get; set; } = default!;
+
+    private static string GetRoleSubtitle(ProfileDto profile) => profile.Role switch
+    {
+        RoleType.Teacher => string.IsNullOrWhiteSpace(profile.Department) ? "Departamento no establecido" : profile.Department,
+        RoleType.Student => "Estudiante",
+        RoleType.Admin => "Administrador del sistema",
+        _ => profile.Role.ToString()
+    };
 }

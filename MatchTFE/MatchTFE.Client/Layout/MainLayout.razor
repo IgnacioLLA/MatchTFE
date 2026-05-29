@@ -17,7 +17,7 @@
                 MENÚ PRINCIPAL
             </MudText>
         </div>
-        <NavMenu />
+        <NavMenu Profile="_globalProfile" />
     </MudDrawer>
 
     <MudAppBar Elevation="0" Variant="Variant.Outlined">
@@ -55,7 +55,7 @@
                         @_globalProfile.FirstName @_globalProfile.LastName
                     </MudText>
                     <MudText Typo="Typo.caption" Color="Color.Inherit" Class="app-caption-uppercase">
-                        @(_globalProfile.Role == RoleType.Student ? "ESTUDIANTE" : "PROFESOR")
+                        @GetRoleCaption(_globalProfile.Role)
                     </MudText>
                 </div>
             }
@@ -109,4 +109,12 @@
             _isLoading = false;
         }
     }
+
+    private static string GetRoleCaption(RoleType role) => role switch
+    {
+        RoleType.Student => "ESTUDIANTE",
+        RoleType.Teacher => "PROFESOR",
+        RoleType.Admin => "ADMINISTRADOR",
+        _ => "USUARIO"
+    };
 }

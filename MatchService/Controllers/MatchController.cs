@@ -71,6 +71,7 @@ namespace MatchService.Controllers
         }
 
         [HttpDelete("tag/{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteTag(int id)
         {
             var deleted = await _tagService.DeleteTagAsync(id);
@@ -79,6 +80,7 @@ namespace MatchService.Controllers
         }
 
         [HttpPost("tfe")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -127,6 +129,7 @@ namespace MatchService.Controllers
         }
 
         [HttpPut("proposal/tfe/decision")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -186,6 +189,7 @@ namespace MatchService.Controllers
         }
 
         [HttpGet("tfe/recommended")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -196,6 +200,7 @@ namespace MatchService.Controllers
         }
 
         [HttpPost("proposal/tfe")]
+        [Authorize(Roles = "User")]
         public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -221,7 +226,6 @@ namespace MatchService.Controllers
         }
 
         [HttpGet("proposal/tfe/matches")]
-        [HttpGet("matches/accepted")]
         public async Task<IActionResult> GetAcceptedMatches()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
