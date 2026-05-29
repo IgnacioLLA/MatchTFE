@@ -87,14 +87,24 @@ namespace UserService.Service
         public async Task<ProfileByTfeInterestResponse> GetProfileByTfeInterestAsync(ProfileByTfeInterestRequest request)
         {
             if (request == null || int.IsNegative(request.TfeId))
-                return new ProfileByTfeInterestResponse(new List<ProfileDto>());
+                return new ProfileByTfeInterestResponse(new List<TfeCandidateDto>());
 
             var entities = await _userRepository.GetInterestedUsersByTfeIdInUserServiceAsync(request.TfeId);
 
             if (entities == null || !entities.Any())
-                return new ProfileByTfeInterestResponse(new List<ProfileDto>());
+                return new ProfileByTfeInterestResponse(new List<TfeCandidateDto>());
 
-            var dtos = entities.Select(GetProfileDto).ToList();
+            var dtos = entities.Select(user =>
+            {
+                var proposal = user.TfeProposals.First(tp => tp.TfeId == request.TfeId);
+
+                return new TfeCandidateDto
+                {
+                    Profile = GetProfileDto(user),
+                    Status = proposal.Status
+                };
+            }).ToList();
+
             return new ProfileByTfeInterestResponse(dtos);
         }
         public async Task<RoleUpdateResponse> UpdateUserRoleAsync(string userId, RoleType newRole)

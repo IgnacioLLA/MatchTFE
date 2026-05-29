@@ -43,7 +43,7 @@ namespace TFELibrary.Shared
     );
 
     public record ProfileByTfeInterestResponse(
-        List<ProfileDto> Interested
+        List<TfeCandidateDto> Interested
     );
 
     public record ChangeRoleRequest(

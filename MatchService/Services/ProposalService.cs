@@ -7,10 +7,12 @@ namespace MatchService.Services
     public class ProposalService : IProposalService
     {
         private readonly IProposalRepository _proposalRepository;
+        private readonly ITfeRepository _tfeRepository;
 
-        public ProposalService(IProposalRepository proposalRepository)
+        public ProposalService(IProposalRepository proposalRepository, ITfeRepository tfeRepository)
         {
             _proposalRepository = proposalRepository;
+            _tfeRepository = tfeRepository;
         }
 
         public async Task<TfeProposalCreationResponse> CreateTfeProposalAsync(string userId, TfeProposalCreationRequest request)
@@ -89,6 +91,86 @@ namespace MatchService.Services
                     Message = "Error al obtener los matches."
                 };
             }
+        }
+
+        public async Task<TfeCandidateDecisionResponse> DecideTfeCandidateAsync(string authorId, TfeCandidateDecisionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(authorId))
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "User ID cannot be empty."
+                };
+            }
+
+            if (request == null || string.IsNullOrWhiteSpace(request.CandidateId) || request.TfeId <= 0)
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "Invalid decision request."
+                };
+            }
+
+            if (request.Status is not (ProposalStatus.Accepted or ProposalStatus.Rejected))
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "Only accepted or rejected statuses are allowed."
+                };
+            }
+
+            var tfe = await _tfeRepository.GetByIdAsync(request.TfeId);
+            if (tfe == null)
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "TFE not found."
+                };
+            }
+
+            if (!string.Equals(tfe.AuthorId, authorId, StringComparison.Ordinal))
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "You do not have permission to decide this proposal."
+                };
+            }
+
+            var proposal = await _proposalRepository.GetTfeProposalByUserIdAsync(request.CandidateId, request.TfeId);
+            if (proposal == null)
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "Candidate proposal not found."
+                };
+            }
+
+            if (proposal.Status != ProposalStatus.Pending)
+            {
+                return new TfeCandidateDecisionResponse
+                {
+                    Success = false,
+                    Message = "This proposal has already been resolved."
+                };
+            }
+
+            proposal.Status = request.Status;
+            await _proposalRepository.UpdateTfeProposalAsync(proposal);
+
+            return new TfeCandidateDecisionResponse
+            {
+                Success = true,
+                Message = request.Status == ProposalStatus.Accepted
+                    ? "Candidate accepted successfully."
+                    : "Candidate rejected successfully.",
+                Status = proposal.Status
+            };
         }
     }
 }

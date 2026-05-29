@@ -7,5 +7,6 @@ namespace MatchService.Services
         Task<TfeProposalUpdateResponse> UpdateTfeProposalAsync(TfeProposalUpdateRequest request);
         Task<TfeProposalCreationResponse> CreateTfeProposalAsync(string userId, TfeProposalCreationRequest request);
         Task<GetAcceptedMatchesResponse> GetAcceptedMatchesForUserAsync(string userId);
+        Task<TfeCandidateDecisionResponse> DecideTfeCandidateAsync(string authorId, TfeCandidateDecisionRequest request);
     }
 }

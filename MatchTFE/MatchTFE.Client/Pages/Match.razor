@@ -1,6 +1,7 @@
 ﻿@page "/match"
 @using TFELibrary.Shared
 @inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8 mb-10 animate-fade-in">
 
@@ -37,14 +38,23 @@
                         </div>
 
                         <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@match.TfeTitle</MudText>
-                        <MudText Typo="Typo.body2" Class="mud-text-secondary mb-2">
+                        <MudText Typo="Typo.h5" Color="Color.Primary" Class="font-weight-bold mb-2 app-title-tight text-truncate">
                             <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" Class="mr-1" />
                             @match.MatchedUserFullName
                         </MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary mb-2">
-                            <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" Class="mr-1" />
-                            Tutor: @match.TfeTutorName
-                        </MudText>
+
+                        <div class="mb-2">
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
+                                <span class="font-weight-medium">Tutor:</span>
+                                <span>@match.TfeTutorName</span>
+                            </MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" />
+                                <span class="font-weight-medium">Alumno:</span>
+                                <span>@match.MatchedUserFullName</span>
+                            </MudText>
+                        </div>
 
                         @if (!string.IsNullOrEmpty(match.MatchedUserDepartment))
                         {
@@ -61,8 +71,8 @@
 
                         <MudSpacer />
 
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@Icons.Material.Filled.Email" OnClick="@(() => ContactMatch(match))">
-                            Contactar
+                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@GetContactButtonIcon(match)" OnClick="@(() => ToggleContactEmail(match))">
+                            @GetContactButtonText(match)
                         </MudButton>
                     </MudPaper>
                 </MudItem>
@@ -74,6 +84,7 @@
 @code {
     private List<AcceptedMatchDto> _tfeMatches = new();
     private bool _isLoading = true;
+    private readonly HashSet<int> _visibleContactEmails = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -117,8 +128,37 @@
         }
     }
 
-    private void ContactMatch(AcceptedMatchDto match)
+    private void ToggleContactEmail(AcceptedMatchDto match)
     {
-        Console.WriteLine($"Contactando con {match.MatchedUserFullName} (Email: {match.MatchedUserEmail})");
+        if (string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+        {
+            Snackbar.Add($"No hay correo disponible para {match.MatchedUserFullName}.", Severity.Warning);
+            return;
+        }
+
+        if (!_visibleContactEmails.Add(match.TfeId))
+        {
+            _visibleContactEmails.Remove(match.TfeId);
+        }
+    }
+
+    private string GetContactButtonText(AcceptedMatchDto match)
+    {
+        if (_visibleContactEmails.Contains(match.TfeId) && !string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+        {
+            return match.MatchedUserEmail;
+        }
+
+        return "Contactar";
+    }
+
+    private string GetContactButtonIcon(AcceptedMatchDto match)
+    {
+        if (_visibleContactEmails.Contains(match.TfeId) && !string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+        {
+            return Icons.Material.Filled.VisibilityOff;
+        }
+
+        return Icons.Material.Filled.Visibility;
     }
 }

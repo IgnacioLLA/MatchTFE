@@ -128,7 +128,13 @@ namespace UserService.Repositories
         public async Task<List<UserProfile>> GetInterestedUsersByTfeIdInUserServiceAsync(int tfeId)
         {
             return await _context.UserProfile
-                .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId && tp.Status == ProposalStatus.Pending))
+                .Include(u => u.UserInterests)
+                    .ThenInclude(ui => ui.Tag)
+                .Include(u => u.StudentSkills)
+                    .ThenInclude(ss => ss.Tag)
+                .Include(u => u.TfeProposals)
+                .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId))
+                .AsNoTracking()
                 .ToListAsync();
         }
 

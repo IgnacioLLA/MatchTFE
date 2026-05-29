@@ -81,6 +81,33 @@ namespace TFELibrary.Shared
         public string Message { get; set; } = string.Empty;
     }
 
+    public class TfeCandidateDecisionRequest
+    {
+        [Required]
+        public int TfeId { get; set; }
+
+        [Required]
+        public string CandidateId { get; set; } = string.Empty;
+
+        [Required]
+        public ProposalStatus Status { get; set; }
+    }
+
+    public class TfeCandidateDecisionResponse
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public ProposalStatus Status { get; set; }
+    }
+
+    public class TfeCandidateDto
+    {
+        public ProfileDto Profile { get; set; } = new ProfileDto();
+        public ProposalStatus Status { get; set; } = ProposalStatus.Pending;
+
+        public bool CanDecide => Status == ProposalStatus.Pending;
+    }
+
     // -- Accepted Matches --
     public class AcceptedMatchDto
     {

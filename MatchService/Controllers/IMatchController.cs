@@ -41,5 +41,8 @@ namespace MatchService.Controllers
 
         [HttpGet("proposal/tfe/matches")]
         Task<IActionResult> GetAcceptedMatches();
+
+        [HttpPut("proposal/tfe/decision")]
+        Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request);
     }
 }

@@ -126,6 +126,40 @@ namespace MatchService.Controllers
             }
         }
 
+        [HttpPut("proposal/tfe/decision")]
+        public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            try
+            {
+                var response = await _proposalService.DecideTfeCandidateAsync(authorId, request);
+
+                if (!response.Success)
+                {
+                    if (response.Message.Contains("permission", StringComparison.OrdinalIgnoreCase))
+                        return Forbid();
+
+                    if (response.Message.Contains("already been resolved", StringComparison.OrdinalIgnoreCase))
+                        return Conflict(response);
+
+                    if (response.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+                        return NotFound(response);
+
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error al decidir sobre el candidato." });
+            }
+        }
+
         [HttpGet("tfe/author")]
         public async Task<IActionResult> GetTfesByAuthor()
         {
