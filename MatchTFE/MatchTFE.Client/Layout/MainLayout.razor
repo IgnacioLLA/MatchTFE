@@ -69,9 +69,13 @@
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
             }
-            else if (_globalProfile == null)
+            else if (_globalProfile == null && !_isPublicRoute)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else if (_globalProfile == null)
+            {
+                @Body
             }
             else
             {
@@ -91,24 +95,27 @@
 
     private ProfileDto? _globalProfile;
     private bool _isLoading = true;
+    private bool _isPublicRoute;
 
     protected override async Task OnInitializedAsync()
     {
+        var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var normalized = string.IsNullOrWhiteSpace(currentPath)
+            ? "/"
+            : $"/{currentPath.TrimStart('/')}";
+
+        _isPublicRoute = IsPublicRoute(normalized);
+
+        if (_isPublicRoute)
+        {
+            _isLoading = false;
+            return;
+        }
+
         await CargarPerfilGlobalAsync();
 
-        if (_globalProfile == null)
+        if (_globalProfile == null && OperatingSystem.IsBrowser())
         {
-            var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
-            var normalized = string.IsNullOrWhiteSpace(currentPath)
-                ? "/"
-                : $"/{currentPath.TrimStart('/')}";
-
-            if (normalized.Equals("/login", StringComparison.OrdinalIgnoreCase)
-                || normalized.Equals("/register", StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
             Navigation.NavigateTo("/login", replace: true);
         }
     }
@@ -138,4 +145,9 @@
         RoleType.Admin => "ADMINISTRADOR",
         _ => "USUARIO"
     };
+
+    private static bool IsPublicRoute(string normalizedPath)
+        => normalizedPath.Equals("/login", StringComparison.OrdinalIgnoreCase)
+           || normalizedPath.Equals("/register", StringComparison.OrdinalIgnoreCase)
+           || normalizedPath.Equals("/not-found", StringComparison.OrdinalIgnoreCase);
 }

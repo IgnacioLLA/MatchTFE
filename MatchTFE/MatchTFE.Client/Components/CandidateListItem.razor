@@ -9,14 +9,14 @@
             {
                 <MudImage Src="@Candidate.Profile.AvatarUrl" Alt="@Candidate.Profile.FirstName" />
             }
-            else
-            {
-                <span class="font-weight-bold" style="font-size: 1.2rem;">@Candidate.Profile.FirstName.FirstOrDefault()</span>
-            }
+                else
+                {
+                    <span class="font-weight-bold candidate-initial">@Candidate.Profile.FirstName.FirstOrDefault()</span>
+                }
         </MudAvatar>
 
         <div>
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main" Style="line-height: 1.2;">
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main line-tight">
                 @Candidate.Profile.FirstName @Candidate.Profile.LastName
             </MudText>
 
@@ -40,12 +40,11 @@
         </MudButton>
 
         <MudIconButton Icon="@Icons.Material.Filled.Close"
-                       Variant="Variant.Outlined"
-                       Color="Color.Error"
-                       Class="rounded-lg"
-                       Style="border-color: var(--mud-palette-error);"
-                       Disabled="@(!Candidate.CanDecide)"
-                       OnClick="() => OnReject.InvokeAsync(Candidate)" />
+                   Variant="Variant.Outlined"
+                   Color="Color.Error"
+                   Class="rounded-lg border-error"
+                   Disabled="@(!Candidate.CanDecide)"
+                   OnClick="() => OnReject.InvokeAsync(Candidate)" />
 
         <MudButton Variant="Variant.Filled"
                    Color="Color.Success"

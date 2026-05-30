@@ -1,8 +1,24 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
+    /* App visual tokens (synchronized with MatchTheme.DefaultTheme where possible) */
     --app-appbar-bg: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     --app-shadow-float: 0 -10px 40px rgba(0, 0, 0, 0.05);
+
+    /* Primary palette (light theme baseline) */
+    --app-primary: #2563eb;
+    --app-primary-dark: #1d4ed8;
+    --app-primary-light: #dbeafe;
+
+    /* Semantic text / surface tokens */
+    --app-text-main: #0f172a;
+    --app-text-muted: #475569;
+    --app-border: #e2e8f0;
+    --app-surface: #ffffff;
+
+    /* Shadows / radii */
+    --app-shadow-card: 0 10px 25px rgba(0,0,0,0.05);
+    --app-radius-lg: 12px;
 }
 
 body {
@@ -205,3 +221,38 @@ body {
         transform: translateY(-2px);
         box-shadow: var(--mud-elevation-8) !important;
     }
+
+/* Shared small surface for chips/tags using app tokens */
+.chip-surface {
+    background-color: var(--app-primary-light) !important;
+    color: var(--app-primary-dark) !important;
+    padding: 0.5rem 0.75rem !important;
+}
+
+/* Utility helpers */
+.candidate-initial { font-size: 1.2rem !important; }
+.line-tight { line-height: 1.2 !important; }
+.v-sub { vertical-align: sub !important; }
+.border-error { border-color: var(--mud-palette-error) !important; }
+.min-w-150 { min-width: 150px !important; }
+.min-w-140 { min-width: 140px !important; }
+.btn-height-40 { height: 40px !important; }
+.max-w-300 { max-width: 300px !important; }
+.max-w-400 { max-width: 400px !important; }
+.nowrap { white-space: nowrap !important; }
+.m-0 { margin: 0 !important; }
+.border-b-default { border-bottom: 1px solid var(--mud-palette-lines-default) !important; }
+.th-actions { width: 100px; text-align: right; }
+.text-right { text-align: right !important; }
+.center-height-50vh { height: 50vh !important; display: flex; align-items: center; justify-content: center; }
+.tag-chip { background-color: #e0f2fe !important; color: #0284c7 !important; font-weight: 600 !important; padding: 0.25rem 0.5rem !important; border-radius: 8px !important; }
+.list-disc { list-style-type: disc !important; padding-left: 1.5rem !important; }
+.metric-box { background-color: #f8fafc !important; max-width: 220px !important; aspect-ratio: 16/9 !important; display: flex; align-items: center; justify-content: center; padding: 1rem !important; }
+.letter-sp-1 { letter-spacing: 1px !important; }
+.letter-sp-05 { letter-spacing: 0.5px !important; }
+.chip-min-200 { min-width: 200px !important; }
+
+.chip-text {
+    color: var(--app-primary-dark) !important;
+    font-weight: 600 !important;
+}

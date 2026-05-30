@@ -6,10 +6,7 @@
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
 
-<DiscoverLayout ActiveIndex="0"
-                MobileTitle="Descubrir un proyecto"
-                MobileButtonText="Buscar perfiles"
-                MobileButtonIcon="@Icons.Material.Filled.People">
+<DiscoverLayout MobileTitle="Descubrir propuestas de TFE">
 
     @if (_proposalsQueue.Any())
     {

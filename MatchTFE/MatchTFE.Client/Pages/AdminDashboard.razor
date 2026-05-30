@@ -44,23 +44,22 @@
                               Margin="Margin.Dense"
                               Class="flex-grow-1" />
 
-                <MudSelect T="RoleType?"
-                           @bind-Value="_roleUpdateSelection"
-                           Label="New Role"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           Style="min-width: 150px;">
+                    <MudSelect T="RoleType?"
+                               @bind-Value="_roleUpdateSelection"
+                               Label="New Role"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Class="min-w-150">
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
                 </MudSelect>
 
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="HandleUpdateRoleAsync"
-                           Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
-                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
-                           Style="height: 40px;">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="HandleUpdateRoleAsync"
+                               Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
+                               Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
                     UPDATE
                 </MudButton>
             </div>
@@ -87,12 +86,11 @@
                     </MudButton>
                 </MudFileUpload>
 
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="HandleImportUsersAsync"
-                           Disabled="@(_uploadedFile == null)"
-                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
-                           Style="height: 40px;">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="HandleImportUsersAsync"
+                               Disabled="@(_uploadedFile == null)"
+                               Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
                     IMPORT
                 </MudButton>
             </div>
@@ -101,7 +99,7 @@
 </MudGrid>
 
 <MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-10">
-    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1 border-b-default">
         <MudTextField @bind-Value="SearchQuery"
                       Placeholder="Search by name or email..."
                       Adornment="Adornment.Start"
@@ -111,13 +109,12 @@
                       Class="rounded-lg flex-grow-1" />
 
         <MudSelect T="RoleType?"
-                   @bind-Value="SelectedRoleFilter"
-                   Placeholder="Filter by role..."
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Clearable="true"
-                   Class="rounded-lg flex-grow-1"
-                   Style="max-width: 300px;">
+               @bind-Value="SelectedRoleFilter"
+               Placeholder="Filter by role..."
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               Clearable="true"
+               Class="rounded-lg flex-grow-1 max-w-300">
             <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
             <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
             <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
@@ -227,7 +224,7 @@
 
             <div class="d-flex flex-column flex-md-row align-stretch align-md-center gap-4">
                 @* Ocultamos el label en móvil para ahorrar espacio *@
-                <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-md-block" Style="white-space: nowrap;">
+                <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-md-block nowrap">
                     Tag Name:
                 </MudText>
 
@@ -237,17 +234,15 @@
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               FullWidth="true"
-                              Class="flex-grow-1"
+                              Class="flex-grow-1 m-0"
                               Error="@(!string.IsNullOrEmpty(_tagError))"
-                              ErrorText="@_tagError"
-                              Style="margin: 0;" />
+                              ErrorText="@_tagError" />
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            OnClick="HandleCreateTagAsync"
                            Disabled="@(string.IsNullOrWhiteSpace(_newTagName))"
-                           Class="rounded-lg font-weight-bold px-md-8 py-2 btn-primary-shadow"
-                           Style="height: 40px; white-space: nowrap; min-width: 140px;">
+                           Class="rounded-lg font-weight-bold px-md-8 py-2 btn-primary-shadow btn-height-40 nowrap min-w-140">
                     ADD TAG
                 </MudButton>
             </div>
@@ -263,10 +258,10 @@
                     @_tagEditError
                 </MudAlert>
             }
-            <div class="pa-4 border-b-1 d-flex flex-column flex-md-row align-stretch align-md-center justify-space-between gap-4" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+            <div class="pa-4 border-b-1 d-flex flex-column flex-md-row align-stretch align-md-center justify-space-between gap-4 border-b-default">
 
                 @* white-space: nowrap evita que "Current Tags" se rompa en dos renglones *@
-                <div class="d-flex align-center" style="white-space: nowrap;">
+                <div class="d-flex align-center nowrap">
                     <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Primary" Class="mr-3" />
                     <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Current Tags</MudText>
                 </div>
@@ -277,8 +272,7 @@
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
-                              Class="rounded-lg w-100"
-                              Style="margin: 0; max-width: 400px;" />
+                              Class="rounded-lg w-100 m-0 max-w-400" />
             </div>
 
             <MudTable Items="@GetFilteredTags()"
@@ -293,13 +287,13 @@
                       RowEditCommit="HandleEditTagCommitAsync">
                 <HeaderContent>
                     <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">TAG NAME</MudText></MudTh>
-                    <MudTh Style="width: 100px; text-align: right;"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
+                    <MudTh Class="th-actions"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Tag Name">
                         <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.Name</MudText>
                     </MudTd>
-                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                    <MudTd DataLabel="Actions" Class="text-right">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
                                        Size="Size.Small"
@@ -310,7 +304,7 @@
                     <MudTd DataLabel="Tag Name">
                         <MudTextField @bind-Value="context.Name" Required="true" Margin="Margin.Dense" />
                     </MudTd>
-                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                    <MudTd DataLabel="Actions" Class="text-right">
                     </MudTd>
                 </RowEditingTemplate>
                 <PagerContent>
