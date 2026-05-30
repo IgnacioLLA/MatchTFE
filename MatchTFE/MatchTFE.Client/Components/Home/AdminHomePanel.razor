@@ -1,0 +1,46 @@
+<div class="home-panel">
+    <HomeHero Tag="ADMINISTRACION"
+              Title="Controla la plataforma desde una vista central"
+              Subtitle="Supervisa usuarios, manten la calidad operativa del ecosistema y actua rapido ante incidencias para garantizar una experiencia fiable."
+              PrimaryText="Ir al panel de administracion"
+              PrimaryHref="/admin"
+              PrimaryIcon="@Icons.Material.Filled.AdminPanelSettings" />
+
+    <HomeFeatureGrid SectionId="admin-capabilities"
+                     Title="Vision operativa de MATCH-TFE"
+                     Subtitle="Accede a los procesos clave de moderacion y seguimiento sin perder contexto del estado general de la plataforma.">
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Gestion de usuarios</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">Administra roles y visibilidad para mantener orden y trazabilidad en el sistema.</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                <MudIcon Icon="@Icons.Material.Filled.Insights" Color="Color.Info" Size="Size.Large" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Importa nuevos usuarios al sistema</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">Crea altas de usuarios de forma ordenada para mantener el acceso centralizado y actualizado.</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                <MudIcon Icon="@Icons.Material.Filled.Subject" Color="Color.Success" Size="Size.Large" Class="mb-3" />
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Gestiona las temáticas disponibles para la aplicación</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">Organiza y actualiza los contenidos temáticos para mantener la aplicación alineada con su actividad.</MudText>
+            </MudPaper>
+        </MudItem>
+    </HomeFeatureGrid>
+
+    <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
+        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Prioridad sugerida</MudText>
+        <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
+            Consulta el dashboard de administracion para revisar altas recientes y estado operativo.
+        </MudText>
+        <MudButton Href="/admin" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Dashboard" Class="rounded-lg font-weight-bold">
+            Abrir administracion
+        </MudButton>
+    </MudPaper>
+</div>

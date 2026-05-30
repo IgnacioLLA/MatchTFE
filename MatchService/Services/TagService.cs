@@ -27,7 +27,7 @@ namespace MatchService.Services
         public async Task<TagCreationResponse> CreateTagAsync(TagCreationRequest dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Tag.Name))
-                throw new ArgumentException("El nombre del tag no puede estar vacío.");
+                throw new ArgumentException("Tag name cannot be empty.");
             var tag = new Tag { Name = dto.Tag.Name };
             try
             {
@@ -36,14 +36,14 @@ namespace MatchService.Services
             }
             catch (DbUpdateException ex)
             {
-                throw new InvalidOperationException($"Ya existe un tag con el nombre '{tag.Name}'.");
+                throw new InvalidOperationException($"A tag with the name '{tag.Name}' already exists.");
             }
         }
 
         public async Task<bool> UpdateTagAsync(int id, TagUpdateRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
-                throw new ArgumentException("El nombre del tag no puede estar vacío.");
+                throw new ArgumentException("Tag name cannot be empty.");
 
             var tag = await _tagRepository.GetByIdAsync(id);
             if (tag == null) return false;
@@ -56,7 +56,7 @@ namespace MatchService.Services
             }
             catch (DbUpdateException)
             {
-                throw new InvalidOperationException($"Ya existe un tag con el nombre '{request.Name}'.");
+                throw new InvalidOperationException($"A tag with the name '{request.Name}' already exists.");
             }
         }
 

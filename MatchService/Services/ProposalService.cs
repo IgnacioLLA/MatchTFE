@@ -97,67 +97,39 @@ namespace MatchService.Services
         {
             if (string.IsNullOrWhiteSpace(authorId))
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "User ID cannot be empty."
-                };
+                throw new ArgumentException("User ID cannot be empty.");
             }
 
             if (request == null || string.IsNullOrWhiteSpace(request.CandidateId) || request.TfeId <= 0)
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "Invalid decision request."
-                };
+                throw new ArgumentException("Invalid decision request.");
             }
 
             if (request.Status is not (ProposalStatus.Accepted or ProposalStatus.Rejected))
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "Only accepted or rejected statuses are allowed."
-                };
+                throw new ArgumentException("Only accepted or rejected statuses are allowed.");
             }
 
             var tfe = await _tfeRepository.GetByIdAsync(request.TfeId);
             if (tfe == null)
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "TFE not found."
-                };
+                throw new KeyNotFoundException("TFE not found.");
             }
 
             if (!string.Equals(tfe.AuthorId, authorId, StringComparison.Ordinal))
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "You do not have permission to decide this proposal."
-                };
+                throw new UnauthorizedAccessException("You do not have permission to decide this proposal.");
             }
 
             var proposal = await _proposalRepository.GetTfeProposalByUserIdAsync(request.CandidateId, request.TfeId);
             if (proposal == null)
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "Candidate proposal not found."
-                };
+                throw new KeyNotFoundException("Candidate proposal not found.");
             }
 
             if (proposal.Status != ProposalStatus.Pending)
             {
-                return new TfeCandidateDecisionResponse
-                {
-                    Success = false,
-                    Message = "This proposal has already been resolved."
-                };
+                throw new InvalidOperationException("This proposal has already been resolved.");
             }
 
             proposal.Status = request.Status;

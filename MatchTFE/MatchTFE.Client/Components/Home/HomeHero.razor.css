@@ -1,0 +1,110 @@
+.home-hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: linear-gradient(
+        145deg,
+        rgba(var(--mud-palette-primary-rgb), 0.12),
+        rgba(var(--mud-palette-surface-rgb), 0.94)
+    );
+}
+
+.home-hero::before,
+.home-hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.home-hero::before {
+    width: 18rem;
+    height: 18rem;
+    top: -8rem;
+    right: -5rem;
+    background: radial-gradient(
+        circle at center,
+        rgba(var(--mud-palette-primary-rgb), 0.23),
+        rgba(var(--mud-palette-primary-rgb), 0)
+    );
+}
+
+.home-hero::after {
+    width: 14rem;
+    height: 14rem;
+    left: -6rem;
+    bottom: -7rem;
+    background: radial-gradient(
+        circle at center,
+        rgba(var(--mud-palette-info-rgb), 0.22),
+        rgba(var(--mud-palette-info-rgb), 0)
+    );
+}
+
+.home-hero__content {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+}
+
+.home-hero__title {
+    max-width: 24ch;
+}
+
+.home-hero__subtitle {
+    color: rgba(var(--mud-palette-text-primary-rgb), 0.86);
+    max-width: 64ch;
+}
+
+.home-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.home-hero__action-button {
+    min-width: 12rem;
+}
+
+.home-hero__actions :is(a, button):focus-visible {
+    outline: 3px solid rgba(var(--mud-palette-primary-rgb), 0.38);
+    outline-offset: 3px;
+}
+
+@media (max-width: 959.98px) {
+    .home-hero::before {
+        width: 13rem;
+        height: 13rem;
+        top: -6rem;
+        right: -5rem;
+    }
+
+    .home-hero::after {
+        width: 11rem;
+        height: 11rem;
+        left: -5rem;
+        bottom: -5rem;
+    }
+
+    .home-hero__content {
+        padding: 1.5rem;
+    }
+
+    .home-hero__actions {
+        flex-direction: column;
+    }
+
+    .home-hero__action-button {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-hero,
+    .home-hero * {
+        animation: none !important;
+        transition: none !important;
+    }
+}

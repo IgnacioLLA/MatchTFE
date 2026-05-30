@@ -4,6 +4,7 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <MudThemeProvider Theme="MatchTheme.DefaultTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudDialogProvider />
@@ -68,6 +69,10 @@
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
             }
+            else if (_globalProfile == null)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
             else
             {
                 <CascadingValue Value="@_globalProfile">
@@ -90,6 +95,22 @@
     protected override async Task OnInitializedAsync()
     {
         await CargarPerfilGlobalAsync();
+
+        if (_globalProfile == null)
+        {
+            var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+            var normalized = string.IsNullOrWhiteSpace(currentPath)
+                ? "/"
+                : $"/{currentPath.TrimStart('/')}";
+
+            if (normalized.Equals("/login", StringComparison.OrdinalIgnoreCase)
+                || normalized.Equals("/register", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            Navigation.NavigateTo("/login", replace: true);
+        }
     }
 
     private async Task CargarPerfilGlobalAsync()

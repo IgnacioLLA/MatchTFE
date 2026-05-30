@@ -44,8 +44,15 @@ namespace MatchService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var created = await _tagService.CreateTagAsync(request);
-            return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
+            try
+            {
+                var created = await _tagService.CreateTagAsync(request);
+                return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpPut("tag/{id}")]
@@ -66,7 +73,7 @@ namespace MatchService.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
         }
 
@@ -100,7 +107,6 @@ namespace MatchService.Controllers
             if (tfe == null) return NotFound();
             return Ok(tfe);
         }
-
         [HttpPut("tfe/{id}")]
         public async Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request)
         {
@@ -122,44 +128,9 @@ namespace MatchService.Controllers
             {
                 return BadRequest(ex.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
-            }
-        }
-
-        [HttpPut("proposal/tfe/decision")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
-
-            try
-            {
-                var response = await _proposalService.DecideTfeCandidateAsync(authorId, request);
-
-                if (!response.Success)
-                {
-                    if (response.Message.Contains("permission", StringComparison.OrdinalIgnoreCase))
-                        return Forbid();
-
-                    if (response.Message.Contains("already been resolved", StringComparison.OrdinalIgnoreCase))
-                        return Conflict(response);
-
-                    if (response.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                        return NotFound(response);
-
-                    return BadRequest(response);
-                }
-
-                return Ok(response);
-            }
-            catch (Exception)
-            {
-                return StatusCode(500, new { message = "Error al decidir sobre el candidato." });
             }
         }
 
@@ -245,6 +216,43 @@ namespace MatchService.Controllers
             catch (Exception)
             {
                 return StatusCode(500, new { message = "Error al obtener los matches." });
+            }
+        }
+
+        [HttpPut("proposal/tfe/decision")]
+        [Authorize(Roles = "User")]
+        public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+            try
+            {
+                var response = await _proposalService.DecideTfeCandidateAsync(authorId, request);
+
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Error al decidir sobre el candidato." });
             }
         }
     }

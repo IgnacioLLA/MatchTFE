@@ -29,7 +29,14 @@
             <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
                 Quickly change the system role of a specific user by their email address.
             </MudText>
-            
+
+            @if (!string.IsNullOrEmpty(_roleUpdateError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _roleUpdateError = string.Empty)">
+                    @_roleUpdateError
+                </MudAlert>
+            }
+
             <div class="d-flex flex-wrap gap-3 align-end mt-auto">
                 <MudTextField @bind-Value="_roleUpdateEmail"
                               Label="User Email"
@@ -167,6 +174,12 @@
 @if (_selectedUsers.Any())
 {
     <div class="animate-fade-in mb-10">
+        @if (!string.IsNullOrEmpty(_bulkActionError))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _bulkActionError = string.Empty)">
+                @_bulkActionError
+            </MudAlert>
+        }
         <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all d-flex justify-space-between align-center">
             <MudText Typo="Typo.body1" Class="font-weight-bold text-main">
                 @_selectedUsers.Count users selected
@@ -203,94 +216,110 @@
     </div>
 </div>
 
-<div class="animate-fade-in mb-10 w-100">
-
+<MudGrid Class="mb-10 animate-fade-in">
     @* SECTION: CREATE TAG *@
-    <MudPaper Elevation="0" Class="pa-4 pa-sm-6 rounded-xl border-all mb-6 w-100">
-        <div class="d-flex align-center mb-4">
-            <MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" Class="mr-3" />
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Create Tag</MudText>
-        </div>
-
-        <div class="d-flex flex-column flex-sm-row align-stretch align-sm-center gap-4">
-            <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-sm-block" Style="white-space: nowrap;">
-                Tag Name:
-            </MudText>
-
-            <MudTextField @bind-Value="_newTagName"
-                          Placeholder="Enter new tag name..."
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="flex-grow-1"
-                          Style="margin: 0;" />
-
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="HandleCreateTagAsync"
-                       Disabled="@(string.IsNullOrWhiteSpace(_newTagName))"
-                       Class="rounded-lg font-weight-bold py-2 px-sm-6 btn-primary-shadow flex-shrink-0"
-                       Style="height: 40px; min-width: 140px;">
-                ADD TAG
-            </MudButton>
-        </div>
-    </MudPaper>
-
-    @* SECTION: TAGS LIST *@
-    <MudPaper Elevation="0" Class="border-all rounded-xl d-flex flex-column w-100">
-        <div class="pa-4 border-b-1 d-flex flex-column flex-sm-row align-stretch align-sm-center justify-space-between gap-4" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
-            <div class="d-flex align-center">
-                <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Current Tags</MudText>
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="pa-4 pa-sm-6 rounded-xl border-all">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Create Tag</MudText>
             </div>
 
-            <MudTextField @bind-Value="_tagSearchQuery"
-                          Placeholder="Search tags..."
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          Class="rounded-lg w-100 w-sm-auto"
-                          Style="margin: 0; min-width: 250px;" />
-        </div>
+            <div class="d-flex flex-column flex-md-row align-stretch align-md-center gap-4">
+                @* Ocultamos el label en móvil para ahorrar espacio *@
+                <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-md-block" Style="white-space: nowrap;">
+                    Tag Name:
+                </MudText>
 
-        <MudTable Items="@GetFilteredTags()"
-                  Hover="true"
-                  Elevation="0"
-                  Loading="@_isTagsLoading"
-                  Class="transparent-bg"
-                  FixedHeader="true"
-                  Height="400px"
-                  CanCancelEdit="true"
-                  EditTrigger="TableEditTrigger.RowClick"
-                  RowEditCommit="HandleEditTagCommitAsync">
-            <HeaderContent>
-                <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">TAG NAME</MudText></MudTh>
-                <MudTh Style="width: 100px; text-align: right;"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Tag Name">
-                    <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.Name</MudText>
-                </MudTd>
-                <MudTd DataLabel="Actions" Style="text-align: right;">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                                   Color="Color.Error"
-                                   Size="Size.Small"
-                                   OnClick="@(() => HandleDeleteTagAsync(context))" />
-                </MudTd>
-            </RowTemplate>
-            <RowEditingTemplate>
-                <MudTd DataLabel="Tag Name">
-                    <MudTextField @bind-Value="context.Name" Required="true" Margin="Margin.Dense" />
-                </MudTd>
-                <MudTd DataLabel="Actions" Style="text-align: right;">
-                </MudTd>
-            </RowEditingTemplate>
-            <PagerContent>
-                <MudTablePager HideRowsPerPage="true" />
-            </PagerContent>
-        </MudTable>
-    </MudPaper>
-</div>
+                @* flex-grow-1 fuerza a que el input ocupe todo el espacio sobrante *@
+                <MudTextField @bind-Value="_newTagName"
+                              Placeholder="Enter new tag name..."
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true"
+                              Class="flex-grow-1"
+                              Error="@(!string.IsNullOrEmpty(_tagError))"
+                              ErrorText="@_tagError"
+                              Style="margin: 0;" />
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleCreateTagAsync"
+                           Disabled="@(string.IsNullOrWhiteSpace(_newTagName))"
+                           Class="rounded-lg font-weight-bold px-md-8 py-2 btn-primary-shadow"
+                           Style="height: 40px; white-space: nowrap; min-width: 140px;">
+                    ADD TAG
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    @* SECTION: TAGS LIST *@
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="border-all rounded-xl d-flex flex-column">
+            @if (!string.IsNullOrEmpty(_tagEditError))
+            {
+                <MudAlert Severity="Severity.Error" Class="ma-4" CloseButton="true" OnClose="@(() => _tagEditError = string.Empty)">
+                    @_tagEditError
+                </MudAlert>
+            }
+            <div class="pa-4 border-b-1 d-flex flex-column flex-md-row align-stretch align-md-center justify-space-between gap-4" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+
+                @* white-space: nowrap evita que "Current Tags" se rompa en dos renglones *@
+                <div class="d-flex align-center" style="white-space: nowrap;">
+                    <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Primary" Class="mr-3" />
+                    <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Current Tags</MudText>
+                </div>
+
+                <MudTextField @bind-Value="_tagSearchQuery"
+                              Placeholder="Search tags..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="rounded-lg w-100"
+                              Style="margin: 0; max-width: 400px;" />
+            </div>
+
+            <MudTable Items="@GetFilteredTags()"
+                      Hover="true"
+                      Elevation="0"
+                      Loading="@_isTagsLoading"
+                      Class="transparent-bg"
+                      FixedHeader="true"
+                      Height="400px"
+                      CanCancelEdit="true"
+                      EditTrigger="TableEditTrigger.RowClick"
+                      RowEditCommit="HandleEditTagCommitAsync">
+                <HeaderContent>
+                    <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">TAG NAME</MudText></MudTh>
+                    <MudTh Style="width: 100px; text-align: right;"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Tag Name">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.Name</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => HandleDeleteTagAsync(context))" />
+                    </MudTd>
+                </RowTemplate>
+                <RowEditingTemplate>
+                    <MudTd DataLabel="Tag Name">
+                        <MudTextField @bind-Value="context.Name" Required="true" Margin="Margin.Dense" />
+                    </MudTd>
+                    <MudTd DataLabel="Actions" Style="text-align: right;">
+                    </MudTd>
+                </RowEditingTemplate>
+                <PagerContent>
+                    <MudTablePager HideRowsPerPage="true" />
+                </PagerContent>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
     private List<ProfileDto> _users = new();
@@ -320,13 +349,17 @@
 
     private string _roleUpdateEmail = string.Empty;
     private RoleType? _roleUpdateSelection;
+    private string _roleUpdateError = string.Empty;
     private IBrowserFile? _uploadedFile;
     private bool _isLoading = true;
 
     private List<TagDto> _tags = new();
     private string _newTagName = string.Empty;
+    private string _tagError = string.Empty;
+    private string _tagEditError = string.Empty;
     private string _tagSearchQuery = string.Empty;
     private bool _isTagsLoading = true;
+    private string _bulkActionError = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -423,6 +456,8 @@
 
     private async Task HandleUpdateRoleAsync()
     {
+        _roleUpdateError = string.Empty;
+
         if (string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null) return;
 
         try
@@ -440,19 +475,21 @@
             if (result != null && result.Success)
             {
                 Snackbar.Add(result.Message, Severity.Success);
-                await LoadUsersAsync(); 
+                await LoadUsersAsync();
                 _roleUpdateEmail = string.Empty;
                 _roleUpdateSelection = null;
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Failed to update role.", Severity.Error);
+                _roleUpdateError = result?.Message ?? "Failed to update role.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while updating role.", Severity.Error);
+            _roleUpdateError = "Connection error while updating role.";
         }
+
+        StateHasChanged();
     }
 
     private void HandleFileSelected(IBrowserFile file)
@@ -498,6 +535,8 @@
 
     private async Task HandleBulkActionAsync(BulkUserActionType actionType)
     {
+        _bulkActionError = string.Empty;
+
         if (!_selectedUsers.Any()) return;
 
         try
@@ -520,13 +559,15 @@
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Bulk action failed.", Severity.Error);
+                _bulkActionError = result?.Message ?? "Bulk action failed.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while executing bulk action.", Severity.Error);
+            _bulkActionError = "Connection error while executing bulk action.";
         }
+
+        StateHasChanged();
     }
 
     private async Task HandleBulkDeleteAsync() => await HandleBulkActionAsync(BulkUserActionType.Delete);
@@ -534,33 +575,34 @@
 
     private async Task HandleCreateTagAsync()
     {
+        _tagError = string.Empty;
         try
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
             var request = new TagCreationRequest { Tag = new TagDto { Name = _newTagName } };
-            
+
             var response = await client.PostAsJsonAsync("api/match/tag", request);
-            
+
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Tag created successfully.", Severity.Success);
                 _newTagName = string.Empty;
                 await LoadTagsAsync();
             }
             else
             {
-                Snackbar.Add("Failed to create tag.", Severity.Error);
+                _tagError = await response.Content.ReadAsStringAsync();
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while creating tag.", Severity.Error);
+            _tagError = "Connection error while creating tag.";
         }
     }
 
     private async void HandleEditTagCommitAsync(object element)
     {
         var tag = (TagDto)element;
+        _tagEditError = string.Empty;
         try
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
@@ -569,44 +611,43 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Tag updated successfully.", Severity.Success);
                 _tags = _tags.OrderBy(t => t.Name).ToList();
                 StateHasChanged();
             }
             else
             {
-                Snackbar.Add("Failed to update tag.", Severity.Error);
+                _tagEditError = await response.Content.ReadAsStringAsync();
                 await LoadTagsAsync();
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while updating tag.", Severity.Error);
+            _tagEditError = "Connection error while updating tag.";
             await LoadTagsAsync();
         }
     }
 
     private async Task HandleDeleteTagAsync(TagDto tag)
     {
+        _tagEditError = string.Empty;
         try
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
             var response = await client.DeleteAsync($"api/match/tag/{tag.Id}");
-            
+
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Tag deleted successfully.", Severity.Success);
                 _tags.Remove(tag);
                 StateHasChanged();
             }
             else
             {
-                Snackbar.Add("Failed to delete tag.", Severity.Error);
+                _tagEditError = await response.Content.ReadAsStringAsync();
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while deleting tag.", Severity.Error);
+            _tagEditError = "Connection error while deleting tag.";
         }
     }
 

@@ -71,9 +71,12 @@
     private LoginRequestDto _loginModel = new();
     private bool _rememberSession = false;
     private bool _isLoading = false;
+    
 
     private InputType _passwordInput = InputType.Password;
     private string _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+
+    
 
     private void TogglePasswordVisibility()
     {
@@ -102,7 +105,7 @@
 
                 Snackbar.Add($"¡Bienvenido {result?.Name}!", Severity.Success);
 
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo("/", replace: true);
             }
             else
             {
@@ -121,4 +124,6 @@
             _isLoading = false;
         }
     }
+
+    
 }

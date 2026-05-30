@@ -1,0 +1,58 @@
+<MudPaper Elevation="0" Class="home-hero border-all rounded-xl mb-6">
+    <div class="home-hero__content">
+        @if (!string.IsNullOrWhiteSpace(Tag))
+        {
+            <MudChip T="string" Color="Color.Primary" Variant="Variant.Text" Size="Size.Small" Class="mb-3">@Tag</MudChip>
+        }
+
+        <h1 class="mud-typography mud-typography-h1 app-title-tight home-hero__title mb-3">@Title</h1>
+        <MudText Typo="Typo.body1" Class="home-hero__subtitle mb-5">@Subtitle</MudText>
+
+        @if (HasActions)
+        {
+            <div class="home-hero__actions" role="group" aria-label="Acciones principales">
+                @if (HasPrimaryAction)
+                {
+                    <MudButton Href="@PrimaryHref"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               StartIcon="@PrimaryIcon"
+                               Class="rounded-lg px-6 py-3 font-weight-bold home-hero__action-button">
+                        @PrimaryText
+                    </MudButton>
+                }
+
+                @if (HasSecondaryAction)
+                {
+                    <MudButton Href="@SecondaryHref"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@SecondaryIcon"
+                               Class="rounded-lg px-6 py-3 font-weight-bold home-hero__action-button">
+                        @SecondaryText
+                    </MudButton>
+                }
+            </div>
+        }
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public string Tag { get; set; } = string.Empty;
+
+    [Parameter] public string? PrimaryText { get; set; }
+    [Parameter] public string? PrimaryHref { get; set; }
+    [Parameter] public string PrimaryIcon { get; set; } = Icons.Material.Filled.RocketLaunch;
+
+    [Parameter] public string? SecondaryText { get; set; }
+    [Parameter] public string? SecondaryHref { get; set; }
+    [Parameter] public string SecondaryIcon { get; set; } = Icons.Material.Filled.Tune;
+
+    private bool HasPrimaryAction => !string.IsNullOrWhiteSpace(PrimaryText) && !string.IsNullOrWhiteSpace(PrimaryHref);
+
+    private bool HasSecondaryAction => !string.IsNullOrWhiteSpace(SecondaryText) && !string.IsNullOrWhiteSpace(SecondaryHref);
+
+    private bool HasActions => HasPrimaryAction || HasSecondaryAction;
+}
