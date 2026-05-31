@@ -20,6 +20,22 @@ namespace MatchService.Services
             if (string.IsNullOrWhiteSpace(userId))
                 throw new ArgumentException("User ID cannot be empty.");
 
+            if (request == null || request.TfeId <= 0)
+            {
+                return new TfeProposalCreationResponse { Success = false, Message = "Invalid proposal request." };
+            }
+
+            var tfe = await _tfeRepository.GetByIdAsync(request.TfeId);
+            if (tfe == null)
+            {
+                return new TfeProposalCreationResponse { Success = false, Message = "TFE not found." };
+            }
+
+            if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
+            {
+                return new TfeProposalCreationResponse { Success = false, Message = "This TFE has expired and cannot receive new proposals." };
+            }
+
             if (await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
             {
                 return new TfeProposalCreationResponse { Success = false, Message = "TFE already exists." };
@@ -44,6 +60,18 @@ namespace MatchService.Services
         {
             if (string.IsNullOrWhiteSpace(request.UserId))
                 return new TfeProposalUpdateResponse { Success = false, Message = "User ID cannot be empty." };
+
+            if (request.TfeId <= 0)
+            {
+                return new TfeProposalUpdateResponse { Success = false, Message = "Invalid proposal request." };
+            }
+
+            var tfe = await _tfeRepository.GetByIdAsync(request.TfeId);
+            if (tfe == null)
+                return new TfeProposalUpdateResponse { Success = false, Message = "TFE not found." };
+
+            if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
+                return new TfeProposalUpdateResponse { Success = false, Message = "This TFE has expired and can no longer be updated." };
 
             var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(request.UserId, request.TfeId);
             if (existingTfe == null)
@@ -114,6 +142,11 @@ namespace MatchService.Services
             if (tfe == null)
             {
                 throw new KeyNotFoundException("TFE not found.");
+            }
+
+            if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
+            {
+                throw new InvalidOperationException("This TFE has expired and can no longer be decided.");
             }
 
             if (!string.Equals(tfe.AuthorId, authorId, StringComparison.Ordinal))

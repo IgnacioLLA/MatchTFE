@@ -20,7 +20,11 @@ namespace MatchService.Services
 
         public async Task<TfeCreationResponse> CreateTfeAsync(TfeCreationRequest request, string authorId)
         {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Tfe);
+
             CheckTfe(request.Tfe);
+            ValidateExpirationDate(request.Tfe.ExpirationDate);
 
             request.Tfe.Status = TFEStatus.Open;
             request.Tfe.CreationDate = DateTime.UtcNow;
@@ -70,6 +74,9 @@ namespace MatchService.Services
 
         public async Task<bool> UpdateTfeAsync(int id, TfeUpdateRequest request, string authorId)
         {
+            ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.Tfe);
+
             CheckTfe(request.Tfe);
 
             var existingTfe = await _tfeRepository.GetByIdAsync(id);
@@ -84,6 +91,7 @@ namespace MatchService.Services
                 existingTfe.Title = request.Tfe.Title;
                 existingTfe.Description = request.Tfe.Description;
                 existingTfe.EstimatedDelivery = DateOnly.FromDateTime(request.Tfe.EstimatedDelivery);
+                ValidateExpirationDate(request.Tfe.ExpirationDate, existingTfe.ExpirationDate);
                 existingTfe.ExpirationDate = DateOnly.FromDateTime(request.Tfe.ExpirationDate);
                 await MapTagsAndSkillsAsync(existingTfe, request.Tfe);
                 await _tfeRepository.UpdateAsync(existingTfe);
@@ -114,7 +122,11 @@ namespace MatchService.Services
             var userInterestTagIds = userInterests.Select(t => t.Id).ToList();
 
             var tfes = await _tfeRepository.GetRecommendedTfesAsync(userId, userInterestTagIds, request.Count);
-            var tfeDtos = tfes.Select(CreateTfeDto).ToList()!;
+            var tfeDtos = tfes
+                .Select(CreateTfeDto)
+                .Where(tfeDto => tfeDto != null)
+                .Select(tfeDto => tfeDto!)
+                .ToList();
 
             return new TfeRecommendedResponse
             {
@@ -130,6 +142,23 @@ namespace MatchService.Services
             if (tfe == null) throw new ArgumentNullException(nameof(tfe));
             if (string.IsNullOrWhiteSpace(tfe.Title)) throw new ArgumentException("Title is mandatory.", nameof(tfe));
             if (string.IsNullOrWhiteSpace(tfe.Description)) throw new ArgumentException("Description is mandatory.", nameof(tfe));
+        }
+
+        private static void ValidateExpirationDate(DateTime expirationDate, DateOnly? existingExpirationDate = null)
+        {
+            var selectedExpirationDate = DateOnly.FromDateTime(expirationDate);
+
+            if (existingExpirationDate.HasValue && existingExpirationDate.Value == selectedExpirationDate)
+            {
+                return;
+            }
+
+            if (!TfeDateRules.IsValidExpirationDate(selectedExpirationDate))
+            {
+                throw new ArgumentException(
+                    $"La fecha de caducidad debe ser, como mínimo, el {TfeDateRules.MinimumExpirationDate.ToString("dd/MM/yyyy", System.Globalization.CultureInfo.CurrentCulture)}.",
+                    nameof(expirationDate));
+            }
         }
 
         private TfeDto? CreateTfeDto(TFE? tfe)

@@ -106,6 +106,8 @@ namespace MatchService.Repositories
 
         public async Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count)
         {
+            var minimumExpirationDate = TfeDateRules.MinimumExpirationDate;
+
             var excludedTfeIds = await _context.TfeProposal
                 .Where(tp => tp.OriginUserId == userId)
                 .Select(tp => tp.TfeId)
@@ -122,6 +124,7 @@ namespace MatchService.Repositories
                 .Include(t => t.RequiredSkills).ThenInclude(rs => rs.Tag)
                 .Where(t => t.AuthorId != userId
                          && t.Status == TFEStatus.Open
+                         && t.ExpirationDate >= minimumExpirationDate
                          && !excludedTfeIds.Contains(t.Id)
                          && t.Author.Role != userRole);
 

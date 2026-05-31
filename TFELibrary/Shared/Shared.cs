@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using TFELibrary.Data;
@@ -39,6 +40,26 @@ namespace TFELibrary.Shared
         Accepted = 2,
         Rejected = 3,
         Expired = 0
+    }
+
+    public static class TfeDateRules
+    {
+        public static DateOnly MinimumExpirationDate => DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+
+        public static bool IsValidExpirationDate(DateTime expirationDate)
+        {
+            return DateOnly.FromDateTime(expirationDate) >= MinimumExpirationDate;
+        }
+
+        public static bool IsValidExpirationDate(DateOnly expirationDate)
+        {
+            return expirationDate >= MinimumExpirationDate;
+        }
+
+        public static string ToInputDateValue(DateOnly date)
+        {
+            return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        }
     }
 
     public class CandidateProfileDto

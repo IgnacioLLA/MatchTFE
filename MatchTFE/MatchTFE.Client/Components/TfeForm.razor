@@ -1,15 +1,27 @@
-﻿@using TFELibrary.Shared
-@inject ISnackbar Snackbar
+﻿@using System.Globalization
+@using TFELibrary.Shared
 
 <MudGrid Spacing="4" Class="animate-fade-in">
     @* --- LEFT COLUMN --- *@
     <MudItem xs="12" md="7" lg="7">
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-all h-100">
             <MudText Typo="Typo.subtitle2" Class="app-subtitle">Título del TFE</MudText>
-            <MudTextField @bind-Value="_title" T="string" Variant="Variant.Outlined" Margin="Margin.Dense" Class="mb-8 rounded-lg" />
+            <MudTextField @bind-Value="_title"
+                          T="string"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Error="@(!string.IsNullOrWhiteSpace(_titleError))"
+                          ErrorText="@_titleError"
+                          Class="mb-8 rounded-lg" />
 
             <MudText Typo="Typo.subtitle2" Class="app-subtitle">Descripción Detallada</MudText>
-            <MudTextField @bind-Value="_description" T="string" Variant="Variant.Outlined" Lines="15" Class="rounded-lg" />
+            <MudTextField @bind-Value="_description"
+                          T="string"
+                          Variant="Variant.Outlined"
+                          Lines="15"
+                          Error="@(!string.IsNullOrWhiteSpace(_descriptionError))"
+                          ErrorText="@_descriptionError"
+                          Class="rounded-lg" />
         </MudPaper>
     </MudItem>
 
@@ -21,26 +33,54 @@
                 <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
                     Fecha de Caducidad de la Propuesta
                 </MudText>
+                <MudTooltip Text="Fecha límite para publicar la propuesta." Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="ml-2 app-text-muted" Style="cursor: help;" />
+                </MudTooltip>
             </div>
 
-            <div class="d-flex justify-center mb-6">
-                <MudDatePicker PickerVariant="PickerVariant.Static"
-                               Rounded="true"
-                               Elevation="0"
-                               Color="Color.Primary"
-                               Date="@_expirationDate"
-                               DateChanged="OnDateChanged" />
+            <div class="mb-2">
+                <MudTextField T="string"
+                              @bind-Value="_expirationDateText"
+                              InputType="InputType.Date"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              InputAttributes="_expirationDateInputAttributes"
+                              Error="@(!string.IsNullOrWhiteSpace(_expirationDateError))"
+                              ErrorText="@_expirationDateError"
+                              Class="rounded-lg" />
             </div>
 
-            <MudText Typo="Typo.subtitle2" Class="app-subtitle">
-                Duración Estimada
+            @if (IsEditMode)
+            {
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@GetEditExpirationStatusColor()"
+                         Variant="Variant.Filled"
+                         Class="mt-2 font-weight-bold px-3">
+                    @GetEditExpirationStatusText()
+                </MudChip>
+            }
+
+            <MudText Typo="Typo.caption" Class="app-text-muted">
+                Selecciona una fecha de cierre sin ocupar espacio extra en la tarjeta.
             </MudText>
+
+            <div class="d-flex align-center mt-6 mb-2">
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
+                    Duración Estimada
+                </MudText>
+                <MudTooltip Text="Duración orientativa para estimar cuándo podría entregarse el trabajo." Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="ml-2 app-text-muted" Style="cursor: help;" />
+                </MudTooltip>
+            </div>
             <MudSelect T="string"
                        @bind-Value="_estimatedDuration"
                        Variant="Variant.Outlined"
                        AnchorOrigin="Origin.BottomCenter"
                        Placeholder="Seleccione un rango..."
                        Margin="Margin.Dense"
+                      Error="@(!string.IsNullOrWhiteSpace(_estimatedDurationError))"
+                      ErrorText="@_estimatedDurationError"
                        Class="rounded-lg">
                 <MudSelectItem Value="@("3 meses")" />
                 <MudSelectItem Value="@("6 meses")" />
@@ -88,8 +128,19 @@
     private string _description = string.Empty;
     private List<string> _selectedTopics = new();
     private List<SkillDto> _requiredSkills = new(); 
-    private DateTime? _expirationDate = DateTime.Today.AddMonths(1);
+    private string _expirationDateText = DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd");
     private string _estimatedDuration = string.Empty;
+    private string? _titleError;
+    private string? _descriptionError;
+    private string? _expirationDateError;
+    private string? _estimatedDurationError;
+
+    private static string MinimumExpirationDateText => TfeDateRules.ToInputDateValue(TfeDateRules.MinimumExpirationDate);
+
+    private Dictionary<string, object> _expirationDateInputAttributes => new()
+    {
+        ["min"] = MinimumExpirationDateText
+    };
 
     protected override void OnParametersSet()
     {
@@ -101,7 +152,9 @@
             _selectedTopics = Tfe.Topics?.Select(t => t.Name).ToList() ?? new();
             _requiredSkills = Tfe.RequiredSkills?.ToList() ?? new();
 
-            _expirationDate = Tfe.ExpirationDate;
+            _expirationDateText = Tfe.ExpirationDate != default
+                ? Tfe.ExpirationDate.ToString("yyyy-MM-dd")
+                : string.Empty;
 
             if (Tfe.EstimatedDelivery != default)
             {
@@ -112,14 +165,11 @@
         }
     }
 
-    private void OnDateChanged(DateTime? newDate)
-    {
-        _expirationDate = newDate;
-    }
-
     private async Task HandleSubmitAsync()
     {
         if (!CheckForm()) return;
+
+        DateOnly.TryParseExact(_expirationDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expirationDate);
 
         var resultTfe = new TfeDto
         {
@@ -128,7 +178,7 @@
             Topics = _selectedTopics.Select(topic => new TagDto { Name = topic }).ToList(),
             RequiredSkills = _requiredSkills.ToList(),
             EstimatedDelivery = DateTime.Today.AddMonths(ParseEstimatedMonths(_estimatedDuration)),
-            ExpirationDate = _expirationDate ?? DateTime.Today.AddMonths(1)
+            ExpirationDate = expirationDate == default ? DateTime.Today.AddMonths(1) : expirationDate.ToDateTime(TimeOnly.MinValue)
         };
 
         if (OnValidSubmit.HasDelegate)
@@ -146,16 +196,80 @@
 
     private bool CheckForm()
     {
+        _titleError = null;
+        _descriptionError = null;
+        _expirationDateError = null;
+        _estimatedDurationError = null;
+
         if (string.IsNullOrWhiteSpace(_title) || string.IsNullOrWhiteSpace(_description))
         {
-            Snackbar.Add("El título y la descripción son obligatorios.", Severity.Warning);
+            if (string.IsNullOrWhiteSpace(_title))
+            {
+                _titleError = "El título es obligatorio.";
+            }
+
+            if (string.IsNullOrWhiteSpace(_description))
+            {
+                _descriptionError = "La descripción es obligatoria.";
+            }
+
             return false;
         }
+
+        if (string.IsNullOrWhiteSpace(_expirationDateText) ||
+            !DateOnly.TryParseExact(_expirationDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expirationDate))
+        {
+            _expirationDateError = "Debes seleccionar una fecha de caducidad válida.";
+            return false;
+        }
+
+        if (!IsExpirationDateAllowed(expirationDate))
+        {
+            _expirationDateError = $"La fecha de caducidad debe ser, como mínimo, el {TfeDateRules.MinimumExpirationDate.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)}.";
+            return false;
+        }
+
         if (string.IsNullOrWhiteSpace(_estimatedDuration))
         {
-            Snackbar.Add("Debes seleccionar una duración estimada.", Severity.Warning);
+            _estimatedDurationError = "Debes seleccionar una duración estimada.";
             return false;
         }
         return true;
+    }
+
+    private bool IsExpirationDateAllowed(DateOnly selectedDate)
+    {
+        if (!IsEditMode || Tfe == null || Tfe.ExpirationDate == default)
+        {
+            return TfeDateRules.IsValidExpirationDate(selectedDate);
+        }
+
+        var currentExpirationDate = DateOnly.FromDateTime(Tfe.ExpirationDate);
+        if (selectedDate == currentExpirationDate)
+        {
+            return true;
+        }
+
+        return TfeDateRules.IsValidExpirationDate(selectedDate);
+    }
+
+    private Color GetEditExpirationStatusColor()
+    {
+        if (!IsEditMode || Tfe == null || Tfe.ExpirationDate == default)
+        {
+            return Color.Success;
+        }
+
+        return Tfe.ExpirationDate.Date < DateTime.Today ? Color.Error : Color.Success;
+    }
+
+    private string GetEditExpirationStatusText()
+    {
+        if (!IsEditMode || Tfe == null || Tfe.ExpirationDate == default)
+        {
+            return string.Empty;
+        }
+
+        return Tfe.ExpirationDate.Date < DateTime.Today ? "Caducado" : "Abierto";
     }
 }

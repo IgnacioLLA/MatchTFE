@@ -92,12 +92,23 @@ namespace MatchService.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+            try
+            {
+                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
 
-            var response = await _tfeService.CreateTfeAsync(request, authorId);
+                var response = await _tfeService.CreateTfeAsync(request, authorId);
 
-            return CreatedAtAction(nameof(GetTfeById), new { id = response.TfeId }, response.Tfe);
+                return CreatedAtAction(nameof(GetTfeById), new { id = response.TfeId }, response.Tfe);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
         [HttpGet("tfe/{id}")]

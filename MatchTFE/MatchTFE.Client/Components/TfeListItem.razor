@@ -23,11 +23,21 @@
 
         @* EXPDATE *@
         <MudItem xs="12" md="2" Class="d-none d-md-flex align-center">
-            <div class="d-flex align-center mud-text-secondary">
-                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
-                <MudText Typo="Typo.body2">
-                    @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
-                </MudText>
+            <div class="d-flex flex-column">
+                <div class="d-flex align-center mud-text-secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
+                    <MudText Typo="Typo.body2">
+                        @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                    </MudText>
+                </div>
+
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@GetExpirationStatusColor(Model.ExpirationDate)"
+                         Variant="Variant.Filled"
+                         Class="mt-2 font-weight-bold px-3 align-self-start">
+                    @GetExpirationStatusText(Model.ExpirationDate)
+                </MudChip>
             </div>
         </MudItem>
 
@@ -120,4 +130,13 @@
         TFEStatus.Cancelled => "• Cancelado",
         _ => status.ToString()
     };
+
+    private static bool IsExpired(DateTime expirationDate)
+    {
+        return expirationDate != default && expirationDate.Date < DateTime.Today;
+    }
+
+    private Color GetExpirationStatusColor(DateTime expirationDate) => IsExpired(expirationDate) ? Color.Error : Color.Success;
+
+    private string GetExpirationStatusText(DateTime expirationDate) => IsExpired(expirationDate) ? "Caducado" : "Abierto";
 }
