@@ -3,9 +3,9 @@
 namespace MatchTFE.Client.Themes;
 public static class MatchTheme
 {
-    private static readonly string[] _fontFamily = { "Inter", "Helvetica", "Arial", "sans-serif" };
+    private static readonly string[] _fontFamily = ["Inter", "Helvetica", "Arial", "sans-serif"];
 
-    public static MudTheme DefaultTheme => new()
+    public static readonly MudTheme DefaultTheme = new()
     {
         PaletteLight = CreateLightPalette(),
         PaletteDark = CreateDarkPalette(),

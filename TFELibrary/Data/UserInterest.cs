@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace TFELibrary.Data;
 
-namespace TFELibrary.Data
+public class UserInterest
 {
-    public class UserInterest
-    {
-        public int TagId { get; set; }
-        public Tag Tag { get; set; } = null!;
-        public string UserProfileId { get; set; } = string.Empty;
-        public UserProfile UserProfile { get; set; } = null!;
-    }
+    public int TagId { get; set; }
+    public Tag Tag { get; set; } = null!;
+    public string UserProfileId { get; set; } = string.Empty;
+    public UserProfile UserProfile { get; set; } = null!;
 }

@@ -76,7 +76,7 @@
 
         @* ACTIONS *@
         <MudItem xs="6" md="1" Class="d-flex justify-end align-center gap-1">
-            @if (Model.Status != TFEStatus.Cancelled)
+            @if (Model.Status != TfeStatus.Cancelled)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Size="Size.Small"
@@ -107,27 +107,27 @@
         }
     }
 
-    private Color GetStatusColor(TFEStatus status) => status switch
+    private Color GetStatusColor(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => Color.Success,
-        TFEStatus.Open => Color.Default,
-        TFEStatus.Cancelled => Color.Info,
+        TfeStatus.Completed => Color.Success,
+        TfeStatus.Open => Color.Default,
+        TfeStatus.Cancelled => Color.Info,
         _ => Color.Default
     };
 
-    private Variant GetStatusVariant(TFEStatus status) => status switch
+    private Variant GetStatusVariant(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => Variant.Filled,
-        TFEStatus.Open => Variant.Outlined,
-        TFEStatus.Cancelled => Variant.Filled,
+        TfeStatus.Completed => Variant.Filled,
+        TfeStatus.Open => Variant.Outlined,
+        TfeStatus.Cancelled => Variant.Filled,
         _ => Variant.Filled
     };
 
-    private string GetStatusText(TFEStatus status) => status switch
+    private string GetStatusText(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => "• Completado",
-        TFEStatus.Open => "• Abierto",
-        TFEStatus.Cancelled => "• Cancelado",
+        TfeStatus.Completed => "• Completado",
+        TfeStatus.Open => "• Abierto",
+        TfeStatus.Cancelled => "• Cancelado",
         _ => status.ToString()
     };
 

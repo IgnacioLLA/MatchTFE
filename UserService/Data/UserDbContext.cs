@@ -1,99 +1,96 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TFELibrary.Data;
 
-namespace UserService.Data
+namespace UserService.Data;
+
+public class UserDbContext : DbContext
 {
-    public class UserDbContext : DbContext
+    public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
+
+    public DbSet<UserProfile> UserProfile { get; set; }
+    public DbSet<StudentSkill> StudentSkill { get; set; }
+    public DbSet<Tag> Tag { get; set; }
+    public DbSet<UserInterest> UserInterest { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        public UserDbContext(DbContextOptions<UserDbContext> options) : base(options) { }
+        base.OnModelCreating(builder);
 
-        public DbSet<UserProfile> UserProfile { get; set; }
-        public DbSet<StudentSkill> StudentSkill { get; set; }
-        public DbSet<Tag> Tag { get; set; }
-        public DbSet<UserInterest> UserInterest { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder builder)
+        // Placeholder to create the foreign key constraint across boundaries
+        builder.Entity<AspNetUser>(b =>
         {
-            base.OnModelCreating(builder);
+            b.ToTable("AspNetUsers", t => t.ExcludeFromMigrations());
+            b.HasKey(u => u.Id);
+        });
 
-            // Placeholder to create the foreign key constraint across boundaries
-            builder.Entity<AspNetUser>(b =>
-            {
-                b.ToTable("AspNetUsers", t => t.ExcludeFromMigrations());
-                b.HasKey(u => u.Id);
-            });
+        builder.Entity<UserProfile>().ToTable("UserProfile");
+        builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
+        builder.Entity<StudentSkill>().ToTable("StudentSkill");
+        builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
+        builder.Entity<TFEProposal>().ToTable("TfeProposal", t => t.ExcludeFromMigrations());
 
-            builder.Entity<UserProfile>().ToTable("UserProfile");
-            builder.Entity<UserProfile>().ToTable("UserProfile", t => t.ExcludeFromMigrations());
-            builder.Entity<StudentSkill>().ToTable("StudentSkill");
-            builder.Entity<Tag>().ToTable("Tag", t => t.ExcludeFromMigrations());
-            builder.Entity<TFEProposal>().ToTable("TfeProposal", t => t.ExcludeFromMigrations());
+        builder.Entity<TFEProposal>().Ignore(tp => tp.Tfe);
 
-            builder.Entity<TFEProposal>().Ignore(tp => tp.Tfe);
-            //builder.Entity<UserProfile>().Ignore(u => u.StudentSkills);
-            //builder.Entity<StudentSkill>().Ignore(ss => ss.Tag);
+        builder.Entity<UserProfile>()
+            .HasIndex(p => p.UserId)
+            .IsUnique();
 
-            builder.Entity<UserProfile>()
-                .HasIndex(p => p.UserId)
-                .IsUnique();
+        builder.Entity<UserProfile>()
+            .HasIndex(p => p.Email)
+            .IsUnique();
 
-            builder.Entity<UserProfile>()
-                .HasIndex(p => p.Email)
-                .IsUnique();
+        builder.Entity<UserProfile>()
+            .Property(e => e.Role)
+            .HasConversion<string>();
 
-            builder.Entity<UserProfile>()
-                .Property(e => e.Role)
-                .HasConversion<string>();
+        builder.Entity<UserProfile>()
+            .HasOne<AspNetUser>()
+            .WithOne()
+            .HasForeignKey<UserProfile>(p => p.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<UserProfile>()
-                .HasOne<AspNetUser>()
-                .WithOne()
-                .HasForeignKey<UserProfile>(p => p.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Entity<StudentSkill>(ss =>
-            {
-                ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
-
-                ss.HasOne(s => s.StudentProfile)
-                  .WithMany()
-                  .HasForeignKey(s => s.StudentProfileId)
-                  .OnDelete(DeleteBehavior.Cascade);
-
-                ss.HasOne(s => s.Tag)
-                  .WithMany()
-                  .HasForeignKey(s => s.TagId)
-                  .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            builder.Entity<UserInterest>(j =>
-            {
-                j.ToTable("UserInterest");
-                j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
-
-                j.HasOne(ui => ui.UserProfile)
-                 .WithMany(u => u.UserInterests)
-                 .HasForeignKey(ui => ui.UserProfileId)
-                 .OnDelete(DeleteBehavior.Cascade);
-
-                j.HasOne(ui => ui.Tag)
-                 .WithMany()
-                 .HasForeignKey(ui => ui.TagId)
-                 .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            builder.Entity<TFEProposal>().HasKey(tp => new { tp.OriginUserId, tp.TfeId });
-            builder.Entity<TFEProposal>()
-                .HasOne(tp => tp.OriginUser)
-                .WithMany(u => u.TfeProposals)
-                .HasForeignKey(tp => tp.OriginUserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
-
-        // Weak entity foreign constraint placeholder
-        public class AspNetUser
+        builder.Entity<StudentSkill>(ss =>
         {
-            public string Id { get; set; } = string.Empty;
-        }
+            ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
+
+            ss.HasOne(s => s.StudentProfile)
+              .WithMany()
+              .HasForeignKey(s => s.StudentProfileId)
+              .OnDelete(DeleteBehavior.Cascade);
+
+            ss.HasOne(s => s.Tag)
+              .WithMany()
+              .HasForeignKey(s => s.TagId)
+              .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<UserInterest>(j =>
+        {
+            j.ToTable("UserInterest");
+            j.HasKey(ui => new { ui.TagId, ui.UserProfileId });
+
+            j.HasOne(ui => ui.UserProfile)
+             .WithMany(u => u.UserInterests)
+             .HasForeignKey(ui => ui.UserProfileId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+            j.HasOne(ui => ui.Tag)
+             .WithMany()
+             .HasForeignKey(ui => ui.TagId)
+             .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<TFEProposal>().HasKey(tp => new { tp.OriginUserId, tp.TfeId });
+        builder.Entity<TFEProposal>()
+            .HasOne(tp => tp.OriginUser)
+            .WithMany(u => u.TfeProposals)
+            .HasForeignKey(tp => tp.OriginUserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+
+    // Weak entity foreign constraint placeholder
+    public class AspNetUser
+    {
+        public string Id { get; set; } = string.Empty;
     }
 }

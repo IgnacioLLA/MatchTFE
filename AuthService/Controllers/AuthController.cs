@@ -1,269 +1,283 @@
-﻿using AuthService.Service;
+using AuthService.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using TFELibrary.Shared;
 
-namespace AuthService.Controllers
+namespace AuthService.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase, IAuthController
 {
+    private int TokenCookieLifetime;
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase, IAuthController
+    private readonly IAuthService _authService;
+    private readonly ILogger<AuthController> _logger;
+
+    public AuthController(IAuthService authService, ILogger<AuthController> logger)
     {
-        private int TokenCookieLifetime;
+        _authService = authService;
+        _logger = logger;
+        TokenCookieLifetime = _authService.TokenLifetime;
+    }
 
-        private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        var (response, tokens) = await _authService.LoginAsync(loginDto);
+
+        if (!response.AuthData.IsSuccess)
         {
-            _authService = authService;
-            _logger = logger;
-            TokenCookieLifetime = _authService.TokenLifetime;
+            return Unauthorized(response);
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginDto)
+        var jwtCookieOptions = new CookieOptions
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            HttpOnly = true,
+            // Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+        };
 
-            var response = await _authService.LoginAsync(loginDto);
+        var refreshCookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            // Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+        };
 
-            if (!response.AuthData.IsSuccess)
-            {
-                return Unauthorized(response);
-            }
-
-            var jwtCookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                // Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
-            };
-
-            var refreshCookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                // Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
-            };
-
-            Response.Cookies.Append("AccessToken", response.AuthData.Token, jwtCookieOptions);
-            Response.Cookies.Append("RefreshToken", response.AuthData.RefreshToken, refreshCookieOptions);
-
-            return Ok(response);
+        if (tokens != null)
+        {
+            Response.Cookies.Append("AccessToken", tokens.AccessToken, jwtCookieOptions);
+            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, refreshCookieOptions);
         }
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+        return Ok(response);
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var result = await _authService.RegisterAsync(request);
-
-            if (!result.Error.IsSuccess)
-            {
-                if (result.Error.ErrorCode is "DuplicateEmail" or "DuplicateUserProfile")
-                {
-                    return Conflict(result);
-                }
-
-                return BadRequest(result);
-            }
-
-            if (result.AuthData != null)
-            {
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    // Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
-                };
-
-                Response.Cookies.Append("AccessToken", result.AuthData.Token, cookieOptions);
-                Response.Cookies.Append("RefreshToken", result.AuthData.RefreshToken, cookieOptions);
-            }
-
-            return Ok(result);
+            return BadRequest(ModelState);
         }
 
-        [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshToken()
+        var (result, tokens) = await _authService.RegisterAsync(request);
+
+        if (!result.Error.IsSuccess)
         {
-            var expiredToken = Request.Cookies["AccessToken"];
-            var refreshToken = Request.Cookies["RefreshToken"];
-
-            if (string.IsNullOrEmpty(expiredToken) || string.IsNullOrEmpty(refreshToken))
+            if (result.Error.ErrorCode is "DuplicateEmail" or "DuplicateUserProfile")
             {
-                return Unauthorized(new { IsSuccess = false, ErrorMessage = "Session expired." });
+                return Conflict(result);
             }
 
-            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(expiredToken);
-
-            var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
-                 ?? jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid Token." });
-            }
-
-            var requestDto = new RefreshTokenRequestDto
-            {
-                UserId = userId,
-                RefreshToken = refreshToken
-            };
-
-            var response = await _authService.RefreshTokenAsync(requestDto);
-
-            if (!response.AuthData.IsSuccess)
-            {
-                return Unauthorized(response);
-            }
-
-            var jwtCookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                // Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
-            };
-
-            var refreshCookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                // Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
-            };
-
-            Response.Cookies.Append("AccessToken", response.AuthData.Token, jwtCookieOptions);
-            Response.Cookies.Append("RefreshToken", response.AuthData.RefreshToken, refreshCookieOptions);
-
-            return Ok(response);
+            return BadRequest(result);
         }
 
-        [HttpPost("logout")]
-        [Authorize]
-        public async Task<IActionResult> Logout()
+        if (tokens != null)
         {
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
-
-            var result = await _authService.LogoutAsync(authorId);
-
-            if (!result)
-            {
-                return BadRequest(new { IsSuccess = false, ErrorMessage = "Error al cerrar sesión." });
-            }
-
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
+                // Secure = true,
                 SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
             };
 
-            Response.Cookies.Delete("AccessToken", cookieOptions);
-            Response.Cookies.Delete("RefreshToken", cookieOptions);
-
-            return Ok(new { IsSuccess = true, Message = "Sesión cerrada correctamente." });
+            Response.Cookies.Append("AccessToken", tokens.AccessToken, cookieOptions);
+            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, cookieOptions);
         }
 
-        [HttpGet("test-auth")]
-        [Authorize]
-        public IActionResult TestAuth()
-        {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+        return Ok(result);
+    }
 
-            return Ok(new
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshToken()
+    {
+        var expiredToken = Request.Cookies["AccessToken"];
+        var refreshToken = Request.Cookies["RefreshToken"];
+
+        if (string.IsNullOrEmpty(expiredToken) || string.IsNullOrEmpty(refreshToken))
+        {
+            return Unauthorized(new { IsSuccess = false, ErrorMessage = "Session expired." });
+        }
+
+        string? userId;
+        try
+        {
+            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(expiredToken);
+            userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
+                  ?? jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        }
+        catch (Exception)
+        {
+            return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid token format." });
+        }
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid Token." });
+        }
+
+        var requestDto = new RefreshTokenRequestDto
+        {
+            UserId = userId,
+            RefreshToken = refreshToken
+        };
+
+        var (response, tokens) = await _authService.RefreshTokenAsync(requestDto);
+
+        if (!response.AuthData.IsSuccess)
+        {
+            return Unauthorized(response);
+        }
+
+        var jwtCookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            // Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+        };
+
+        var refreshCookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            // Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+        };
+
+        if (tokens != null)
+        {
+            Response.Cookies.Append("AccessToken", tokens.AccessToken, jwtCookieOptions);
+            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, refreshCookieOptions);
+        }
+
+        return Ok(response);
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        var result = await _authService.LogoutAsync(authorId);
+
+        if (!result)
+        {
+            return BadRequest(new { IsSuccess = false, ErrorMessage = "Error al cerrar sesión." });
+        }
+
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            SameSite = SameSiteMode.Strict,
+        };
+
+        Response.Cookies.Delete("AccessToken", cookieOptions);
+        Response.Cookies.Delete("RefreshToken", cookieOptions);
+
+        return Ok(new { IsSuccess = true, Message = "Sesión cerrada correctamente." });
+    }
+
+    [HttpGet("test-auth")]
+    [Authorize]
+    public IActionResult TestAuth()
+    {
+        var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+        return Ok(new
+        {
+            IsSuccess = true,
+            Message = "¡Autenticación exitosa! El token es válido.",
+            Email = email
+        });
+    }
+
+    [HttpPut("role")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ChangeRole([FromBody] UserRoleUpdateRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new UserRoleUpdateResponse
             {
-                IsSuccess = true,
-                Message = "¡Autenticación exitosa! El token es válido.",
-                Email = email
+                Error = new OperationResult(false, "Invalid request format.")
             });
         }
 
-        [HttpPut("role")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ChangeRole([FromBody] UserRoleUpdateRequest request)
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(currentUserId))
+            return Unauthorized(new UserRoleUpdateResponse { Error = new OperationResult(false, "Could not identify the current user.") });
+
+        var response = await _authService.ChangeUserRoleAsync(request, currentUserId);
+
+        if (!response.Error.IsSuccess)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new UserRoleUpdateResponse
-                {
-                    Error = new ErrorRecord(false, "Invalid request format.")
-                });
-            }
-
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.ChangeUserRoleAsync(request, currentUserId);
-
-            if (!response.Error.IsSuccess)
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+            return BadRequest(response);
         }
 
-        [HttpPost("import")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> BulkImportUsers([FromBody] BulkUserImportRequest request)
+        return Ok(response);
+    }
+
+    [HttpPost("import")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> BulkImportUsers([FromBody] BulkUserImportRequest request)
+    {
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
+            return BadRequest(new BulkUserImportResponse
             {
-                return BadRequest(new BulkUserImportResponse
-                {
-                    Error = new ErrorRecord(false, "Invalid file or request format.")
-                });
-            }
-
-            //var response = await _authService.BulkImportUsersAsync(request);
-
-            var response = new BulkUserImportResponse
-            {
-                Error = new ErrorRecord(false, "Invalid file or request format.")
-            };
-
-            if (!response.Error.IsSuccess)
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+                Error = new OperationResult(false, "Invalid file or request format.")
+            });
         }
 
-        [HttpPost("bulk-action")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request)
+        var response = new BulkUserImportResponse
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new BulkUserActionResponse
-                {
-                    Error = new ErrorRecord(false, "Invalid request format.")
-                });
-            }
+            Error = new OperationResult(false, "Invalid file or request format.")
+        };
 
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.ExecuteBulkActionAsync(request, currentUserId);
-
-            if (!response.Error.IsSuccess)
-            {
-                return BadRequest(response);
-            }
-
-            return Ok(response);
+        if (!response.Error.IsSuccess)
+        {
+            return BadRequest(response);
         }
 
+        return Ok(response);
+    }
+
+    [HttpPost("bulk-action")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new BulkUserActionResponse
+            {
+                Error = new OperationResult(false, "Invalid request format.")
+            });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(currentUserId))
+            return Unauthorized(new BulkUserActionResponse { Error = new OperationResult(false, "Could not identify the current user.") });
+
+        var response = await _authService.ExecuteBulkActionAsync(request, currentUserId);
+
+        if (!response.Error.IsSuccess)
+        {
+            return BadRequest(response);
+        }
+
+        return Ok(response);
     }
 }

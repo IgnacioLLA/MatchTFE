@@ -17,19 +17,19 @@
             <DataAnnotationsValidator />
 
             <div class="form-row-2">
-                <MudTextField @bind-Value="_registerModel.Name"
+                <MudTextField @bind-Value="_registerModel.FirstName"
                               Label="Nombre"
                               Placeholder="Tu nombre"
                               Variant="Variant.Outlined"
                               Class="auth-input"
-                              For="@(() => _registerModel.Name)" />
+                              For="@(() => _registerModel.FirstName)" />
 
-                <MudTextField @bind-Value="_registerModel.Surname"
+                <MudTextField @bind-Value="_registerModel.LastName"
                               Label="Apellidos"
                               Placeholder="Tus apellidos"
                               Variant="Variant.Outlined"
                               Class="auth-input"
-                              For="@(() => _registerModel.Surname)" />
+                              For="@(() => _registerModel.LastName)" />
             </div>
 
             <MudTextField @bind-Value="_registerModel.Email"
@@ -127,8 +127,8 @@
         {
             var requestDto = new RegisterRequestDto
             {
-                Name = _registerModel.Name,
-                Surname = _registerModel.Surname,
+                FirstName = _registerModel.FirstName,
+                LastName = _registerModel.LastName,
                 Email = _registerModel.Email,
                 Password = _registerModel.Password
             };

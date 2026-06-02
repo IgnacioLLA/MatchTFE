@@ -1,13 +1,11 @@
-﻿using Autofac;
-using Autofac.Core;
+using Autofac;
 
-namespace MatchTFE.Client.Infrastructure
+namespace MatchTFE.Client.Infrastructure;
+
+public class MatchTFEDependencyInjector
 {
-    public class MatchTFEDependencyInjector
+    public static void RegisterDependencies(ContainerBuilder builder)
     {
-        public static void RegisterDependencies(ContainerBuilder builder)
-        {
 
-        }
     }
 }

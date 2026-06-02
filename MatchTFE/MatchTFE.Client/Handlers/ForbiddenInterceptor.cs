@@ -1,27 +1,26 @@
 using Microsoft.AspNetCore.Components;
 using System.Net;
 
-namespace MatchTFE.Client.Handlers
+namespace MatchTFE.Client.Handlers;
+
+public class ForbiddenInterceptor : DelegatingHandler
 {
-    public class ForbiddenInterceptor : DelegatingHandler
+    private readonly NavigationManager _navigationManager;
+
+    public ForbiddenInterceptor(NavigationManager navigationManager)
     {
-        private readonly NavigationManager _navigationManager;
+        _navigationManager = navigationManager;
+    }
 
-        public ForbiddenInterceptor(NavigationManager navigationManager)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var response = await base.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode == HttpStatusCode.Forbidden)
         {
-            _navigationManager = navigationManager;
+            _navigationManager.NavigateTo("/");
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            var response = await base.SendAsync(request, cancellationToken);
-
-            if (response.StatusCode == HttpStatusCode.Forbidden)
-            {
-                _navigationManager.NavigateTo("/");
-            }
-
-            return response;
-        }
+        return response;
     }
 }

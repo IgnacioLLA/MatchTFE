@@ -1,191 +1,185 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
 using TFELibrary.Data;
 
-namespace TFELibrary.Shared
+namespace TFELibrary.Shared;
+
+public static class Roles
 {
-    public static class Roles
+    public const string Admin = "Admin";
+    public const string User = "User";
+}
+
+public enum RoleType
+{
+    Student,
+    Teacher,
+    Admin
+}
+
+public class TfeDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string TutorName { get; set; } = string.Empty;
+    public int InterestedAmount { get; set; }
+    public List<TagDto> Topics { get; set; } = new();
+    public List<SkillDto> RequiredSkills { get; set; } = new();
+    public DateTime EstimatedDelivery { get; set; }
+    public DateTime ExpirationDate { get; set; }
+    public DateTime CreationDate { get; set; }
+    public TfeStatus Status { get; set; }
+}
+
+public enum TfeStatus
+{
+    Open = 1,
+    Completed = 2,
+    Cancelled = 0
+}
+
+public enum ProposalStatus
+{
+    Pending = 1,
+    Accepted = 2,
+    Rejected = 3,
+    Expired = 0
+}
+
+public static class TfeDateRules
+{
+    public static DateOnly MinimumExpirationDate => DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+
+    public static bool IsValidExpirationDate(DateTime expirationDate)
     {
-        public const string Admin = "Admin";
-        public const string User = "User";
+        return DateOnly.FromDateTime(expirationDate) >= MinimumExpirationDate;
     }
 
-    public enum RoleType
+    public static bool IsValidExpirationDate(DateOnly expirationDate)
     {
-        Student,
-        Teacher,
-        Admin
+        return expirationDate >= MinimumExpirationDate;
     }
 
-    public class TfeDto
+    public static string ToInputDateValue(DateOnly date)
     {
-        public int Id { get; set; }
-        public string Title { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public string TutorName { get; set; } = string.Empty;
-        public int InterestedAmount { get; set; }
-        public List<TagDto> Topics { get; set; } = new();
-        public List<SkillDto> RequiredSkills { get; set; } = new();
-        public DateTime EstimatedDelivery { get; set; }
-        public DateTime ExpirationDate { get; set; }
-        public DateTime CreationDate { get; set; }
-        public TFEStatus Status { get; set; }
+        return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
+}
 
-    public enum TFEStatus
-    {
-        Open = 1,
-        Completed = 2,
-        Cancelled = 0 
-    }
-    public enum ProposalStatus
-    {
-        Pending = 1,
-        Accepted = 2,
-        Rejected = 3,
-        Expired = 0
-    }
+public class CandidateProfileDto
+{
+    public int Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Degree { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public string AcademicYear { get; set; } = string.Empty;
+    public List<string> AreasOfInterest { get; set; } = new();
+    public string Biography { get; set; } = string.Empty;
+    public List<CompetencyDto> Competencies { get; set; } = new();
+}
 
-    public static class TfeDateRules
-    {
-        public static DateOnly MinimumExpirationDate => DateOnly.FromDateTime(DateTime.Today.AddDays(1));
+public class ProfileDto
+{
+    public string Id { get; set; } = string.Empty;
+    public RoleType Role { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
 
-        public static bool IsValidExpirationDate(DateTime expirationDate)
-        {
-            return DateOnly.FromDateTime(expirationDate) >= MinimumExpirationDate;
-        }
+    public string Bio { get; set; } = string.Empty;
+    public List<string> Interests { get; set; } = new();
 
-        public static bool IsValidExpirationDate(DateOnly expirationDate)
-        {
-            return expirationDate >= MinimumExpirationDate;
-        }
+    // ----------------------------------
+    // STUDENT
+    // ----------------------------------
+    public string AcademicYear { get; set; } = string.Empty;
+    public List<SkillDto> Skills { get; set; } = new();
 
-        public static string ToInputDateValue(DateOnly date)
-        {
-            return date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        }
-    }
+    // ----------------------------------
+    // TEACHER
+    // ----------------------------------
+    public string Department { get; set; } = string.Empty;
+    public string OfficeLocation { get; set; } = string.Empty;
+}
 
-    public class CandidateProfileDto
-    {
-        public int Id { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string Degree { get; set; } = string.Empty;
-        public string Location { get; set; } = string.Empty;
-        public string AcademicYear { get; set; } = string.Empty;
-        public List<string> AreasOfInterest { get; set; } = new();
-        public string Biography { get; set; } = string.Empty;
-        public List<CompetencyDto> Competencies { get; set; } = new();
-    }
+public class SkillDto
+{
+    public string Tag { get; set; } = string.Empty;
+    public int Level { get; set; } = 1;
+}
 
-    public class ProfileDto
-    {
-        public string Id { get; set; } = string.Empty;
-        public RoleType Role { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+public class CompetencyDto
+{
+    public string Name { get; set; } = string.Empty;
+    public int Score { get; set; }
+    public int MaxScore { get; set; } = 5;
+}
 
-        public string Bio { get; set; } = string.Empty;
-        public List<string> Interests { get; set; } = new();
+public class TagDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
 
-        // ----------------------------------
-        // STUDENT
-        // ----------------------------------
-        public string AcademicYear { get; set; } = string.Empty;
-        public List<SkillDto> Skills { get; set; } = new();
+public class LoginRequestDto
+{
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
+    public string Email { get; set; } = string.Empty;
 
-        // ----------------------------------
-        // TEACHER
-        // ----------------------------------
-        public string Department { get; set; } = string.Empty;
-        public string OfficeLocation { get; set; } = string.Empty;
-    }
-    public class SkillDto
-    {
-        public string Tag { get; set; } = string.Empty;
-        public int Level { get; set; } = 1;
-    }
+    [Required(ErrorMessage = "Password is required.")]
+    public string Password { get; set; } = string.Empty;
+}
 
-    public class CompetencyDto
-    {
-        public string Name { get; set; } = string.Empty;
-        public int Score { get; set; }
-        public int MaxScore { get; set; } = 5;
-    }
-    public class TagDto
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+public record OperationResult(bool IsSuccess, string Message, string? ErrorCode = null);
 
-    public class LoginRequestDto
-    {
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string Email { get; set; } = string.Empty;
+public class LoginResponseDto
+{
+    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+}
 
-        [Required(ErrorMessage = "Password is required.")]
-        public string Password { get; set; } = string.Empty;
-    }
+public class RegisterRequestDto
+{
+    [Required(ErrorMessage = "Email is required.")]
+    [EmailAddress(ErrorMessage = "Invalid email format.")]
+    public string Email { get; set; } = string.Empty;
 
-    public record ErrorRecord(bool IsSuccess, string Message, string? ErrorCode = null);
+    [Required(ErrorMessage = "Password is required.")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+    public string Password { get; set; } = string.Empty;
 
-    public class LoginResponseDto
-    {
-        public AuthResultDto AuthData { get; set; } = new AuthResultDto();
-        public string Name { get; set; } = string.Empty;
-        public string Surname { get; set; } = string.Empty;
-    }
+    [Required(ErrorMessage = "First name is required.")]
+    public string FirstName { get; set; } = string.Empty;
 
-    public class RegisterRequestDto
-    {
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
-        public string Email { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Last name is required.")]
+    public string LastName { get; set; } = string.Empty;
+}
 
-        [Required(ErrorMessage = "Password is required.")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
-        public string Password { get; set; } = string.Empty;
+public class RegisterResponseDto
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
+}
 
-        [Required(ErrorMessage = "First name is required.")]
-        public string Name { get; set; } = string.Empty;
+public class RefreshTokenRequestDto
+{
+    [Required]
+    public string UserId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Last name is required.")]
-        public string Surname { get; set; } = string.Empty;
-    }
-    public class RegisterResponseDto
-    {
-        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
-        public AuthResultDto AuthData { get; set; } = new AuthResultDto();
-    }
+    [Required]
+    public string RefreshToken { get; set; } = string.Empty;
+}
 
-    public class RefreshTokenRequestDto
-    {
-        [Required]
-        public string UserId { get; set; } = string.Empty;
+public class RefreshTokenResponseDto
+{
+    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
+}
 
-        [Required]
-        public string RefreshToken { get; set; } = string.Empty;
-    }
-
-    public class RefreshTokenResponseDto
-    {
-        public AuthResultDto AuthData { get; set; } = new AuthResultDto();
-    }
-
-    public class AuthResultDto
-    {
-        public bool IsSuccess { get; set; }
-
-        [JsonIgnore]
-        public string Token { get; set; } = string.Empty;
-
-        [JsonIgnore]
-        public string RefreshToken { get; set; } = string.Empty;
-
-        public string Message { get; set; } = string.Empty;
-    }
+public class AuthResultDto
+{
+    public bool IsSuccess { get; set; }
+    public string Message { get; set; } = string.Empty;
 }

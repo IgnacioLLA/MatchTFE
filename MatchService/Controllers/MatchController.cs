@@ -1,273 +1,311 @@
-﻿using MatchService.Services;
+using MatchService.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TFELibrary.Shared;
 
-namespace MatchService.Controllers
+namespace MatchService.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class MatchController : ControllerBase, IMatchController
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/[controller]")]
-    public class MatchController : ControllerBase, IMatchController
+    private readonly ITagService _tagService;
+    private readonly ITfeService _tfeService;
+    private readonly IProposalService _proposalService;
+    private readonly ILogger<MatchController> _logger;
+
+    public MatchController(ITagService tagService, ITfeService tfeService, IProposalService proposalService, ILogger<MatchController> logger)
     {
-        private readonly ITagService _tagService;
-        private readonly ITfeService _tfeService;
-        private readonly IProposalService _proposalService;
-        private readonly ILogger<MatchController> _logger;
+        _tagService = tagService;
+        _tfeService = tfeService;
+        _proposalService = proposalService;
+        _logger = logger;
+    }
 
-        public MatchController(ITagService tagService, ITfeService tfeService, IProposalService proposalService, ILogger<MatchController> logger)
+    [HttpGet("tag")]
+    public async Task<IActionResult> GetAllTags()
+    {
+        var tags = await _tagService.GetAllTagsAsync();
+        return Ok(tags);
+    }
+
+    [HttpGet("tag/{id}")]
+    public async Task<IActionResult> GetTagById(int id)
+    {
+        var tag = await _tagService.GetTagByIdAsync(id);
+        if (tag == null) return NotFound();
+        return Ok(tag);
+    }
+
+    [HttpPost("tag")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateTag([FromBody] TagCreationRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
         {
-            _tagService = tagService;
-            _tfeService = tfeService;
-            _proposalService = proposalService;
-            _logger = logger;
+            var created = await _tagService.CreateTagAsync(request);
+            return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
         }
-
-        [HttpGet("tag")]
-        public async Task<IActionResult> GetAllTags()
+        catch (InvalidOperationException ex)
         {
-            var tags = await _tagService.GetAllTagsAsync();
-            return Ok(tags);
+            return Conflict(ex.Message);
         }
+    }
 
-        [HttpGet("tag/{id}")]
-        public async Task<IActionResult> GetTagById(int id)
+    [HttpPut("tag/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        try
         {
-            var tag = await _tagService.GetTagByIdAsync(id);
-            if (tag == null) return NotFound();
-            return Ok(tag);
-        }
-
-        [HttpPost("tag")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> CreateTag([FromBody] TagCreationRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            try
-            {
-                var created = await _tagService.CreateTagAsync(request);
-                return CreatedAtAction(nameof(GetTagById), new { id = created.TagId }, created);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-        }
-
-        [HttpPut("tag/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            try
-            {
-                var updated = await _tagService.UpdateTagAsync(id, request);
-                if (!updated) return NotFound();
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
-        }
-
-        [HttpDelete("tag/{id}")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteTag(int id)
-        {
-            var deleted = await _tagService.DeleteTagAsync(id);
-            if (!deleted) return NotFound();
+            var updated = await _tagService.UpdateTagAsync(id, request);
+            if (!updated) return NotFound();
             return NoContent();
         }
-
-        [HttpPost("tfe")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request)
+        catch (ArgumentException ex)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            try
-            {
-                var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
-
-                var response = await _tfeService.CreateTfeAsync(request, authorId);
-
-                return CreatedAtAction(nameof(GetTfeById), new { id = response.TfeId }, response.Tfe);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            return BadRequest(ex.Message);
         }
-
-        [HttpGet("tfe/{id}")]
-        public async Task<IActionResult> GetTfeById(int id)
+        catch (InvalidOperationException ex)
         {
-            var tfe = await _tfeService.GetTfeByIdAsync(id);
-            if (tfe == null) return NotFound();
-            return Ok(tfe);
+            return Conflict(ex.Message);
         }
-        [HttpPut("tfe/{id}")]
-        public async Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+    }
 
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+    [HttpDelete("tag/{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> DeleteTag(int id)
+    {
+        var deleted = await _tagService.DeleteTagAsync(id);
+        if (!deleted) return NotFound();
+        return NoContent();
+    }
 
-            try
-            {
-                var isUpdated = await _tfeService.UpdateTfeAsync(id, request, authorId);
+    [HttpPost("tfe")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> CreateTfe([FromBody] TfeCreationRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                if (!isUpdated)
-                    return NotFound("La propuesta no existe o no tienes permisos para editarla.");
-
-                return NoContent();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected error while updating TFE {TfeId} for user {UserId}.", id, authorId);
-                return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
-            }
-        }
-
-        [HttpGet("tfe/author")]
-        public async Task<IActionResult> GetTfesByAuthor()
+        try
         {
             var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
 
+            var response = await _tfeService.CreateTfeAsync(request, authorId);
+
+            return CreatedAtAction(nameof(GetTfeById), new { id = response.TfeId }, response.Tfe);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
+    [HttpGet("tfe/{id}")]
+    public async Task<IActionResult> GetTfeById(int id)
+    {
+        if (id <= 0) return BadRequest("Invalid TFE ID.");
+
+        var tfe = await _tfeService.GetTfeByIdAsync(id);
+        if (tfe == null) return NotFound();
+        return Ok(tfe);
+    }
+
+    [HttpPut("tfe/{id}")]
+    public async Task<IActionResult> UpdateTfe(int id, [FromBody] TfeUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        try
+        {
+            var isUpdated = await _tfeService.UpdateTfeAsync(id, request, authorId);
+
+            if (!isUpdated)
+                return NotFound("La propuesta no existe o no tienes permisos para editarla.");
+
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while updating TFE {TfeId} for user {UserId}.", id, authorId);
+            return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
+        }
+    }
+
+    [HttpGet("tfe/author")]
+    public async Task<IActionResult> GetTfesByAuthor()
+    {
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        try
+        {
             var tfes = await _tfeService.GetTfesByAuthorIdAsync(authorId);
-
             return Ok(tfes);
         }
-
-        [HttpDelete("tfe/{id}")]
-        public async Task<IActionResult> DeleteTfe(int id)
+        catch (ArgumentException ex)
         {
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while retrieving TFEs for author {AuthorId}.", authorId);
+            return StatusCode(500, "Ocurrió un error al obtener los TFEs.");
+        }
+    }
 
+    [HttpDelete("tfe/{id}")]
+    public async Task<IActionResult> DeleteTfe(int id)
+    {
+        if (id <= 0) return BadRequest("Invalid TFE ID.");
+
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        try
+        {
             var deleted = await _tfeService.DeleteTfeAsync(id, authorId);
             if (!deleted) return NotFound("TFE not found or you don't have permission to delete it.");
-
             return NoContent();
         }
-
-        [HttpGet("tfe/recommended")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request)
+        catch (ArgumentException ex)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while deleting TFE {TfeId} for user {UserId}.", id, authorId);
+            return StatusCode(500, "Ocurrió un error al eliminar el TFE.");
+        }
+    }
 
+    [HttpGet("tfe/recommended")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> GetRecommendedTfes([FromQuery] TfeRecommendedRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+
+        try
+        {
             var response = await _tfeService.GetRecommendedTfesAsync(userId, request);
             return Ok(response);
         }
-
-        [HttpPost("proposal/tfe")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request)
+        catch (Exception ex)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _logger.LogError(ex, "Unexpected error while retrieving recommended TFEs for user {UserId}.", userId);
+            return StatusCode(500, "Ocurrió un error al obtener los TFEs recomendados.");
+        }
+    }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
+    [HttpPost("proposal/tfe")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var response = await _proposalService.CreateTfeProposalAsync(userId, request);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId)) return Unauthorized();
 
-            if (!response.Error.IsSuccess) return Conflict(response.Error.Message);
+        var response = await _proposalService.CreateTfeProposalAsync(userId, request);
+
+        if (!response.Error.IsSuccess)
+        {
+            return response.Error.ErrorCode switch
+            {
+                "DuplicateProposal" or "TfeExpired" => Conflict(response.Error.Message),
+                "TfeNotFound" => NotFound(response.Error.Message),
+                "DatabaseError" => StatusCode(500, response.Error.Message),
+                _ => BadRequest(response.Error.Message)
+            };
+        }
+        return Ok(response);
+    }
+
+    [HttpPut("proposal/tfe")]
+    public async Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var response = await _proposalService.UpdateTfeProposalAsync(request);
+
+        if (!response.Error.IsSuccess)
+        {
+            return response.Error.ErrorCode switch
+            {
+                "TfeExpired" or "InvalidProposalStatus" => Conflict(response.Error.Message),
+                "TfeNotFound" or "ProposalNotFound" => NotFound(response.Error.Message),
+                "DatabaseError" => StatusCode(500, response.Error.Message),
+                _ => BadRequest(response.Error.Message)
+            };
+        }
+        return Ok(response);
+    }
+
+    [HttpGet("proposal/tfe/matches")]
+    public async Task<IActionResult> GetAcceptedMatches()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrWhiteSpace(userId))
+            return Unauthorized(new { message = "Usuario no autenticado." });
+
+        try
+        {
+            var response = await _proposalService.GetAcceptedMatchesForUserAsync(userId);
+
+            if (!response.Error.IsSuccess)
+                return BadRequest(response);
+
             return Ok(response);
         }
-
-        [HttpPut("proposal/tfe")]
-        public async Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request)
+        catch (Exception ex)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var response = await _proposalService.UpdateTfeProposalAsync(request);
-
-            if (!response.Error.IsSuccess) return Conflict(response.Error.Message);
-            return Ok(response);
+            _logger.LogError(ex, "Unexpected error while retrieving accepted matches for user {UserId}.", userId);
+            return StatusCode(500, new { message = "Error al obtener los matches." });
         }
+    }
 
-        [HttpGet("proposal/tfe/matches")]
-        public async Task<IActionResult> GetAcceptedMatches()
+    [HttpPut("proposal/tfe/decision")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        var response = await _proposalService.DecideTfeCandidateAsync(authorId, request);
+
+        if (!response.Error.IsSuccess)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userId))
-                return Unauthorized(new { message = "Usuario no autenticado." });
-
-            try
+            return response.Error.ErrorCode switch
             {
-                var response = await _proposalService.GetAcceptedMatchesForUserAsync(userId);
-
-                if (!response.Error.IsSuccess)
-                    return BadRequest(response);
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected error while retrieving accepted matches for user {UserId}.", userId);
-                return StatusCode(500, new { message = "Error al obtener los matches." });
-            }
+                "Unauthorized" => Forbid(),
+                "TfeNotFound" or "ProposalNotFound" => NotFound(new { message = response.Error.Message }),
+                "TfeExpired" or "ProposalAlreadyResolved" or "InvalidStatus" => Conflict(new { message = response.Error.Message }),
+                "DatabaseError" => StatusCode(500, new { message = response.Error.Message }),
+                _ => BadRequest(new { message = response.Error.Message })
+            };
         }
-
-        [HttpPut("proposal/tfe/decision")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
-            var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
-
-            try
-            {
-                var response = await _proposalService.DecideTfeCandidateAsync(authorId, request);
-
-                return Ok(response);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                return Forbid();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(new { message = ex.Message });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Unexpected error while deciding on candidate {CandidateId} for TFE {TfeId}.", request?.CandidateId, request?.TfeId);
-                return StatusCode(500, new { message = "Error al decidir sobre el candidato." });
-            }
-        }
+        return Ok(response);
     }
 }

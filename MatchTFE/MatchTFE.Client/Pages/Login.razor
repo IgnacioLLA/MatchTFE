@@ -103,7 +103,7 @@
             {
                 var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
 
-                Snackbar.Add($"¡Bienvenido {result?.Name}!", Severity.Success);
+                Snackbar.Add($"¡Bienvenido {result?.FirstName}!", Severity.Success);
 
                 Navigation.NavigateTo("/", replace: true);
             }
