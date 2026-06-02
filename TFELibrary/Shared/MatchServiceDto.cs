@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -13,6 +13,7 @@ namespace TFELibrary.Shared
 
     public class TagCreationResponse
     {
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public TagDto Tag { get; set; }
         public int TagId { get; set; }
     }
@@ -32,6 +33,7 @@ namespace TFELibrary.Shared
 
     public class TfeCreationResponse
     {
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public TfeDto Tfe { get; set; }
         public int TfeId { get; set; }
     }
@@ -46,6 +48,7 @@ namespace TFELibrary.Shared
     }
     public class TfeRecommendedResponse
     {
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public List<TfeDto> Tfes { get; set; } = new();
         public int TotalCount { get; set; }
     }
@@ -61,8 +64,7 @@ namespace TFELibrary.Shared
 
     public class TfeProposalCreationResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
     }
 
     public class TfeProposalUpdateRequest
@@ -77,8 +79,7 @@ namespace TFELibrary.Shared
 
     public class TfeProposalUpdateResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
     }
 
     public class TfeCandidateDecisionRequest
@@ -95,8 +96,7 @@ namespace TFELibrary.Shared
 
     public class TfeCandidateDecisionResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public ProposalStatus Status { get; set; }
     }
 
@@ -115,7 +115,6 @@ namespace TFELibrary.Shared
         public string MatchedUserFullName { get; set; } = string.Empty;
         public string MatchedUserEmail { get; set; } = string.Empty;
         public RoleType MatchedUserRole { get; set; }
-        public string MatchedUserAvatarUrl { get; set; } = string.Empty;
         public string? MatchedUserAcademicYear { get; set; }
         public string? MatchedUserDepartment { get; set; }
         public int TfeId { get; set; }
@@ -127,8 +126,7 @@ namespace TFELibrary.Shared
 
     public class GetAcceptedMatchesResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public int TotalMatches { get; set; }
         public List<AcceptedMatchDto> Matches { get; set; } = new();
     }

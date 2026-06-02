@@ -7,14 +7,7 @@
 
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4 text-center">
                 <MudAvatar Size="Size.Large" Class="avatar-xl mb-4 mx-auto" Color="Color.Primary" Variant="Variant.Filled">
-                    @if (!string.IsNullOrWhiteSpace(Profile.AvatarUrl))
-                    {
-                        <MudImage Src="@Profile.AvatarUrl" Alt="@Profile.FirstName" />
-                    }
-                    else
-                    {
-                        <span class="font-weight-bold text-h4">@Profile.FirstName.FirstOrDefault()</span>
-                    }
+                    <span class="font-weight-bold text-h4">@Profile.FirstName.FirstOrDefault()</span>
                 </MudAvatar>
 
                 <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FirstName @Profile.LastName</MudText>

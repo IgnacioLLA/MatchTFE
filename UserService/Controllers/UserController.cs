@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System;
@@ -28,10 +28,8 @@ namespace UserService.Controllers
 
             var response = await _profileService.GetProfileByUserIdAsync(userId);
 
-            if (response == null || response.Profile == null)
-            {
-                return NotFound(new ProfileResponse(null));
-            }
+            if (!response.Error.IsSuccess || response.Profile == null)
+                return NotFound();
 
             return Ok(response);
         }
@@ -40,16 +38,12 @@ namespace UserService.Controllers
         public async Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId)
         {
             if (string.IsNullOrWhiteSpace(userId))
-            {
                 return BadRequest("Invalid ID.");
-            }
 
             var response = await _profileService.GetProfileByUserIdAsync(userId);
 
-            if (response == null || response.Profile == null)
-            {
+            if (!response.Error.IsSuccess || response.Profile == null)
                 return NotFound($"User not found: {userId}");
-            }
 
             return Ok(response);
         }
@@ -59,17 +53,23 @@ namespace UserService.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (request == null)
+                return BadRequest(new ProfileCreationResponse(new ErrorRecord(false, "Request payload cannot be null.")));
+
             if (string.IsNullOrWhiteSpace(userId) || userId != request.UserId)
                 return Unauthorized();
 
             var response = await _profileService.CreateProfileAsync(request);
 
-            if (!response.IsSuccess)
+            if (!response.Error.IsSuccess)
             {
+                if (response.Error.ErrorCode is "DuplicateEmail" or "DuplicateUserProfile")
+                    return Conflict(response);
+
                 return BadRequest(response);
             }
 
-            return Ok(response);
+            return CreatedAtAction(nameof(GetCurrentProfile), response);
         }
 
         [HttpPut("profile")]
@@ -78,31 +78,27 @@ namespace UserService.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Unauthorized(new ProfileUpdateResponse(false, "Could not identify the user."));
-            }
+                return Unauthorized(new ProfileUpdateResponse(new ErrorRecord(false, "Could not identify the user.")));
 
             var response = await _profileService.UpdateProfileAsync(userId, request);
 
-            if (response.IsSuccess)
-            {
+            if (response.Error.IsSuccess)
                 return Ok(response);
-            }
+
+            if (response.Error.ErrorCode == "UserNotFound")
+                return NotFound(response);
 
             return BadRequest(response);
         }
 
-        [HttpGet("tfe/{TfeId}/candidates")]
+        [HttpGet("tfe/{tfeId}/candidates")]
         [Authorize(Roles = "User")]
-        public async Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request)
+        public async Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] int tfeId)
         {
             var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
 
-            var response = await _profileService.GetProfileByTfeInterestAsync(request);
-
-            if (response == null || response.Interested == null || response.Interested.Count == 0)
-                return NotFound("No candidates found for this TFE interest.");
+            var response = await _profileService.GetProfileByTfeInterestAsync(new ProfileByTfeInterestRequest(tfeId));
 
             return Ok(response);
         }
@@ -112,23 +108,23 @@ namespace UserService.Controllers
         public async Task<ActionResult<RoleUpdateResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request)
         {
             if (string.IsNullOrWhiteSpace(userId))
-            {
-                return BadRequest(new RoleUpdateResponse(false, "Invalid user ID."));
-            }
+                return BadRequest(new RoleUpdateResponse(new ErrorRecord(false, "Invalid user ID.")));
+
+            if (request == null)
+                return BadRequest(new RoleUpdateResponse(new ErrorRecord(false, "Request body cannot be null.")));
 
             if (!Enum.IsDefined(typeof(RoleType), request.NewRole))
-            {
-                return BadRequest(new RoleUpdateResponse(false, "Invalid role type."));
-            }
+                return BadRequest(new RoleUpdateResponse(new ErrorRecord(false, "Invalid role type.")));
 
             var response = await _profileService.UpdateUserRoleAsync(userId, request.NewRole);
 
-            if (!response.IsSuccess)
-            {
-                return NotFound(response);
-            }
+            if (response.Error.IsSuccess)
+                return Ok(response);
 
-            return Ok(response);
+            if (response.Error.ErrorCode == "UserNotFound")
+                return NotFound(response);
+
+            return BadRequest(response);
         }
 
         [Authorize(Roles = "Admin")]

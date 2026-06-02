@@ -15,12 +15,14 @@ namespace MatchService.Controllers
         private readonly ITagService _tagService;
         private readonly ITfeService _tfeService;
         private readonly IProposalService _proposalService;
+        private readonly ILogger<MatchController> _logger;
 
-        public MatchController(ITagService tagService, ITfeService tfeService, IProposalService proposalService)
+        public MatchController(ITagService tagService, ITfeService tfeService, IProposalService proposalService, ILogger<MatchController> logger)
         {
             _tagService = tagService;
             _tfeService = tfeService;
             _proposalService = proposalService;
+            _logger = logger;
         }
 
         [HttpGet("tag")]
@@ -141,6 +143,7 @@ namespace MatchService.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while updating TFE {TfeId} for user {UserId}.", id, authorId);
                 return StatusCode(500, "Ocurrió un error al actualizar el TFE.");
             }
         }
@@ -148,8 +151,6 @@ namespace MatchService.Controllers
         [HttpGet("tfe/author")]
         public async Task<IActionResult> GetTfesByAuthor()
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-
             var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
 
@@ -192,7 +193,7 @@ namespace MatchService.Controllers
 
             var response = await _proposalService.CreateTfeProposalAsync(userId, request);
 
-            if (!response.Success) return Conflict(response.Message);
+            if (!response.Error.IsSuccess) return Conflict(response.Error.Message);
             return Ok(response);
         }
 
@@ -203,7 +204,7 @@ namespace MatchService.Controllers
 
             var response = await _proposalService.UpdateTfeProposalAsync(request);
 
-            if (!response.Success) return Conflict(response.Message);
+            if (!response.Error.IsSuccess) return Conflict(response.Error.Message);
             return Ok(response);
         }
 
@@ -219,13 +220,14 @@ namespace MatchService.Controllers
             {
                 var response = await _proposalService.GetAcceptedMatchesForUserAsync(userId);
 
-                if (!response.Success)
+                if (!response.Error.IsSuccess)
                     return BadRequest(response);
 
                 return Ok(response);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while retrieving accepted matches for user {UserId}.", userId);
                 return StatusCode(500, new { message = "Error al obtener los matches." });
             }
         }
@@ -261,8 +263,9 @@ namespace MatchService.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error while deciding on candidate {CandidateId} for TFE {TfeId}.", request?.CandidateId, request?.TfeId);
                 return StatusCode(500, new { message = "Error al decidir sobre el candidato." });
             }
         }

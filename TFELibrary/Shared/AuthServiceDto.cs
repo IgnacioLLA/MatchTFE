@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -18,8 +18,7 @@ namespace TFELibrary.Shared
 
     public class UserRoleUpdateResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
     }
 
     public class BulkUserImportRequest
@@ -32,8 +31,7 @@ namespace TFELibrary.Shared
 
     public class BulkUserImportResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public int ImportedCount { get; set; }
     }
 
@@ -53,8 +51,7 @@ namespace TFELibrary.Shared
 
     public class BulkUserActionResponse
     {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public int AffectedCount { get; set; }
     }
 }

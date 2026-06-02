@@ -110,7 +110,7 @@
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-                var errorMessage = errorResult?.AuthData?.ErrorMessage ?? "Email o contraseña incorrectos.";
+                var errorMessage = errorResult?.AuthData?.Message ?? "Email o contraseña incorrectos.";
 
                 Snackbar.Add(errorMessage, Severity.Error);
             }

@@ -32,7 +32,7 @@ namespace MatchService.Services
             try
             {
                 tag = await _tagRepository.CreateAsync(tag);
-                return new TagCreationResponse { Tag = CreateTagDto(tag), TagId = tag.Id };
+                return new TagCreationResponse { Error = new ErrorRecord(true, "Tag created successfully."), Tag = CreateTagDto(tag), TagId = tag.Id };
             }
             catch (DbUpdateException ex)
             {

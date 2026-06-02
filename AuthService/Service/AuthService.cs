@@ -1,4 +1,4 @@
-﻿using AuthService.Data;
+using AuthService.Data;
 using AuthService.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -45,15 +45,19 @@ namespace AuthService.Service
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return new RegisterResponseDto { IsSuccess = false, ErrorMessage = errors };
+                var isDuplicateUser = result.Errors.Any(e =>
+                    e.Code.Contains("Duplicate", StringComparison.OrdinalIgnoreCase));
+
+                return new RegisterResponseDto
+                {
+                    Error = new ErrorRecord(false, errors, isDuplicateUser ? "DuplicateEmail" : null),
+                    AuthData = new AuthResultDto { IsSuccess = false, Message = errors }
+                };
             }
 
-            var roleResult = await _authRepository.AddToRoleAsync(newUser, "User");
+            var roleResult = await _authRepository.AddToRoleAsync(newUser, Roles.User);
             if (!roleResult.Succeeded)
-                _logger.LogWarning($"No se pudo asignar el rol 'User' al usuario {newUser.Id}.");
-
-
-            // New user token generation
+                _logger.LogWarning("Failed to assign the 'User' role to user {UserId}.", newUser.Id);
 
             var authResult = await GenerateAndSaveTokensAsync(newUser);
             try
@@ -63,7 +67,6 @@ namespace AuthService.Service
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
 
                 ProfileCreationRequest profile = new ProfileCreationRequest(
-
                     newUser.Id,
                     new ProfileDto
                     {
@@ -77,18 +80,36 @@ namespace AuthService.Service
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning($"Usuario {newUser.Id} registrado, pero falló la creación del perfil en UserService. StatusCode: {response.StatusCode}");
+                    _logger.LogWarning("User {UserId} registered but profile creation in UserService failed. StatusCode: {StatusCode}", newUser.Id, response.StatusCode);
+
+                    var profileResponse = await response.Content.ReadFromJsonAsync<ProfileCreationResponse>();
+                    var errorMessage = profileResponse?.Error.Message ?? "Could not create the user profile.";
+
+                    await _authRepository.DeleteUserAsync(newUser);
+
+                    return new RegisterResponseDto
+                    {
+                        Error = new ErrorRecord(false, errorMessage, profileResponse?.Error.ErrorCode),
+                        AuthData = new AuthResultDto { IsSuccess = false, Message = errorMessage }
+                    };
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error crítico conectando con UserService durante el registro.");
+                _logger.LogError(ex, "Critical error connecting to UserService during registration.");
+                await _authRepository.DeleteUserAsync(newUser);
+
+                const string errorMessage = "Could not create the user profile.";
+                return new RegisterResponseDto
+                {
+                    Error = new ErrorRecord(false, errorMessage),
+                    AuthData = new AuthResultDto { IsSuccess = false, Message = errorMessage }
+                };
             }
 
             return new RegisterResponseDto
             {
-                IsSuccess = true,
-                ErrorMessage = string.Empty,
+                Error = new ErrorRecord(true, string.Empty),
                 AuthData = authResult
             };
         }
@@ -101,7 +122,7 @@ namespace AuthService.Service
             {
                 return new LoginResponseDto
                 {
-                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid credentials." }
+                    AuthData = new AuthResultDto { IsSuccess = false, Message = "Invalid credentials." }
                 };
             }
 
@@ -121,19 +142,19 @@ namespace AuthService.Service
 
             if (!IsValidToken(request.RefreshToken, refreshSecret))
             {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token expirado, falso o incorrecto." } };
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Token expirado, falso o incorrecto." } };
             }
 
             var user = await _authRepository.GetUserByIdAsync(request.UserId);
 
             if (user == null)
             {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." } };
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "User not found." } };
             }
 
             if (await _authRepository.GetRefreshTokenAsync(user) != request.RefreshToken)
             {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token revocado o reemplazado." } };
+                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Token revocado o reemplazado." } };
             }
 
             var authResult = await GenerateAndSaveTokensAsync(user);
@@ -168,7 +189,7 @@ namespace AuthService.Service
                 IsSuccess = true,
                 Token = jwtToken,
                 RefreshToken = newRefreshToken,
-                ErrorMessage = string.Empty
+                Message = string.Empty
             };
         }
 
@@ -182,7 +203,6 @@ namespace AuthService.Service
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                //new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -202,7 +222,6 @@ namespace AuthService.Service
 
         public async Task<bool> LogoutAsync(string id)
         {
-            //var user = await _authRepository.GetUserByEmailAsync(email);
             var user = await _authRepository.GetUserByIdAsync(id);
             if (user == null) return false;
 
@@ -214,7 +233,7 @@ namespace AuthService.Service
         private bool IsValidToken(string token, string secretKey)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
-            
+
             var validationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
@@ -245,36 +264,34 @@ namespace AuthService.Service
 
             if (user == null)
             {
-                response.Success = false;
-                response.Message = $"No user found with email '{request.Email}'.";
+                response.Error = new ErrorRecord(false, $"No user found with email '{request.Email}'.");
                 return response;
             }
 
             if (user.Id == currentUserId)
             {
-                response.Success = false;
-                response.Message = "You cannot change your own role.";
+                response.Error = new ErrorRecord(false, "You cannot change your own role.");
                 return response;
             }
 
             var newRoleString = request.NewRole.ToString();
             var currentRoles = await _authRepository.GetUserRolesAsync(user);
 
-            if (currentRoles.Count == 1 && currentRoles.Contains(newRoleString))
+            if (currentRoles.Count == 1 && currentRoles.Contains(newRoleString, StringComparer.OrdinalIgnoreCase))
             {
-                response.Success = true;
-                response.Message = "The user already has this role assigned.";
+                response.Error = new ErrorRecord(true, "The user already has this role assigned.");
                 return response;
             }
 
             var isExecutionOk = true;
+            var errorMessage = string.Empty;
 
             foreach (var role in currentRoles)
             {
                 var removeResult = await _authRepository.RemoveFromRoleAsync(user, role);
                 if (!removeResult.Succeeded)
                 {
-                    response.Message = $"Failed to remove the previous role '{role}'.";
+                    errorMessage = $"Failed to remove the previous role '{role}'.";
                     isExecutionOk = false;
                     break;
                 }
@@ -282,19 +299,18 @@ namespace AuthService.Service
 
             if (isExecutionOk)
             {
-                newRoleString = getAspNetRole(request.NewRole);
+                newRoleString = GetAspNetRole(request.NewRole);
                 var addResult = await _authRepository.AddToRoleAsync(user, newRoleString);
                 if (!addResult.Succeeded)
                 {
-                    response.Message = $"Failed to assign the new role '{newRoleString}'.";
+                    errorMessage = $"Failed to assign the new role '{newRoleString}'.";
                     isExecutionOk = false;
                 }
             }
 
             if (isExecutionOk)
             {
-                response.Success = true;
-                response.Message = $"Role successfully updated to {newRoleString}.";
+                response.Error = new ErrorRecord(true, $"Role successfully updated to {newRoleString}.");
 
                 try
                 {
@@ -321,67 +337,66 @@ namespace AuthService.Service
 
                     if (!apiResponse.IsSuccessStatusCode)
                     {
-                        _logger.LogWarning($"Role for user {user.Id} was locally updated but failed in UserService. StatusCode: {apiResponse.StatusCode}");
+                        _logger.LogWarning("Role for user {UserId} was updated locally but failed in UserService. StatusCode: {StatusCode}", user.Id, apiResponse.StatusCode);
                     }
-
-                    _logger.LogWarning($"Role for user {user.Id} was locally updated and in UserService. StatusCode: {apiResponse.StatusCode}");
+                    else
+                    {
+                        _logger.LogInformation("Role for user {UserId} updated successfully in UserService.", user.Id);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Crítical error connecting to UserService during role change.");
+                    _logger.LogError(ex, "Critical error connecting to UserService during role change.");
                 }
             }
             else
             {
-                response.Success = false;
+                response.Error = new ErrorRecord(false, errorMessage);
             }
 
             return response;
         }
 
-        private string getAspNetRole(RoleType Role)
+        private static string GetAspNetRole(RoleType role)
         {
-
-            if (Role.Equals(RoleType.Admin))
-                return "Admin";
-            if (Role.Equals(RoleType.Teacher) || Role.Equals(RoleType.Student))
-                return "User";
-            else
-                throw new ArgumentException("Invalid role.");
+            if (role == RoleType.Admin)
+                return Roles.Admin;
+            if (role == RoleType.Teacher || role == RoleType.Student)
+                return Roles.User;
+            throw new ArgumentException("Invalid role.");
         }
 
         public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId)
         {
-            var response = new BulkUserActionResponse { Success = true, AffectedCount = 0 };
+            var response = new BulkUserActionResponse { AffectedCount = 0 };
 
             if (request.UserIds.Contains(currentUserId))
             {
-                response.Success = false;
-                response.Message = "You cannot perform actions on yourself.";
+                response.Error = new ErrorRecord(false, "You cannot perform actions on yourself.");
                 return response;
             }
 
             if (request.Action == BulkUserActionType.Delete)
             {
-                foreach (var userId in request.UserIds)
+                var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+                foreach (var user in users)
                 {
-                    var user = await _authRepository.GetUserByIdAsync(userId);
-                    if (user != null)
+                    var result = await _authRepository.DeleteUserAsync(user);
+                    if (result.Succeeded)
                     {
-                        var result = await _authRepository.DeleteUserAsync(user);
-                        if (result.Succeeded)
-                        {
-                            response.AffectedCount++;
-                        }
+                        response.AffectedCount++;
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to delete user {UserId}: {Errors}", user.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
                     }
                 }
 
-                response.Message = $"Successfully deleted {response.AffectedCount} user(s).";
+                response.Error = new ErrorRecord(true, $"Successfully deleted {response.AffectedCount} user(s).");
             }
             else
             {
-                response.Success = false;
-                response.Message = "Action not supported.";
+                response.Error = new ErrorRecord(false, "Action not supported.");
             }
 
             return response;

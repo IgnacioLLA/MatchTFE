@@ -105,7 +105,7 @@
                 var result = System.Text.Json.JsonSerializer.Deserialize<GetAcceptedMatchesResponse>(json,
                     new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                if (result?.Success == true && result.Matches != null)
+                if (result?.Error.IsSuccess == true && result.Matches != null)
                 {
                     _tfeMatches = result.Matches
                         .DistinctBy(m => m.TfeId)

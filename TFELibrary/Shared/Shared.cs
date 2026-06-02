@@ -6,6 +6,12 @@ using TFELibrary.Data;
 
 namespace TFELibrary.Shared
 {
+    public static class Roles
+    {
+        public const string Admin = "Admin";
+        public const string User = "User";
+    }
+
     public enum RoleType
     {
         Student,
@@ -69,7 +75,6 @@ namespace TFELibrary.Shared
         public string Degree { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public string AcademicYear { get; set; } = string.Empty;
-        public string AvatarUrl { get; set; } = string.Empty;
         public List<string> AreasOfInterest { get; set; } = new();
         public string Biography { get; set; } = string.Empty;
         public List<CompetencyDto> Competencies { get; set; } = new();
@@ -85,7 +90,6 @@ namespace TFELibrary.Shared
 
         public string Bio { get; set; } = string.Empty;
         public List<string> Interests { get; set; } = new();
-        public string AvatarUrl { get; set; } = string.Empty;
 
         // ----------------------------------
         // STUDENT
@@ -127,6 +131,8 @@ namespace TFELibrary.Shared
         public string Password { get; set; } = string.Empty;
     }
 
+    public record ErrorRecord(bool IsSuccess, string Message, string? ErrorCode = null);
+
     public class LoginResponseDto
     {
         public AuthResultDto AuthData { get; set; } = new AuthResultDto();
@@ -152,8 +158,7 @@ namespace TFELibrary.Shared
     }
     public class RegisterResponseDto
     {
-        public bool IsSuccess { get; set; }
-        public string? ErrorMessage { get; set; }
+        public ErrorRecord Error { get; set; } = new ErrorRecord(false, string.Empty);
         public AuthResultDto AuthData { get; set; } = new AuthResultDto();
     }
 
@@ -181,6 +186,6 @@ namespace TFELibrary.Shared
         [JsonIgnore]
         public string RefreshToken { get; set; } = string.Empty;
 
-        public string ErrorMessage { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
     }
 }

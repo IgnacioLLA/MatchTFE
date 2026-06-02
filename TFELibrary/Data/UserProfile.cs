@@ -28,8 +28,6 @@ namespace TFELibrary.Data
         public string LastName { get; set; } = string.Empty;
         [MaxLength(2000)]
         public string? Bio { get; set; }
-        [MaxLength(1000)]
-        public string AvatarUrl { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<UserInterest> UserInterests { get; set; } = new List<UserInterest>();

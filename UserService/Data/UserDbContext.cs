@@ -38,6 +38,10 @@ namespace UserService.Data
                 .IsUnique();
 
             builder.Entity<UserProfile>()
+                .HasIndex(p => p.Email)
+                .IsUnique();
+
+            builder.Entity<UserProfile>()
                 .Property(e => e.Role)
                 .HasConversion<string>();
 

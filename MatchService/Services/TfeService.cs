@@ -37,7 +37,7 @@ namespace MatchService.Services
                 var createdTfe = await _tfeRepository.CreateAsync(tfe);
                 var dto = CreateTfeDto(createdTfe);
 
-                return new TfeCreationResponse { Tfe = dto, TfeId = createdTfe.Id };
+                return new TfeCreationResponse { Error = new ErrorRecord(true, "TFE created successfully."), Tfe = dto, TfeId = createdTfe.Id };
             }
             catch (DbUpdateException ex)
             {
@@ -59,13 +59,12 @@ namespace MatchService.Services
             var tfes = await _tfeRepository.GetByAuthorIdAsync(authorId);
             var tfeIds = tfes.Select(t => t.Id).ToList();
 
-            // Traer todos los contadores en una sola consulta
             var interestedCounts = await _proposalRepository.GetInterestedCountsByTfeIdsAsync(tfeIds);
 
-            var dtos = tfes.Select(t => 
+            var dtos = tfes.Select(t =>
             {
                 var dto = CreateTfeDto(t);
-                dto.InterestedAmount = interestedCounts.ContainsKey(t.Id) ? interestedCounts[t.Id] : 0;
+                dto.InterestedAmount = interestedCounts.GetValueOrDefault(t.Id, 0);
                 return dto;
             }).ToList();
 
@@ -130,6 +129,7 @@ namespace MatchService.Services
 
             return new TfeRecommendedResponse
             {
+                Error = new ErrorRecord(true, string.Empty),
                 Tfes = tfeDtos,
                 TotalCount = tfeDtos.Count
             };
@@ -201,12 +201,17 @@ namespace MatchService.Services
             tfeEntity.Topics = new List<Tag>();
             tfeEntity.RequiredSkills = new List<TfeRequiredSkill>();
 
+            var topicNames = dto.Topics?.Select(t => t.Name) ?? Enumerable.Empty<string>();
+            var skillNames = dto.RequiredSkills?.Select(s => s.Tag) ?? Enumerable.Empty<string>();
+            var allNames = topicNames.Concat(skillNames).Distinct();
+
+            var tagMap = await _tagRepository.GetByNamesAsync(allNames);
+
             if (dto.Topics != null)
             {
                 foreach (var topicDto in dto.Topics)
                 {
-                    var tag = await _tagRepository.GetByNameAsync(topicDto.Name);
-                    if (tag == null)
+                    if (!tagMap.TryGetValue(topicDto.Name, out var tag))
                         throw new ArgumentException($"Invalid '{topicDto.Name}' tag. Not found.");
                     tfeEntity.Topics.Add(tag);
                 }
@@ -216,8 +221,7 @@ namespace MatchService.Services
             {
                 foreach (var skillDto in dto.RequiredSkills)
                 {
-                    var skillTag = await _tagRepository.GetByNameAsync(skillDto.Tag);
-                    if (skillTag == null)
+                    if (!tagMap.TryGetValue(skillDto.Tag, out var skillTag))
                         throw new ArgumentException($"Invalid '{skillDto.Tag}' tag. Not found.");
 
                     tfeEntity.RequiredSkills.Add(new TfeRequiredSkill

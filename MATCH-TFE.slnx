@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/test/">
+    <Project Path="../MatchTFE.UnitTest/MatchTFE.UnitTest.csproj" Id="d1aff123-1b42-475e-a4c6-d8271dc5a9b6" />
+  </Folder>
   <Project Path="AuthService/AuthService.csproj" Id="d0f6b60e-a5df-4610-974a-4b07777c26cb" />
   <Project Path="docker-compose.dcproj">
     <Build />

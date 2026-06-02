@@ -26,14 +26,7 @@ else
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-4">
             <MudCardContent Class="d-flex align-center flex-wrap gap-4">
                 <MudAvatar Color="Color.Primary" Class="avatar-xl font-weight-bold">
-                    @if (!string.IsNullOrEmpty(GlobalProfile?.AvatarUrl))
-                    {
-                        <MudImage Src="@GlobalProfile.AvatarUrl" Alt="Foto de perfil" />
-                    }
-                    else
-                    {
-                        @($"{GlobalProfile?.FirstName?.FirstOrDefault()}{GlobalProfile?.LastName?.FirstOrDefault()}".ToUpper())
-                    }
+                    @($"{GlobalProfile?.FirstName?.FirstOrDefault()}{GlobalProfile?.LastName?.FirstOrDefault()}".ToUpper())
                 </MudAvatar>
                 <div class="flex-grow-1">
                     <MudText Typo="Typo.h5" Class="app-title-tight mb-1">@_profileDto.FirstName @_profileDto.LastName</MudText>
@@ -209,7 +202,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<ProfileUpdateResponse>();
-                if (result != null && result.IsSuccess && result.UpdatedProfile != null)
+                if (result != null && result.Error.IsSuccess && result.UpdatedProfile != null)
                 {
                     SyncGlobalProfile(result.UpdatedProfile);
                     _profileDto = result.UpdatedProfile;
@@ -217,7 +210,7 @@ else
                 }
                 else
                 {
-                    Snackbar.Add(result?.Message ?? "Error processing response.", Severity.Warning);
+                    Snackbar.Add(result?.Error.Message ?? "Error processing response.", Severity.Warning);
                 }
             }
             else

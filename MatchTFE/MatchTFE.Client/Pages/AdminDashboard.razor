@@ -138,14 +138,7 @@
             <MudTd DataLabel="User">
                 <div class="d-flex align-center">
                     <MudAvatar Size="Size.Small" Color="Color.Primary" Class="mr-3">
-                        @if (!string.IsNullOrWhiteSpace(context.AvatarUrl))
-                        {
-                            <MudImage Src="@context.AvatarUrl" />
-                        }
-                        else
-                        {
-                            @context.FirstName.FirstOrDefault()
-                        }
+                        @context.FirstName.FirstOrDefault()
                     </MudAvatar>
                     <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.FirstName @context.LastName</MudText>
                 </div>
@@ -466,16 +459,16 @@
             var response = await client.PutAsJsonAsync("api/auth/role", request);
             var result = await response.Content.ReadFromJsonAsync<UserRoleUpdateResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Message, Severity.Success);
+                Snackbar.Add(result.Error.Message, Severity.Success);
                 await LoadUsersAsync();
                 _roleUpdateEmail = string.Empty;
                 _roleUpdateSelection = null;
             }
             else
             {
-                _roleUpdateError = result?.Message ?? "Failed to update role.";
+                _roleUpdateError = result?.Error.Message ?? "Failed to update role.";
             }
         }
         catch (Exception)
@@ -510,15 +503,15 @@
             var response = await client.PostAsJsonAsync("api/auth/import", request);
             var result = await response.Content.ReadFromJsonAsync<BulkUserImportResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add($"{result.Message} ({result.ImportedCount} imported)", Severity.Success);
+                Snackbar.Add($"{result.Error.Message} ({result.ImportedCount} imported)", Severity.Success);
                 _uploadedFile = null;
                 await LoadUsersAsync();
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Failed to import users.", Severity.Error);
+                Snackbar.Add(result?.Error.Message ?? "Failed to import users.", Severity.Error);
             }
         }
         catch (Exception)
@@ -545,15 +538,15 @@
             var response = await client.PostAsJsonAsync("api/auth/bulk-action", request);
             var result = await response.Content.ReadFromJsonAsync<BulkUserActionResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Message, actionType == BulkUserActionType.Delete ? Severity.Success : Severity.Warning);
+                Snackbar.Add(result.Error.Message, actionType == BulkUserActionType.Delete ? Severity.Success : Severity.Warning);
                 _selectedUsers.Clear();
                 await LoadUsersAsync();
             }
             else
             {
-                _bulkActionError = result?.Message ?? "Bulk action failed.";
+                _bulkActionError = result?.Error.Message ?? "Bulk action failed.";
             }
         }
         catch (Exception)

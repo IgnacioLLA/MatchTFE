@@ -1,6 +1,7 @@
 ﻿using AuthService.Repositories;
 using AuthService.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchTFE.AuthService.Repositories;
 
@@ -50,6 +51,14 @@ public class AuthRepository : IAuthRepository
     public async Task<MatchUser?> GetUserByIdAsync(string userId)
     {
         return await _userManager.FindByIdAsync(userId);
+    }
+
+    public async Task<List<MatchUser>> GetUsersByIdsAsync(IEnumerable<string> userIds)
+    {
+        var idList = userIds.ToList();
+        return await _userManager.Users
+            .Where(u => idList.Contains(u.Id))
+            .ToListAsync();
     }
     public async Task<IList<string>> GetUserRolesAsync(MatchUser user)
     {

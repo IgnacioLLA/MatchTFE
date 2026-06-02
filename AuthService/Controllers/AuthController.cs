@@ -69,8 +69,13 @@ namespace AuthService.Controllers
 
             var result = await _authService.RegisterAsync(request);
 
-            if (!result.IsSuccess)
+            if (!result.Error.IsSuccess)
             {
+                if (result.Error.ErrorCode is "DuplicateEmail" or "DuplicateUserProfile")
+                {
+                    return Conflict(result);
+                }
+
                 return BadRequest(result);
             }
 
@@ -130,7 +135,7 @@ namespace AuthService.Controllers
                 HttpOnly = true,
                 // Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(TokenCookieLifetime)
+                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
             };
 
             var refreshCookieOptions = new CookieOptions
@@ -138,7 +143,7 @@ namespace AuthService.Controllers
                 HttpOnly = true,
                 // Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(TokenCookieLifetime)
+                Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
             };
 
             Response.Cookies.Append("AccessToken", response.AuthData.Token, jwtCookieOptions);
@@ -195,15 +200,14 @@ namespace AuthService.Controllers
             {
                 return BadRequest(new UserRoleUpdateResponse
                 {
-                    Success = false,
-                    Message = "Invalid request format."
+                    Error = new ErrorRecord(false, "Invalid request format.")
                 });
             }
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var response = await _authService.ChangeUserRoleAsync(request, currentUserId);
 
-            if (!response.Success)
+            if (!response.Error.IsSuccess)
             {
                 return BadRequest(response);
             }
@@ -217,10 +221,9 @@ namespace AuthService.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(new BulkUserImportResponse 
-                { 
-                    Success = false, 
-                    Message = "Invalid file or request format." 
+                return BadRequest(new BulkUserImportResponse
+                {
+                    Error = new ErrorRecord(false, "Invalid file or request format.")
                 });
             }
 
@@ -228,11 +231,10 @@ namespace AuthService.Controllers
 
             var response = new BulkUserImportResponse
             {
-                Success = false,
-                Message = "Invalid file or request format."
+                Error = new ErrorRecord(false, "Invalid file or request format.")
             };
 
-            if (!response.Success)
+            if (!response.Error.IsSuccess)
             {
                 return BadRequest(response);
             }
@@ -248,15 +250,14 @@ namespace AuthService.Controllers
             {
                 return BadRequest(new BulkUserActionResponse
                 {
-                    Success = false,
-                    Message = "Invalid request format."
+                    Error = new ErrorRecord(false, "Invalid request format.")
                 });
             }
 
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var response = await _authService.ExecuteBulkActionAsync(request, currentUserId);
 
-            if (!response.Success)
+            if (!response.Error.IsSuccess)
             {
                 return BadRequest(response);
             }

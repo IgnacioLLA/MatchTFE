@@ -1,11 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace TFELibrary.Shared
 {
     public record ProfileResponse(
-        ProfileDto Profile
+        ErrorRecord Error,
+        ProfileDto? Profile = null
     );
 
     public record ProfileCreationRequest(
@@ -14,8 +15,7 @@ namespace TFELibrary.Shared
     );
 
     public record ProfileCreationResponse(
-        bool IsSuccess,
-        string Message, 
+        ErrorRecord Error,
         string? UserId = null
     );
 
@@ -24,8 +24,7 @@ namespace TFELibrary.Shared
     );
 
     public record ProfileUpdateResponse(
-        bool IsSuccess,
-        string Message,
+        ErrorRecord Error,
         ProfileDto? UpdatedProfile = null
     );
 
@@ -33,16 +32,12 @@ namespace TFELibrary.Shared
 
     );
 
-    public record ProfileLogoutResponse(
-        bool IsSuccess,
-        string Message
-    );
-
     public record ProfileByTfeInterestRequest(
         int TfeId
     );
 
     public record ProfileByTfeInterestResponse(
+        ErrorRecord Error,
         List<TfeCandidateDto> Interested
     );
 
@@ -50,17 +45,13 @@ namespace TFELibrary.Shared
         RoleType NewRole
     );
 
-    public record ChangeRoleResponse(
-        bool IsSuccess,
-        string Message
-    );
-
     public record GetAllProfilesRequest();
 
     public record GetAllProfilesResponse(
+        ErrorRecord Error,
         List<ProfileDto> Profiles
     );
 
-    public record RoleUpdateResponse(bool IsSuccess, string Message);
+    public record RoleUpdateResponse(ErrorRecord Error);
 
 }

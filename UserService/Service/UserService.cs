@@ -1,7 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Npgsql;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 using UserService.Repositories;
@@ -11,58 +15,92 @@ namespace UserService.Service
     public class UserService : IUserService
     {
         private readonly IUserProfileRepository _userRepository;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserProfileRepository userRepository)
+        private static readonly EmailAddressAttribute _emailValidator = new();
+
+        public UserService(IUserProfileRepository userRepository, ILogger<UserService> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<ProfileResponse?> GetProfileByUserIdAsync(string userId)
+        public async Task<ProfileResponse> GetProfileByUserIdAsync(string userId)
         {
             if (string.IsNullOrWhiteSpace(userId))
-                return null;
+                return new ProfileResponse(new ErrorRecord(false, "User ID is required."));
 
             var entity = await _userRepository.GetByUserIdAsync(userId);
 
             if (entity == null)
-                return null;
+                return new ProfileResponse(new ErrorRecord(false, "User not found.", "UserNotFound"));
 
-            var dto = GetProfileDto(entity);
-
-            return new ProfileResponse(dto);
+            return new ProfileResponse(new ErrorRecord(true, string.Empty), GetProfileDto(entity));
         }
+
         public async Task<ProfileCreationResponse> CreateProfileAsync(ProfileCreationRequest request)
         {
             if (request == null)
-                return new ProfileCreationResponse(false, "Request payload cannot be null.");
+                return new ProfileCreationResponse(new ErrorRecord(false, "Request payload cannot be null."));
 
             if (request.Profile == null)
-                return new ProfileCreationResponse(false, "Profile data is required.");
+                return new ProfileCreationResponse(new ErrorRecord(false, "Profile data is required."));
+
+            var prof = request.Profile;
+
+            if (string.IsNullOrWhiteSpace(prof.FirstName) || string.IsNullOrWhiteSpace(prof.LastName))
+                return new ProfileCreationResponse(new ErrorRecord(false, "First name and last name are required."));
+
+            if (string.IsNullOrWhiteSpace(prof.Email))
+                return new ProfileCreationResponse(new ErrorRecord(false, "Email is required."));
+
+            if (!_emailValidator.IsValid(prof.Email))
+                return new ProfileCreationResponse(new ErrorRecord(false, "Invalid email format.", "InvalidEmail"));
 
             if (string.IsNullOrWhiteSpace(request.UserId))
-                return new ProfileCreationResponse(false, "User ID is required.");
+                return new ProfileCreationResponse(new ErrorRecord(false, "User ID is required."));
 
-            var profDto = request.Profile;
             var newProfile = new UserProfile
             {
                 UserId = request.UserId,
-                FirstName = profDto.FirstName ?? string.Empty,
-                LastName = profDto.LastName ?? string.Empty,
-                Email = profDto.Email ?? string.Empty
+                FirstName = prof.FirstName,
+                LastName = prof.LastName,
+                Email = prof.Email
             };
 
-            await _userRepository.CreateProfileAsync(newProfile);
+            try
+            {
+                await _userRepository.CreateProfileAsync(newProfile);
+            }
+            catch (DbUpdateException ex) when (TryGetUniqueConstraintName(ex, out var constraintName))
+            {
+                if (IsEmailConstraint(constraintName))
+                {
+                    return new ProfileCreationResponse(
+                        new ErrorRecord(false, "A profile already exists with this email.", "DuplicateEmail")
+                    );
+                }
 
-            return new ProfileCreationResponse(true, "Profile created successfully.", newProfile.UserId);
+                return new ProfileCreationResponse(
+                    new ErrorRecord(false, "A profile already exists for this user.", "DuplicateUserProfile")
+                );
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Database error while creating profile for user {UserId}.", request.UserId);
+                return new ProfileCreationResponse(new ErrorRecord(false, "Could not create profile due to a database error.", "DatabaseError"));
+            }
+
+            return new ProfileCreationResponse(new ErrorRecord(true, "Profile created successfully."), newProfile.UserId);
         }
 
         public async Task<ProfileUpdateResponse> UpdateProfileAsync(string userId, ProfileUpdateRequest request)
         {
             if (string.IsNullOrWhiteSpace(userId))
-                return new ProfileUpdateResponse(false, "User ID is required.");
+                return new ProfileUpdateResponse(new ErrorRecord(false, "User ID is required."));
 
             if (request?.Profile == null)
-                return new ProfileUpdateResponse(false, "Profile data cannot be empty.");
+                return new ProfileUpdateResponse(new ErrorRecord(false, "Profile data cannot be empty."));
 
             var entity = new UserProfile
             {
@@ -76,57 +114,88 @@ namespace UserService.Service
                 OfficeLocation = request.Profile.OfficeLocation
             };
 
-            var isSaved = await _userRepository.UpdateUserProfileAsync(entity, request.Profile.Interests, request.Profile.Skills);
+            try
+            {
+                var isSaved = await _userRepository.UpdateUserProfileAsync(entity, request.Profile.Interests, request.Profile.Skills);
 
-            if (isSaved)
-                return new ProfileUpdateResponse(true, "Profile updated successfully.", request.Profile);
+                if (isSaved)
+                    return new ProfileUpdateResponse(new ErrorRecord(true, "Profile updated successfully."), request.Profile);
 
-            return new ProfileUpdateResponse(false, "Could not update profile. Ensure the user exists.");
+                return new ProfileUpdateResponse(new ErrorRecord(false, "User not found.", "UserNotFound"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while updating profile for user {UserId}.", userId);
+                return new ProfileUpdateResponse(new ErrorRecord(false, "Could not update profile due to an unexpected error.", "DatabaseError"));
+            }
         }
 
         public async Task<ProfileByTfeInterestResponse> GetProfileByTfeInterestAsync(ProfileByTfeInterestRequest request)
         {
-            if (request == null || int.IsNegative(request.TfeId))
-                return new ProfileByTfeInterestResponse(new List<TfeCandidateDto>());
+            if (request == null || request.TfeId <= 0)
+                return new ProfileByTfeInterestResponse(new ErrorRecord(false, "TfeId is required."), new List<TfeCandidateDto>());
 
             var entities = await _userRepository.GetInterestedUsersByTfeIdInUserServiceAsync(request.TfeId);
 
             if (entities == null || !entities.Any())
-                return new ProfileByTfeInterestResponse(new List<TfeCandidateDto>());
+                return new ProfileByTfeInterestResponse(new ErrorRecord(true, string.Empty), new List<TfeCandidateDto>());
 
             var dtos = entities.Select(user =>
             {
-                var proposal = user.TfeProposals.First(tp => tp.TfeId == request.TfeId);
+                var proposal = user.TfeProposals.FirstOrDefault(tp => tp.TfeId == request.TfeId);
+
+                if (proposal == null)
+                {
+                    _logger.LogWarning("User {UserId} returned for TFE {TfeId} but has no matching proposal.", user.UserId, request.TfeId);
+                    return null;
+                }
 
                 return new TfeCandidateDto
                 {
                     Profile = GetProfileDto(user),
                     Status = proposal.Status
                 };
-            }).ToList();
+            })
+            .Where(dto => dto != null)
+            .ToList();
 
-            return new ProfileByTfeInterestResponse(dtos);
+            return new ProfileByTfeInterestResponse(new ErrorRecord(true, string.Empty), dtos!);
         }
+
         public async Task<RoleUpdateResponse> UpdateUserRoleAsync(string userId, RoleType newRole)
         {
             if (string.IsNullOrWhiteSpace(userId))
-                return new RoleUpdateResponse(false, "User ID is required.");
+                return new RoleUpdateResponse(new ErrorRecord(false, "User ID is required."));
 
-            var isUpdated = await _userRepository.UpdateUserRoleAsync(userId, newRole);
+            try
+            {
+                var isUpdated = await _userRepository.UpdateUserRoleAsync(userId, newRole);
 
-            if (isUpdated)
-                return new RoleUpdateResponse(true, "User role updated successfully.");
+                if (isUpdated)
+                    return new RoleUpdateResponse(new ErrorRecord(true, "User role updated successfully."));
 
-            return new RoleUpdateResponse(false, "Could not update role. Ensure the user exists.");
+                return new RoleUpdateResponse(new ErrorRecord(false, "User not found.", "UserNotFound"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while updating role for user {UserId}.", userId);
+                return new RoleUpdateResponse(new ErrorRecord(false, "Could not update role due to an unexpected error.", "DatabaseError"));
+            }
         }
 
         public async Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request)
         {
-            var entities = await _userRepository.GetAllProfilesAsync();
-
-            var dtos = entities?.Select(GetProfileDto).ToList() ?? new List<ProfileDto>();
-
-            return new GetAllProfilesResponse(dtos);
+            try
+            {
+                var entities = await _userRepository.GetAllProfilesAsync();
+                var dtos = entities?.Select(GetProfileDto).ToList() ?? new List<ProfileDto>();
+                return new GetAllProfilesResponse(new ErrorRecord(true, string.Empty), dtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error while retrieving all profiles.");
+                return new GetAllProfilesResponse(new ErrorRecord(false, "Could not retrieve profiles.", "DatabaseError"), new List<ProfileDto>());
+            }
         }
 
         // --------------------------------------------------
@@ -151,6 +220,25 @@ namespace UserService.Service
                 Department = profile.Department ?? string.Empty,
                 OfficeLocation = profile.OfficeLocation ?? string.Empty
             };
+        }
+
+        private static bool TryGetUniqueConstraintName(DbUpdateException exception, out string? constraintName)
+        {
+            constraintName = null;
+
+            if (exception.InnerException is not PostgresException postgresException ||
+                postgresException.SqlState != PostgresErrorCodes.UniqueViolation)
+            {
+                return false;
+            }
+
+            constraintName = postgresException.ConstraintName;
+            return true;
+        }
+
+        private static bool IsEmailConstraint(string? constraintName)
+        {
+            return constraintName?.Contains("Email", StringComparison.OrdinalIgnoreCase) == true;
         }
     }
 }

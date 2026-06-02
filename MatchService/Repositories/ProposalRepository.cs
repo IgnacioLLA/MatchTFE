@@ -76,7 +76,6 @@ namespace MatchService.Repositories
                     MatchedUserFullName = $"{matchedUser.FirstName} {matchedUser.LastName}",
                     MatchedUserEmail = matchedUser.Email,
                     MatchedUserRole = matchedUser.Role,
-                    MatchedUserAvatarUrl = matchedUser.AvatarUrl ?? string.Empty,
                     MatchedUserAcademicYear = matchedUser.AcademicYear,
                     MatchedUserDepartment = matchedUser.Department,
                     TfeId = proposal.Tfe.Id,

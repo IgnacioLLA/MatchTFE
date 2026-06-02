@@ -12,6 +12,11 @@ namespace AuthService.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<MatchUser>()
+                .HasIndex(user => user.NormalizedEmail)
+                .IsUnique()
+                .HasDatabaseName("EmailIndex");
         }
     }
 }
