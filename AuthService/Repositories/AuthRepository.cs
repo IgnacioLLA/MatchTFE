@@ -73,4 +73,13 @@ public class AuthRepository : IAuthRepository
     {
         return await _userManager.RemoveFromRoleAsync(user, role);
     }
+
+    public async Task<IdentityResult> ResetPasswordDirectlyAsync(MatchUser user, string newPassword)
+    {
+        var removeResult = await _userManager.RemovePasswordAsync(user);
+        if (!removeResult.Succeeded)
+            return removeResult;
+
+        return await _userManager.AddPasswordAsync(user, newPassword);
+    }
 }

@@ -52,3 +52,25 @@ public class BulkUserActionResponse
     public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
     public int AffectedCount { get; set; }
 }
+
+public class AdminPasswordChangeRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6)]
+    [MaxLength(100)]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(6)]
+    [MaxLength(100)]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public class AdminPasswordChangeResponse
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+}

@@ -255,6 +255,27 @@ public class AuthController : ControllerBase, IAuthController
         return Ok(response);
     }
 
+    [HttpPut("admin/password")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ChangeUserPassword([FromBody] AdminPasswordChangeRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new AdminPasswordChangeResponse
+            {
+                Error = new OperationResult(false, "Invalid request format.")
+            });
+        }
+
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(currentUserId))
+            return Unauthorized(new AdminPasswordChangeResponse { Error = new OperationResult(false, "Could not identify the current user.") });
+
+        var response = await _authService.ChangeUserPasswordAsync(request, currentUserId);
+
+        return response.Error.IsSuccess ? Ok(response) : BadRequest(response);
+    }
+
     [HttpPost("bulk-action")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request)

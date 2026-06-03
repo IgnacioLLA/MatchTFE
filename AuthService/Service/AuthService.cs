@@ -418,4 +418,41 @@ public class AuthService : IAuthService
 
         return response;
     }
+
+    public async Task<AdminPasswordChangeResponse> ChangeUserPasswordAsync(AdminPasswordChangeRequest request, string currentUserId)
+    {
+        var response = new AdminPasswordChangeResponse();
+
+        if (request == null || string.IsNullOrWhiteSpace(request.Email))
+        {
+            response.Error = new OperationResult(false, "Email is required.");
+            return response;
+        }
+
+        if (request.NewPassword != request.ConfirmPassword)
+        {
+            response.Error = new OperationResult(false, "Passwords do not match.", "PasswordMismatch");
+            return response;
+        }
+
+        var user = await _authRepository.GetUserByEmailAsync(request.Email);
+
+        if (user == null)
+        {
+            response.Error = new OperationResult(false, $"No user found with email '{request.Email}'.", "UserNotFound");
+            return response;
+        }
+
+        var result = await _authRepository.ResetPasswordDirectlyAsync(user, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+            response.Error = new OperationResult(false, errorMessage);
+            return response;
+        }
+
+        response.Error = new OperationResult(true, "Password updated successfully.");
+        return response;
+    }
 }

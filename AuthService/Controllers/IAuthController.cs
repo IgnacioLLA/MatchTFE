@@ -24,5 +24,9 @@ namespace AuthService.Controllers
         [HttpPost("bulk-action")]
         [Authorize(Roles = "Admin")]
         Task<IActionResult> ExecuteBulkAction([FromBody] BulkUserActionRequest request);
+
+        [HttpPut("admin/password")]
+        [Authorize(Roles = "Admin")]
+        Task<IActionResult> ChangeUserPassword([FromBody] AdminPasswordChangeRequest request);
     }
 }

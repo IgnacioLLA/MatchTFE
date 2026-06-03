@@ -96,6 +96,65 @@
             </div>
         </MudPaper>
     </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl border-all d-flex flex-column">
+            <div class="d-flex align-center mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Change User Password</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-1">
+                Override a user's password directly. The user's active sessions will be invalidated automatically.
+            </MudText>
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
+                Remember to inform the user that their password has been changed.
+            </MudAlert>
+
+            @if (!string.IsNullOrEmpty(_passwordChangeError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _passwordChangeError = string.Empty)">
+                    @_passwordChangeError
+                </MudAlert>
+            }
+
+            <div class="d-flex flex-wrap gap-3 align-center mt-auto">
+                <MudTextField @bind-Value="_passwordChangeEmail"
+                              Label="User Email"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Email" />
+
+                <MudTextField @bind-Value="_newPassword"
+                              Label="New Password"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Password" />
+
+                <MudTextField @bind-Value="_confirmPassword"
+                              Label="Confirm Password"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Password"
+                              Error="@(_confirmPassword.Length > 0 && _newPassword != _confirmPassword)"
+                              ErrorText="Passwords do not match" />
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleChangePasswordAsync"
+                           Disabled="@(!CanSubmitPasswordChange)"
+                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
+                    CHANGE PASSWORD
+                </MudButton>
+            </div>
+            <MudText Typo="Typo.caption" Class="app-text-muted mt-1">
+                New password must be at least 6 characters.
+            </MudText>
+        </MudPaper>
+    </MudItem>
+
 </MudGrid>
 
 <MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-10">
@@ -348,6 +407,16 @@
     private bool _isTagsLoading = true;
     private string _bulkActionError = string.Empty;
 
+    private string _passwordChangeEmail = string.Empty;
+    private string _newPassword = string.Empty;
+    private string _confirmPassword = string.Empty;
+    private string _passwordChangeError = string.Empty;
+
+    private bool CanSubmitPasswordChange =>
+        !string.IsNullOrWhiteSpace(_passwordChangeEmail) &&
+        _newPassword.Length >= 6 &&
+        _newPassword == _confirmPassword;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAsync();
@@ -559,6 +628,45 @@
 
     private async Task HandleBulkDeleteAsync() => await HandleBulkActionAsync(BulkUserActionType.Delete);
     private async Task HandleBulkSuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Suspend);
+
+    private async Task HandleChangePasswordAsync()
+    {
+        _passwordChangeError = string.Empty;
+
+        if (!CanSubmitPasswordChange) return;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var request = new AdminPasswordChangeRequest
+            {
+                Email = _passwordChangeEmail,
+                NewPassword = _newPassword,
+                ConfirmPassword = _confirmPassword
+            };
+
+            var response = await client.PutAsJsonAsync("api/auth/admin/password", request);
+            var result = await response.Content.ReadFromJsonAsync<AdminPasswordChangeResponse>();
+
+            if (result != null && result.Error.IsSuccess)
+            {
+                Snackbar.Add(result.Error.Message, Severity.Success);
+                _passwordChangeEmail = string.Empty;
+                _newPassword = string.Empty;
+                _confirmPassword = string.Empty;
+            }
+            else
+            {
+                _passwordChangeError = result?.Error.Message ?? "Failed to update password.";
+            }
+        }
+        catch (Exception)
+        {
+            _passwordChangeError = "Connection error while updating password.";
+        }
+
+        StateHasChanged();
+    }
 
     private async Task HandleCreateTagAsync()
     {

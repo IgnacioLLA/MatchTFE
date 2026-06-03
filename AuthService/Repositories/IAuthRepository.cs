@@ -17,5 +17,6 @@ namespace AuthService.Repositories
         Task<IdentityResult> AddToRoleAsync(MatchUser user, string role);
         Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role);
         Task<IdentityResult> DeleteUserAsync(MatchUser user);
+        Task<IdentityResult> ResetPasswordDirectlyAsync(MatchUser user, string newPassword);
     }
 }
