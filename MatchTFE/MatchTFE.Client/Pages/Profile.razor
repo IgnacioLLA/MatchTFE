@@ -1,4 +1,4 @@
-﻿@page "/profile"
+@page "/profile"
 @using Microsoft.AspNetCore.Components.WebAssembly.Http
 @using TFELibrary.Shared
 @using System.Text.Json
@@ -46,16 +46,37 @@ else
             <MudCardContent>
                 <MudGrid>
                     <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="_profileDto.FirstName" Label="NOMBRE" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" Disabled="true" />
+                        <MudTextField @bind-Value="_profileDto.FirstName"
+                                      Label="NOMBRE"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Class="rounded-lg"
+                                      ReadOnly="true"/>
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="_profileDto.LastName" Label="APELLIDOS" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" Disabled="true" />
+                        <MudTextField @bind-Value="_profileDto.LastName"
+                                      Label="APELLIDOS"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      Class="rounded-lg"
+                                      ReadOnly="true"/>
                     </MudItem>
                     <MudItem xs="12">
-                        <MudTextField @bind-Value="_profileDto.Email" Label="EMAIL INSTITUCIONAL" Variant="Variant.Filled" Margin="Margin.Dense" Disabled="true" Class="rounded-lg" />
+                        <MudTextField @bind-Value="_profileDto.Email"
+                                      Label="EMAIL INSTITUCIONAL"
+                                      Variant="Variant.Outlined"
+                                      Margin="Margin.Dense"
+                                      ReadOnly="true"
+                                      Class="rounded-lg"
+                                      HelperText="El email institucional no puede modificarse desde aquí." />
                     </MudItem>
                     <MudItem xs="12">
-                        <MudTextField @bind-Value="_profileDto.Bio" Label="BIOGRAFÍA / SOBRE MÍ" Variant="Variant.Outlined" Lines="4" Class="rounded-lg" HelperText="Preséntate a posibles compañeros de proyecto o tutores." />
+                        <MudTextField @bind-Value="_profileDto.Bio"
+                                      Label="BIOGRAFÍA / SOBRE MÍ"
+                                      Variant="Variant.Outlined"
+                                      Lines="4"
+                                      Class="rounded-lg"
+                                      HelperText="Preséntate a posibles compañeros de proyecto o tutores." />
                     </MudItem>
                 </MudGrid>
             </MudCardContent>
@@ -70,6 +91,9 @@ else
                                  Title="Intereses"
                                  Icon="@Icons.Material.Filled.LocalOffer"
                                  Placeholder="Buscar intereses..." />
+                    <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
+                        Tus intereses ayudan al sistema a recomendarte proyectos y perfiles afines.
+                    </MudText>
                 </MudCardContent>
             </MudCard>
 
@@ -86,15 +110,30 @@ else
         @* ACTION BUTTONS *@
         <div class="d-flex align-center justify-space-between mt-8 mb-4">
             <div class="d-flex gap-4">
-                <MudButton Variant="Variant.Text" Color="Color.Default" Class="font-weight-bold" OnClick="DiscardChanges">Descartar</MudButton>
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Default"
+                           Class="font-weight-bold"
+                           OnClick="DiscardChanges">
+                    Descartar
+                </MudButton>
 
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="SaveChanges">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           DisableElevation="true"
+                           Class="rounded-lg font-weight-bold px-6"
+                           OnClick="SaveChanges">
                     Guardar Cambios
                 </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" DisableElevation="true" Class="rounded-lg font-weight-bold px-6" OnClick="Logout">
-                    Cerrar sesión
-                </MudButton>
             </div>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Error"
+                       DisableElevation="true"
+                       Class="rounded-lg font-weight-bold px-6"
+                       OnClick="Logout"
+                       aria-label="Cerrar sesión y salir de la aplicación">
+                Cerrar sesión
+            </MudButton>
         </div>
     </div>
 }
@@ -125,14 +164,14 @@ else
             }
             else
             {
-                Snackbar.Add("Profile data not found.", Severity.Warning);
+                Snackbar.Add("No se encontraron los datos del perfil.", Severity.Warning);
             }
 
             await LoadTagsAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading profile: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error al cargar el perfil: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -155,7 +194,7 @@ else
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading tags: {ex.Message}", Severity.Warning);
+            Snackbar.Add($"Error al cargar las etiquetas: {ex.Message}", Severity.Warning);
         }
     }
 
@@ -186,7 +225,7 @@ else
         {
             var json = JsonSerializer.Serialize(GlobalProfile);
             _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
-            Snackbar.Add("Changes discarded.", Severity.Info);
+            Snackbar.Add("Cambios descartados.", Severity.Info);
         }
     }
 
@@ -206,21 +245,21 @@ else
                 {
                     SyncGlobalProfile(result.UpdatedProfile);
                     _profileDto = result.UpdatedProfile;
-                    Snackbar.Add("Profile updated!", Severity.Success);
+                    Snackbar.Add("Perfil actualizado correctamente.", Severity.Success);
                 }
                 else
                 {
-                    Snackbar.Add(result?.Error.Message ?? "Error processing response.", Severity.Warning);
+                    Snackbar.Add(result?.Error.Message ?? "Error al procesar la respuesta.", Severity.Warning);
                 }
             }
             else
             {
-                Snackbar.Add($"HTTP error: {response.StatusCode}", Severity.Error);
+                Snackbar.Add($"Error del servidor: {response.StatusCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Connection error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error de conexión: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -241,12 +280,12 @@ else
             }
             else
             {
-                Snackbar.Add($"HTTP error: {response.StatusCode}", Severity.Error);
+                Snackbar.Add($"Error del servidor: {response.StatusCode}", Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Connection error: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error de conexión: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -276,7 +315,7 @@ else
 
     private static string GetRoleDescription(RoleType role) => role switch
     {
-        RoleType.Student => "Estudiante de Ingeniería Informática",
+        RoleType.Student => "Estudiante Universitario",
         RoleType.Teacher => "Profesor Universitario",
         RoleType.Admin => "Administrador del sistema",
         _ => "Usuario"
