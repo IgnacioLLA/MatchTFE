@@ -1,12 +1,17 @@
-﻿@page "/match"
+@page "/match"
 @using TFELibrary.Shared
 @inject IHttpClientFactory HttpClientFactory
-@inject ISnackbar Snackbar
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8 mb-10 animate-fade-in">
 
     <div class="d-flex align-center mb-6 mt-4">
         <MudText Typo="Typo.h3" Class="font-weight-bold">Mis Matches</MudText>
+        @if (!_isLoading)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-3">
+                @_tfeMatches.Count @(_tfeMatches.Count == 1 ? "match" : "matches")
+            </MudChip>
+        }
     </div>
 
     <MudText Typo="Typo.body1" Class="mud-text-secondary mb-8">
@@ -23,7 +28,7 @@
     else if (!_tfeMatches.Any())
     {
         <MudAlert Severity="Severity.Info" Class="mb-6">
-            <MudText>Aún no tienes ningún match. Explora los proyectos o candidatos disponibles y muestra interés para crear matches.</MudText>
+            <MudText>Aún no tienes ningún match activo. Explora los proyectos o candidatos disponibles y muestra interés para crear matches.</MudText>
         </MudAlert>
     }
     else
@@ -31,7 +36,7 @@
         <MudGrid Spacing="4" Class="mt-2">
             @foreach (var match in _tfeMatches)
             {
-                <MudItem xs="12" sm="6" md="4">
+                <MudItem xs="12" sm="6" md="4" lg="3">
                     <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
                         <div class="d-flex align-start justify-space-between mb-3">
                             <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match Aceptado</MudChip>
@@ -71,9 +76,35 @@
 
                         <MudSpacer />
 
-                        <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@GetContactButtonIcon(match)" OnClick="@(() => ToggleContactEmail(match))">
-                            @GetContactButtonText(match)
-                        </MudButton>
+                        @if (string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+                        {
+                            <MudTooltip Text="El contacto no tiene dirección de correo registrada." Placement="Placement.Top">
+                                <span>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Default"
+                                               FullWidth="true"
+                                               Class="rounded-lg mt-4"
+                                               StartIcon="@Icons.Material.Filled.MailOutline"
+                                               Disabled="true"
+                                               aria-disabled="true"
+                                               aria-label="Correo no disponible">
+                                        Sin correo disponible
+                                    </MudButton>
+                                </span>
+                            </MudTooltip>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       FullWidth="true"
+                                       Class="rounded-lg mt-4"
+                                       StartIcon="@GetContactButtonIcon(match)"
+                                       OnClick="@(() => ToggleContactEmail(match))"
+                                       aria-label="@GetContactButtonAriaLabel(match)">
+                                @GetContactButtonText(match)
+                            </MudButton>
+                        }
                     </MudPaper>
                 </MudItem>
             }
@@ -130,12 +161,6 @@
 
     private void ToggleContactEmail(AcceptedMatchDto match)
     {
-        if (string.IsNullOrWhiteSpace(match.MatchedUserEmail))
-        {
-            Snackbar.Add($"No hay correo disponible para {match.MatchedUserFullName}.", Severity.Warning);
-            return;
-        }
-
         if (!_visibleContactEmails.Add(match.TfeId))
         {
             _visibleContactEmails.Remove(match.TfeId);
@@ -160,5 +185,12 @@
         }
 
         return Icons.Material.Filled.Visibility;
+    }
+
+    private string GetContactButtonAriaLabel(AcceptedMatchDto match)
+    {
+        return _visibleContactEmails.Contains(match.TfeId)
+            ? $"Ocultar correo de {match.MatchedUserFullName}"
+            : $"Mostrar correo de {match.MatchedUserFullName}";
     }
 }

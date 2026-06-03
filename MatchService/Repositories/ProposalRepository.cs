@@ -53,9 +53,11 @@ public class ProposalRepository : IProposalRepository
 
     public async Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId)
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
         var matches = await _context.TfeProposal
             .Where(tp => (tp.Tfe.AuthorId == userId || tp.OriginUserId == userId)
-                      && tp.Status == ProposalStatus.Accepted)
+                      && tp.Status == ProposalStatus.Accepted
+                      && tp.Tfe.ExpirationDate >= today)
             .Include(tp => tp.OriginUser)
             .Include(tp => tp.Tfe)
             .ThenInclude(t => t.Author)

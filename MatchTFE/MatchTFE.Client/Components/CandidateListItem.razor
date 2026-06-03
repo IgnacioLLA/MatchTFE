@@ -1,4 +1,4 @@
-﻿@using TFELibrary.Shared
+@using TFELibrary.Shared
 
 <MudPaper Elevation="0" Class="pa-4 rounded-xl border-all mb-4 d-flex flex-column flex-md-row align-center justify-space-between gap-4 transition-all hover-shadow">
 
@@ -21,8 +21,8 @@
 
     @* Actions *@
     <div class="d-flex align-center gap-3 w-100 justify-md-end">
-        <MudChip T="string" Size="Size.Small" Color="@(Candidate.CanDecide ? Color.Info : Color.Secondary)" Variant="Variant.Filled">
-            @(Candidate.CanDecide ? "Pendiente" : Candidate.Status.ToString())
+        <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(Candidate.Status)" Variant="Variant.Filled">
+            @GetStatusLabel(Candidate.Status)
         </MudChip>
 
         <MudButton Variant="Variant.Outlined"
@@ -32,20 +32,22 @@
             Ver Perfil
         </MudButton>
 
-        <MudIconButton Icon="@Icons.Material.Filled.Close"
-                   Variant="Variant.Outlined"
-                   Color="Color.Error"
-                   Class="rounded-lg border-error"
-                   Disabled="@(!Candidate.CanDecide)"
-                   OnClick="() => OnReject.InvokeAsync(Candidate)" />
+        @if (Candidate.CanDecide)
+        {
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Error"
+                       Class="rounded-lg font-weight-bold px-4"
+                       OnClick="() => OnReject.InvokeAsync(Candidate)">
+                No me interesa
+            </MudButton>
 
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Success"
-                   Class="rounded-lg font-weight-bold px-6"
-                   Disabled="@(!Candidate.CanDecide)"
-                   OnClick="() => OnAccept.InvokeAsync(Candidate)">
-            Me interesa
-        </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Class="rounded-lg font-weight-bold px-6"
+                       OnClick="() => OnAccept.InvokeAsync(Candidate)">
+                Me interesa
+            </MudButton>
+        }
     </div>
 </MudPaper>
 
@@ -56,6 +58,23 @@
     [Parameter] public EventCallback<TfeCandidateDto> OnViewProfile { get; set; }
     [Parameter] public EventCallback<TfeCandidateDto> OnReject { get; set; }
     [Parameter] public EventCallback<TfeCandidateDto> OnAccept { get; set; }
+
+    private static string GetStatusLabel(ProposalStatus status) => status switch
+    {
+        ProposalStatus.Pending  => "Pendiente",
+        ProposalStatus.Accepted => "Aceptado",
+        ProposalStatus.Rejected => "Rechazado",
+        ProposalStatus.Expired  => "Expirado",
+        _                       => status.ToString()
+    };
+
+    private static Color GetStatusColor(ProposalStatus status) => status switch
+    {
+        ProposalStatus.Pending  => Color.Info,
+        ProposalStatus.Accepted => Color.Success,
+        ProposalStatus.Rejected => Color.Error,
+        _                       => Color.Secondary
+    };
 
     private static RenderFragment GetProfileSubtitle(ProfileDto profile) => builder =>
     {

@@ -1,27 +1,49 @@
-﻿@using System.Globalization
+@using System.Globalization
 @using TFELibrary.Shared
 
 <MudGrid Spacing="4" Class="animate-fade-in">
     @* --- LEFT COLUMN --- *@
     <MudItem xs="12" md="7" lg="7">
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-all h-100">
-            <MudText Typo="Typo.subtitle2" Class="app-subtitle">Título del TFE</MudText>
+            <div class="d-flex align-center mb-2">
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">Título del TFE</MudText>
+                <MudTooltip Text="Escribe un título descriptivo y atractivo que identifique claramente el proyecto. Máx. 400 caracteres."
+                            Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             aria-label="Ayuda sobre el campo Título del TFE" />
+                </MudTooltip>
+            </div>
             <MudTextField @bind-Value="_title"
                           T="string"
+                          Label="Título del proyecto"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
+                          HelperText="Ej: Sistema de recomendación de TFE con inteligencia artificial"
                           Error="@(!string.IsNullOrWhiteSpace(_titleError))"
                           ErrorText="@_titleError"
-                          Class="mb-8 rounded-lg" />
+                          Class="mb-8 rounded-lg"
+                          aria-required="true" />
 
-            <MudText Typo="Typo.subtitle2" Class="app-subtitle">Descripción Detallada</MudText>
+            <div class="d-flex align-center mb-2">
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">Descripción Detallada</MudText>
+                <MudTooltip Text="Explica los objetivos, metodología y contexto del proyecto. Máx. 4000 caracteres."
+                            Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             aria-label="Ayuda sobre el campo Descripción" />
+                </MudTooltip>
+            </div>
             <MudTextField @bind-Value="_description"
                           T="string"
+                          Label="Descripción del proyecto"
                           Variant="Variant.Outlined"
                           Lines="15"
+                          HelperText="Describe el problema, objetivos y tecnologías previstas"
                           Error="@(!string.IsNullOrWhiteSpace(_descriptionError))"
                           ErrorText="@_descriptionError"
-                          Class="rounded-lg" />
+                          Class="rounded-lg"
+                          aria-required="true" />
         </MudPaper>
     </MudItem>
 
@@ -33,14 +55,18 @@
                 <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
                     Fecha de Caducidad de la Propuesta
                 </MudText>
-                <MudTooltip Text="Fecha límite para publicar la propuesta." Placement="Placement.Right">
-                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="ml-2 app-text-muted" Style="cursor: help;" />
+                <MudTooltip Text="Fecha hasta la que tu propuesta estará visible para los estudiantes. Mínimo mañana."
+                            Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             aria-label="Ayuda sobre la fecha de caducidad" />
                 </MudTooltip>
             </div>
 
             <div class="mb-2">
                 <MudTextField T="string"
                               @bind-Value="_expirationDateText"
+                              Label="Fecha de caducidad"
                               InputType="InputType.Date"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
@@ -52,17 +78,31 @@
 
             @if (IsEditMode)
             {
-                <MudChip T="string"
-                         Size="Size.Small"
-                         Color="@GetEditExpirationStatusColor()"
-                         Variant="Variant.Filled"
-                         Class="mt-2 font-weight-bold px-3">
-                    @GetEditExpirationStatusText()
-                </MudChip>
+                <div class="d-flex align-center flex-wrap gap-2 mt-2">
+                    <MudChip T="string"
+                             Size="Size.Small"
+                             Color="@GetEditExpirationStatusColor()"
+                             Variant="Variant.Filled"
+                             Class="font-weight-bold px-3">
+                        @GetEditExpirationStatusText()
+                    </MudChip>
+
+                        @if (IsCurrentDateExpired())
+                        {
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Secondary"
+                                       Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Autorenew"
+                                       OnClick="RenewExpirationDateByThreeMonths"
+                                       aria-label="Renovar la fecha de caducidad 3 meses desde hoy">
+                                Renovar 3 meses
+                            </MudButton>
+                        }
+                </div>
             }
 
-            <MudText Typo="Typo.caption" Class="app-text-muted">
-                Selecciona una fecha de cierre sin ocupar espacio extra en la tarjeta.
+            <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
+                Selecciona una fecha de cierre para tu propuesta.
             </MudText>
 
             <div class="d-flex align-center mt-6 mb-2">
@@ -70,17 +110,20 @@
                     Duración Estimada
                 </MudText>
                 <MudTooltip Text="Duración orientativa para estimar cuándo podría entregarse el trabajo." Placement="Placement.Right">
-                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="ml-2 app-text-muted" Style="cursor: help;" />
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             aria-label="Ayuda sobre la duración estimada" />
                 </MudTooltip>
             </div>
             <MudSelect T="string"
                        @bind-Value="_estimatedDuration"
+                       Label="Duración estimada"
                        Variant="Variant.Outlined"
                        AnchorOrigin="Origin.BottomCenter"
                        Placeholder="Seleccione un rango..."
                        Margin="Margin.Dense"
-                      Error="@(!string.IsNullOrWhiteSpace(_estimatedDurationError))"
-                      ErrorText="@_estimatedDurationError"
+                       Error="@(!string.IsNullOrWhiteSpace(_estimatedDurationError))"
+                       ErrorText="@_estimatedDurationError"
                        Class="rounded-lg">
                 <MudSelectItem Value="@("3 meses")" />
                 <MudSelectItem Value="@("6 meses")" />
@@ -94,6 +137,9 @@
                          Title="Temática Principal"
                          Icon="@Icons.Material.Filled.Category"
                          Placeholder="Ej: Inteligencia Artificial, Web..." />
+            <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
+                Selecciona las áreas de conocimiento que mejor describen tu proyecto.
+            </MudText>
         </MudPaper>
 
         <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
@@ -101,6 +147,9 @@
                            Title="Requisitos Técnicos (Skills)"
                            Icon="@Icons.Material.Filled.Build"
                            Placeholder="Ej: C#, Python, React..." />
+            <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
+                Especifica las tecnologías o conocimientos que debería tener el estudiante.
+            </MudText>
         </MudPaper>
 
         <MudButton Variant="Variant.Filled"
@@ -112,6 +161,17 @@
                    OnClick="HandleSubmitAsync">
             @(IsEditMode ? "Actualizar Propuesta" : "Publicar Propuesta")
         </MudButton>
+
+        @if (!string.IsNullOrWhiteSpace(ServerError))
+        {
+            <MudAlert Severity="Severity.Error"
+                      Variant="Variant.Filled"
+                      Class="mt-4 rounded-lg"
+                      role="alert"
+                      aria-live="assertive">
+                @ServerError
+            </MudAlert>
+        }
     </MudItem>
 </MudGrid>
 
@@ -122,12 +182,18 @@
     [Parameter]
     public EventCallback<TfeDto> OnValidSubmit { get; set; }
 
+    [Parameter]
+    public string? ServerError { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> ServerErrorChanged { get; set; }
+
     private bool IsEditMode => Tfe != null;
 
     private string _title = string.Empty;
     private string _description = string.Empty;
     private List<string> _selectedTopics = new();
-    private List<SkillDto> _requiredSkills = new(); 
+    private List<SkillDto> _requiredSkills = new();
     private string _expirationDateText = DateTime.Today.AddMonths(1).ToString("yyyy-MM-dd");
     private string _estimatedDuration = string.Empty;
     private string? _titleError;
@@ -167,6 +233,8 @@
 
     private async Task HandleSubmitAsync()
     {
+        await ServerErrorChanged.InvokeAsync(null);
+
         if (!CheckForm()) return;
 
         DateOnly.TryParseExact(_expirationDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expirationDate);
@@ -185,6 +253,13 @@
         {
             await OnValidSubmit.InvokeAsync(resultTfe);
         }
+    }
+
+    private void RenewExpirationDateByThreeMonths()
+    {
+        _expirationDateText = TfeDateRules.ToInputDateValue(
+            DateOnly.FromDateTime(DateTime.Today.AddMonths(3)));
+        _expirationDateError = null;
     }
 
     private static int ParseEstimatedMonths(string estimatedDuration)
@@ -234,6 +309,7 @@
             _estimatedDurationError = "Debes seleccionar una duración estimada.";
             return false;
         }
+
         return true;
     }
 
@@ -253,23 +329,22 @@
         return TfeDateRules.IsValidExpirationDate(selectedDate);
     }
 
+    private bool IsCurrentDateExpired()
+    {
+        if (!DateOnly.TryParseExact(_expirationDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+            return true;
+        return date.ToDateTime(TimeOnly.MinValue).Date < DateTime.Today;
+    }
+
     private Color GetEditExpirationStatusColor()
     {
-        if (!IsEditMode || Tfe == null || Tfe.ExpirationDate == default)
-        {
-            return Color.Success;
-        }
-
-        return Tfe.ExpirationDate.Date < DateTime.Today ? Color.Error : Color.Success;
+        if (!IsEditMode) return Color.Success;
+        return IsCurrentDateExpired() ? Color.Error : Color.Success;
     }
 
     private string GetEditExpirationStatusText()
     {
-        if (!IsEditMode || Tfe == null || Tfe.ExpirationDate == default)
-        {
-            return string.Empty;
-        }
-
-        return Tfe.ExpirationDate.Date < DateTime.Today ? "Caducado" : "Abierto";
+        if (!IsEditMode) return string.Empty;
+        return IsCurrentDateExpired() ? "Caducado" : "Abierto";
     }
 }

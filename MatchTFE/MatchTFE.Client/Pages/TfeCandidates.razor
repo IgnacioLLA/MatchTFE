@@ -82,7 +82,9 @@
 
             if (response != null && response.Interested != null)
             {
-                _candidates = response.Interested;
+                _candidates = response.Interested
+                    .OrderBy(c => GetStatusSortOrder(c.Status))
+                    .ToList();
             }
         }
         catch (Exception e)
@@ -94,6 +96,14 @@
             _isLoading = false;
         }
     }
+
+    private static int GetStatusSortOrder(ProposalStatus status) => status switch
+    {
+        ProposalStatus.Pending  => 0,
+        ProposalStatus.Accepted => 1,
+        ProposalStatus.Rejected => 2,
+        _                       => 3
+    };
 
     private void HandleViewProfile(TfeCandidateDto candidate)
     {
@@ -131,6 +141,7 @@
             if (response.IsSuccessStatusCode)
             {
                 candidate.Status = status;
+                _candidates = [.. _candidates.OrderBy(c => GetStatusSortOrder(c.Status))];
                 Snackbar.Add(status == ProposalStatus.Accepted
                     ? $"Has aceptado a {candidate.Profile.FirstName}."
                     : $"Has descartado a {candidate.Profile.FirstName}.",

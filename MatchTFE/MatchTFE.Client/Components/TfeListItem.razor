@@ -51,16 +51,13 @@
                     </MudText>
                 </div>
 
-                @if (Model.InterestedAmount > 0)
-                {
-                    <MudButton Variant="Variant.Text"
-                               Color="Color.Primary"
-                               Size="Size.Small"
-                               Href="@($"/tfe/{Model.Id}/candidates")"
-                               Class="font-weight-bold px-2 py-0">
-                        Ver
-                    </MudButton>
-                }
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           Href="@($"/tfe/{Model.Id}/candidates")"
+                           Class="font-weight-bold px-2 py-0">
+                    Ver
+                </MudButton>
             </div>
         </MudItem>
 

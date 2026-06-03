@@ -126,15 +126,13 @@ public class UserProfileRepository : IUserProfileRepository
 
     public async Task<List<UserProfile>> GetInterestedUsersByTfeIdInUserServiceAsync(int tfeId)
     {
-        var minimumExpirationDate = TfeDateRules.MinimumExpirationDate;
-
         return await _context.UserProfile
             .Include(u => u.UserInterests)
                 .ThenInclude(ui => ui.Tag)
             .Include(u => u.StudentSkills)
                 .ThenInclude(ss => ss.Tag)
             .Include(u => u.TfeProposals)
-            .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId && tp.Tfe.ExpirationDate >= minimumExpirationDate))
+            .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId))
             .AsNoTracking()
             .ToListAsync();
     }
