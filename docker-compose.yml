@@ -25,9 +25,12 @@ services:
   apigateway:
     image: nginx:alpine
     ports:
-      - "5080:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./matchtfe.pem:/etc/ssl/certs/matchtfe.pem:ro
+      - ./cert.pem:/etc/ssl/private/cert.pem:ro
     depends_on:
       - authservice
 
