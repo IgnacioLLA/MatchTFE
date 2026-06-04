@@ -36,7 +36,8 @@ public class BulkUserImportResponse
 public enum BulkUserActionType
 {
     Suspend,
-    Delete
+    Delete,
+    Unsuspend
 }
 
 public class BulkUserActionRequest

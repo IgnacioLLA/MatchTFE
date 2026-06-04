@@ -88,6 +88,7 @@ public class ProfileDto
     public string Email { get; set; } = string.Empty;
 
     public string Bio { get; set; } = string.Empty;
+    public bool IsSuspended { get; set; } = false;
     public List<string> Interests { get; set; } = new();
 
     // ----------------------------------

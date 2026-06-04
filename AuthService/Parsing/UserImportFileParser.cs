@@ -62,6 +62,11 @@ public static class UserImportFileParser
         while (csv.Read())
         {
             int row = csv.Context.Parser?.Row ?? 0;
+
+            // Skip header row if present (first field is the column name "email")
+            if (row == 1 && (csv.GetField(0) ?? string.Empty).Equals("email", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             UserImportRecord record;
 
             try
@@ -70,11 +75,11 @@ public static class UserImportFileParser
             }
             catch (TypeConverterException ex)
             {
-                return Failure($"Row {ex.Context?.Parser?.Row}: {ex.Message}");
+                return Failure($"Row {ex.Context?.Parser?.Row}: {TrimCsvHelperState(ex.Message)}");
             }
             catch (CsvHelperException ex)
             {
-                return Failure($"Row {ex.Context?.Parser?.Row}: {ex.Message}");
+                return Failure($"Row {ex.Context?.Parser?.Row}: {TrimCsvHelperState(ex.Message)}");
             }
 
             if (string.IsNullOrEmpty(record.Email) || !IsValidEmail(record.Email))
@@ -102,6 +107,12 @@ public static class UserImportFileParser
     {
         try { return new MailAddress(email).Address == email; }
         catch { return false; }
+    }
+
+    private static string TrimCsvHelperState(string message)
+    {
+        var cut = message.IndexOf(" IReader state:", StringComparison.Ordinal);
+        return cut >= 0 ? message[..cut] : message;
     }
 
     private static UserImportFileParseResult Failure(string message)

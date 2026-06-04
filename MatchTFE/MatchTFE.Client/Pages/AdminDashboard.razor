@@ -79,7 +79,7 @@
             <MudExpansionPanels Elevation="0" Class="mb-4 border-all rounded-lg">
                 <MudExpansionPanel Text="File format reference" Dense="true" Class="rounded-lg">
                     <MudText Typo="Typo.caption" Class="app-text-muted mb-1">
-                        One row per user, no header row. Fields must be separated by commas.
+                        One row per user. Header row is optional. Fields must be separated by commas.
                         Fields containing a comma must be wrapped in double quotes.
                         <strong>Admin</strong> role is not allowed in import files.
                     </MudText>
@@ -91,6 +91,13 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                     </MudText>
                 </MudExpansionPanel>
             </MudExpansionPanels>
+
+            @if (!string.IsNullOrEmpty(_importError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3" Dense="true" CloseButton="true" OnClose="@(() => _importError = string.Empty)">
+                    @_importError
+                </MudAlert>
+            }
 
             <div class="d-flex align-center gap-4 mt-auto">
                 <MudFileUpload T="IBrowserFile" FilesChanged="HandleFileSelected" Accept=".txt, .csv" Class="w-100">
@@ -173,6 +180,13 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
 </MudGrid>
 
+@if (!string.IsNullOrEmpty(_bulkActionSuccess))
+{
+    <MudAlert Severity="Severity.Success" Class="mb-4 animate-fade-in" CloseButton="true" OnClose="@(() => _bulkActionSuccess = string.Empty)">
+        @_bulkActionSuccess
+    </MudAlert>
+}
+
 <MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-10">
     <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1 border-b-default">
         <MudTextField @bind-Value="SearchQuery"
@@ -208,6 +222,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">USER</MudText></MudTh>
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">EMAIL</MudText></MudTh>
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ROLE</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">STATUS</MudText></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="User">
@@ -227,6 +242,14 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                          Color="@GetRoleColor(context.Role)"
                          Class="font-weight-bold">
                     @context.Role.ToString()
+                </MudChip>
+            </MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@(context.IsSuspended ? Color.Warning : Color.Success)"
+                         Class="font-weight-bold">
+                    @(context.IsSuspended ? "Suspended" : "Active")
                 </MudChip>
             </MudTd>
         </RowTemplate>
@@ -256,6 +279,14 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                            OnClick="HandleBulkSuspendAsync"
                            Class="rounded-lg font-weight-bold px-6">
                     SUSPEND
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                           OnClick="HandleBulkUnsuspendAsync"
+                           Class="rounded-lg font-weight-bold px-6">
+                    REACTIVATE
                 </MudButton>
 
                 <MudButton Variant="Variant.Filled"
@@ -413,6 +444,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
     private RoleType? _roleUpdateSelection;
     private string _roleUpdateError = string.Empty;
     private IBrowserFile? _uploadedFile;
+    private string _importError = string.Empty;
     private bool _isLoading = true;
 
     private List<TagDto> _tags = new();
@@ -422,6 +454,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
     private string _tagSearchQuery = string.Empty;
     private bool _isTagsLoading = true;
     private string _bulkActionError = string.Empty;
+    private string _bulkActionSuccess = string.Empty;
 
     private string _passwordChangeEmail = string.Empty;
     private string _newPassword = string.Empty;
@@ -573,6 +606,8 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
     {
         if (_uploadedFile == null) return;
 
+        _importError = string.Empty;
+
         try
         {
             using var ms = new MemoryStream();
@@ -590,24 +625,27 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add($"{result.CreatedCount} user(s) created, {result.SkippedCount} already existed.", Severity.Success);
+                _bulkActionSuccess = $"{result.CreatedCount} user(s) created, {result.SkippedCount} already existed.";
                 _uploadedFile = null;
                 await LoadUsersAsync();
             }
             else
             {
-                Snackbar.Add(result?.Error.Message ?? "Failed to import users.", Severity.Error);
+                _importError = result?.Error.Message ?? "Failed to import users.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while importing users.", Severity.Error);
+            _importError = "Connection error while importing users.";
         }
+
+        StateHasChanged();
     }
 
     private async Task HandleBulkActionAsync(BulkUserActionType actionType)
     {
         _bulkActionError = string.Empty;
+        _bulkActionSuccess = string.Empty;
 
         if (!_selectedUsers.Any()) return;
 
@@ -625,7 +663,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Error.Message, actionType == BulkUserActionType.Delete ? Severity.Success : Severity.Warning);
+                _bulkActionSuccess = result.Error.Message;
                 _selectedUsers.Clear();
                 await LoadUsersAsync();
             }
@@ -644,6 +682,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
     private async Task HandleBulkDeleteAsync() => await HandleBulkActionAsync(BulkUserActionType.Delete);
     private async Task HandleBulkSuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Suspend);
+    private async Task HandleBulkUnsuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Unsuspend);
 
     private async Task HandleChangePasswordAsync()
     {

@@ -27,6 +27,7 @@ public class UserProfile
     public string? Bio { get; set; }
 
     public RoleType Role { get; set; } = RoleType.Student;
+    public bool IsSuspended { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<UserInterest> UserInterests { get; set; } = new List<UserInterest>();
     public ICollection<TFEProposal> TfeProposals { get; set; } = new List<TFEProposal>();

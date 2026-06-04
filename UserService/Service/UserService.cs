@@ -179,6 +179,27 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<SuspensionUpdateResponse> UpdateUserSuspensionAsync(string userId, bool isSuspended)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return new SuspensionUpdateResponse(new OperationResult(false, "User ID is required."));
+
+        try
+        {
+            var isUpdated = await _userRepository.UpdateUserSuspensionAsync(userId, isSuspended);
+
+            if (isUpdated)
+                return new SuspensionUpdateResponse(new OperationResult(true, "User suspension status updated successfully."));
+
+            return new SuspensionUpdateResponse(new OperationResult(false, "User not found.", "UserNotFound"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while updating suspension for user {UserId}.", userId);
+            return new SuspensionUpdateResponse(new OperationResult(false, "Could not update suspension status due to an unexpected error.", "DatabaseError"));
+        }
+    }
+
     public async Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request)
     {
         try
@@ -205,6 +226,7 @@ public class UserService : IUserService
             LastName = profile.LastName ?? string.Empty,
             Email = profile.Email ?? string.Empty,
             Bio = profile.Bio ?? string.Empty,
+            IsSuspended = profile.IsSuspended,
             Interests = profile.UserInterests?.Select(ui => ui.Tag.Name).ToList() ?? new List<string>(),
             Role = profile.Role,
             AcademicYear = profile.AcademicYear ?? string.Empty,

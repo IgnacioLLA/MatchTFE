@@ -5,12 +5,24 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
-@inject ISnackbar Snackbar
 
 <MudCard Class="auth-card">
     <MudCardContent Class="auth-card-content">
         <MudText Typo="Typo.h5" Class="auth-title">Bienvenido de nuevo</MudText>
         <MudText Typo="Typo.body2" Class="auth-subtitle">Introduce tus credenciales universitarias</MudText>
+
+        @if (_isSuspended)
+        {
+            <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Block" Class="mb-4" Dense="true">
+                Tu cuenta ha sido suspendida. Contacta con el administrador.
+            </MudAlert>
+        }
+        else if (!string.IsNullOrEmpty(_loginError))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">
+                @_loginError
+            </MudAlert>
+        }
 
         <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
             <DataAnnotationsValidator />
@@ -69,14 +81,12 @@
 
 @code {
     private LoginRequestDto _loginModel = new();
-    private bool _rememberSession = false;
     private bool _isLoading = false;
-    
+    private bool _isSuspended = false;
+    private string _loginError = string.Empty;
 
     private InputType _passwordInput = InputType.Password;
     private string _passwordIcon = Icons.Material.Outlined.VisibilityOff;
-
-    
 
     private void TogglePasswordVisibility()
     {
@@ -95,35 +105,35 @@
     private async Task HandleLoginAsync()
     {
         _isLoading = true;
+        _isSuspended = false;
+        _loginError = string.Empty;
+
         try
         {
             var response = await ClientFactory.CreateClient("GatewayAPI").PostAsJsonAsync("api/auth/login", _loginModel);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-
-                Snackbar.Add($"¡Bienvenido {result?.FirstName}!", Severity.Success);
-
                 Navigation.NavigateTo("/", replace: true);
             }
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-                var errorMessage = errorResult?.AuthData?.Message ?? "Email o contraseña incorrectos.";
+                var message = errorResult?.AuthData?.Message ?? "Email o contraseña incorrectos.";
 
-                Snackbar.Add(errorMessage, Severity.Error);
+                if (message == "Account suspended.")
+                    _isSuspended = true;
+                else
+                    _loginError = message;
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("No se pudo conectar con el servidor. Revisa tu conexión.", Severity.Error);
+            _loginError = "No se pudo conectar con el servidor. Revisa tu conexión.";
         }
         finally
         {
             _isLoading = false;
         }
     }
-
-    
 }

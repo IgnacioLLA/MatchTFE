@@ -82,4 +82,21 @@ public class AuthRepository : IAuthRepository
 
         return await _userManager.AddPasswordAsync(user, newPassword);
     }
+
+    public async Task LockUserAsync(MatchUser user)
+    {
+        await _userManager.SetLockoutEnabledAsync(user, true);
+        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+    }
+
+    public async Task UnlockUserAsync(MatchUser user)
+    {
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.SetLockoutEnabledAsync(user, false);
+    }
+
+    public async Task<bool> IsLockedOutAsync(MatchUser user)
+    {
+        return await _userManager.IsLockedOutAsync(user);
+    }
 }

@@ -102,6 +102,14 @@ public class AuthService : IAuthService
             }, null);
         }
 
+        if (await _authRepository.IsLockedOutAsync(user))
+        {
+            return (new LoginResponseDto
+            {
+                AuthData = new AuthResultDto { IsSuccess = false, Message = "Account suspended." }
+            }, null);
+        }
+
         var (authResult, authTokens) = await GenerateAndSaveTokensAsync(user);
 
         return (new LoginResponseDto
@@ -340,6 +348,32 @@ public class AuthService : IAuthService
 
             response.Error = new OperationResult(true, $"Successfully deleted {response.AffectedCount} user(s).");
         }
+        else if (request.Action == BulkUserActionType.Suspend)
+        {
+            var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            var adminToken = ExtractBearerToken();
+            foreach (var user in users)
+            {
+                await _authRepository.LockUserAsync(user);
+                await UpdateUserSuspensionInUserServiceAsync(user.Id, true, adminToken);
+                response.AffectedCount++;
+            }
+
+            response.Error = new OperationResult(true, $"Successfully suspended {response.AffectedCount} user(s).");
+        }
+        else if (request.Action == BulkUserActionType.Unsuspend)
+        {
+            var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            var adminToken = ExtractBearerToken();
+            foreach (var user in users)
+            {
+                await _authRepository.UnlockUserAsync(user);
+                await UpdateUserSuspensionInUserServiceAsync(user.Id, false, adminToken);
+                response.AffectedCount++;
+            }
+
+            response.Error = new OperationResult(true, $"Successfully reactivated {response.AffectedCount} user(s).");
+        }
         else
         {
             response.Error = new OperationResult(false, "Action not supported.");
@@ -460,6 +494,29 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Critical error connecting to UserService during role update for user {UserId}.", userId);
+        }
+    }
+
+    private async Task UpdateUserSuspensionInUserServiceAsync(string userId, bool isSuspended, string? adminToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            if (!string.IsNullOrEmpty(adminToken))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+            var suspensionResponse = await client.PutAsJsonAsync(
+                $"api/user/profile/{userId}/suspension",
+                new SuspensionUpdateRequest(isSuspended));
+
+            if (!suspensionResponse.IsSuccessStatusCode)
+                _logger.LogWarning("Suspension update for user {UserId} failed in UserService. StatusCode: {StatusCode}", userId, suspensionResponse.StatusCode);
+            else
+                _logger.LogInformation("Suspension status for user {UserId} updated to {IsSuspended} in UserService.", userId, isSuspended);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService during suspension update for user {UserId}.", userId);
         }
     }
 

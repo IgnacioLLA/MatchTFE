@@ -127,7 +127,8 @@ public class TfeRepository : ITfeRepository
                      && t.Status == TfeStatus.Open
                      && t.ExpirationDate >= minimumExpirationDate
                      && !excludedTfeIds.Contains(t.Id)
-                     && t.Author.Role != userRole);
+                     && t.Author.Role != userRole
+                     && !t.Author.IsSuspended);
 
         List<TFE> result = new();
 

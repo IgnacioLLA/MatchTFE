@@ -146,4 +146,14 @@ public class UserProfileRepository : IUserProfileRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> UpdateUserSuspensionAsync(string userId, bool isSuspended)
+    {
+        var profile = await _context.UserProfile.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (profile == null) return false;
+
+        profile.IsSuspended = isSuspended;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }

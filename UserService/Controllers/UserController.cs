@@ -126,6 +126,27 @@ public class UserController : ControllerBase, IUserController
     }
 
     [Authorize(Roles = "Admin")]
+    [HttpPut("profile/{userId}/suspension")]
+    public async Task<ActionResult<SuspensionUpdateResponse>> UpdateSuspension([FromRoute] string userId, [FromBody] SuspensionUpdateRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return BadRequest(new SuspensionUpdateResponse(new OperationResult(false, "Invalid user ID.")));
+
+        if (request == null)
+            return BadRequest(new SuspensionUpdateResponse(new OperationResult(false, "Request body cannot be null.")));
+
+        var response = await _profileService.UpdateUserSuspensionAsync(userId, request.IsSuspended);
+
+        if (response.Error.IsSuccess)
+            return Ok(response);
+
+        if (response.Error.ErrorCode == "UserNotFound")
+            return NotFound(response);
+
+        return BadRequest(response);
+    }
+
+    [Authorize(Roles = "Admin")]
     [HttpGet("profiles")]
     public async Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles()
     {

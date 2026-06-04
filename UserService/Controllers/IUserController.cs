@@ -23,6 +23,9 @@ namespace UserService.Controllers
         [HttpPut("profile/{userId}/role")]
         Task<ActionResult<RoleUpdateResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request);
 
+        [HttpPut("profile/{userId}/suspension")]
+        Task<ActionResult<SuspensionUpdateResponse>> UpdateSuspension([FromRoute] string userId, [FromBody] SuspensionUpdateRequest request);
+
         [HttpGet("profiles")]
         Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();
     }
