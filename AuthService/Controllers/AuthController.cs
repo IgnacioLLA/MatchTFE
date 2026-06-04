@@ -242,17 +242,9 @@ public class AuthController : ControllerBase, IAuthController
             });
         }
 
-        var response = new BulkUserImportResponse
-        {
-            Error = new OperationResult(false, "Invalid file or request format.")
-        };
+        var response = await _authService.BulkImportUsersAsync(request);
 
-        if (!response.Error.IsSuccess)
-        {
-            return BadRequest(response);
-        }
-
-        return Ok(response);
+        return response.Error.IsSuccess ? Ok(response) : BadRequest(response);
     }
 
     [HttpPut("admin/password")]

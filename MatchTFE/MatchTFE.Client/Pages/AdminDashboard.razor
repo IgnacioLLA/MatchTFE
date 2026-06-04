@@ -72,9 +72,25 @@
                 <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Primary" Class="mr-3" />
                 <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Bulk Import Profiles</MudText>
             </div>
-            <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
-                Upload a structured file (.csv or .txt) to automatically generate new user profiles.
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-3">
+                Upload a structured file (.csv or .txt, UTF-8) to automatically generate new user profiles.
             </MudText>
+
+            <MudExpansionPanels Elevation="0" Class="mb-4 border-all rounded-lg">
+                <MudExpansionPanel Text="File format reference" Dense="true" Class="rounded-lg">
+                    <MudText Typo="Typo.caption" Class="app-text-muted mb-1">
+                        One row per user, no header row. Fields must be separated by commas.
+                        Fields containing a comma must be wrapped in double quotes.
+                        <strong>Admin</strong> role is not allowed in import files.
+                    </MudText>
+                    <pre style="font-size:11px; background:var(--mud-palette-background-grey, #f5f5f5); border-radius:6px; padding:8px; margin:6px 0; overflow-x:auto;">student&#64;university.es,Juan,García,Password1!,Student
+teacher&#64;university.es,María,López,Password2!,Teacher</pre>
+                    <MudText Typo="Typo.caption" Class="app-text-muted">
+                        Users that already exist in the system are skipped (not duplicated).
+                        If any row has an invalid format, no users are created and the error is reported.
+                    </MudText>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
 
             <div class="d-flex align-center gap-4 mt-auto">
                 <MudFileUpload T="IBrowserFile" FilesChanged="HandleFileSelected" Accept=".txt, .csv" Class="w-100">
@@ -574,7 +590,7 @@
 
             if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add($"{result.Error.Message} ({result.ImportedCount} imported)", Severity.Success);
+                Snackbar.Add($"{result.CreatedCount} user(s) created, {result.SkippedCount} already existed.", Severity.Success);
                 _uploadedFile = null;
                 await LoadUsersAsync();
             }

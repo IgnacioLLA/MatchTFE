@@ -29,7 +29,8 @@ public class BulkUserImportRequest
 public class BulkUserImportResponse
 {
     public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
-    public int ImportedCount { get; set; }
+    public int CreatedCount { get; set; }
+    public int SkippedCount { get; set; }
 }
 
 public enum BulkUserActionType

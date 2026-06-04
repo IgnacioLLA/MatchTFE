@@ -1,4 +1,5 @@
 using AuthService.Data;
+using AuthService.Parsing;
 using AuthService.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -68,50 +69,14 @@ public class AuthService : IAuthService
 
         var (authResult, authTokens) = await GenerateAndSaveTokensAsync(newUser);
 
-        try
+        var profileResult = await CreateUserProfileAsync(newUser, authTokens.AccessToken);
+        if (!profileResult.IsSuccess)
         {
-            var client = _httpClientFactory.CreateClient("UserServiceClient");
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authTokens.AccessToken);
-
-            ProfileCreationRequest profile = new ProfileCreationRequest(
-                newUser.Id,
-                new ProfileDto
-                {
-                    FirstName = newUser.Name,
-                    LastName = newUser.Surname,
-                    Email = newUser.Email
-                }
-            );
-
-            var response = await client.PostAsJsonAsync("api/user/profile", profile);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogWarning("User {UserId} registered but profile creation in UserService failed. StatusCode: {StatusCode}", newUser.Id, response.StatusCode);
-
-                var profileResponse = await response.Content.ReadFromJsonAsync<ProfileCreationResponse>();
-                var errorMessage = profileResponse?.Error.Message ?? "Could not create the user profile.";
-
-                await _authRepository.DeleteUserAsync(newUser);
-
-                return (new RegisterResponseDto
-                {
-                    Error = new OperationResult(false, errorMessage, profileResponse?.Error.ErrorCode),
-                    AuthData = new AuthResultDto { IsSuccess = false, Message = errorMessage }
-                }, null);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Critical error connecting to UserService during registration.");
             await _authRepository.DeleteUserAsync(newUser);
-
-            const string errorMessage = "Could not create the user profile.";
             return (new RegisterResponseDto
             {
-                Error = new OperationResult(false, errorMessage),
-                AuthData = new AuthResultDto { IsSuccess = false, Message = errorMessage }
+                Error = profileResult,
+                AuthData = new AuthResultDto { IsSuccess = false, Message = profileResult.Message }
             }, null);
         }
 
@@ -322,43 +287,7 @@ public class AuthService : IAuthService
         if (isExecutionOk)
         {
             response.Error = new OperationResult(true, $"Role successfully updated to {newRoleString}.");
-
-            try
-            {
-                var client = _httpClientFactory.CreateClient("UserServiceClient");
-
-                var token = string.Empty;
-                var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-                if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                {
-                    token = authHeader.Substring("Bearer ".Length).Trim();
-                }
-                else
-                {
-                    token = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
-                }
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                }
-
-                var changeRoleReq = new ChangeRoleRequest(request.NewRole);
-                var apiResponse = await client.PutAsJsonAsync($"api/user/profile/{user.Id}/role", changeRoleReq);
-
-                if (!apiResponse.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning("Role for user {UserId} was updated locally but failed in UserService. StatusCode: {StatusCode}", user.Id, apiResponse.StatusCode);
-                }
-                else
-                {
-                    _logger.LogInformation("Role for user {UserId} updated successfully in UserService.", user.Id);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Critical error connecting to UserService during role change.");
-            }
+            await UpdateUserRoleInUserServiceAsync(user.Id, request.NewRole, ExtractBearerToken());
         }
         else
         {
@@ -417,6 +346,130 @@ public class AuthService : IAuthService
         }
 
         return response;
+    }
+
+    public async Task<BulkUserImportResponse> BulkImportUsersAsync(BulkUserImportRequest request)
+    {
+        var parseResult = UserImportFileParser.Parse(request.FileContent);
+
+        if (!parseResult.IsValid)
+        {
+            return new BulkUserImportResponse
+            {
+                Error = new OperationResult(false, parseResult.ErrorMessage!, "ParseError")
+            };
+        }
+
+        var adminToken = ExtractBearerToken();
+        var response = new BulkUserImportResponse();
+
+        foreach (var record in parseResult.Records)
+        {
+            var existingUser = await _authRepository.GetUserByEmailAsync(record.Email);
+            if (existingUser != null)
+            {
+                response.SkippedCount++;
+                continue;
+            }
+
+            var newUser = new MatchUser
+            {
+                UserName = record.Email,
+                Email = record.Email,
+                Name = record.FirstName,
+                Surname = record.LastName
+            };
+
+            var createResult = await _authRepository.CreateUserAsync(newUser, record.Password);
+            if (!createResult.Succeeded)
+            {
+                _logger.LogWarning(
+                    "Failed to create user {Email} during bulk import: {Errors}",
+                    record.Email,
+                    string.Join(", ", createResult.Errors.Select(e => e.Description)));
+                continue;
+            }
+
+            await _authRepository.AddToRoleAsync(newUser, Roles.User);
+
+            var (_, userTokens) = await GenerateAndSaveTokensAsync(newUser);
+
+            var profileResult = await CreateUserProfileAsync(newUser, userTokens.AccessToken);
+            if (!profileResult.IsSuccess)
+            {
+                await _authRepository.DeleteUserAsync(newUser);
+                continue;
+            }
+
+            if (record.Role == RoleType.Teacher)
+                await UpdateUserRoleInUserServiceAsync(newUser.Id, RoleType.Teacher, adminToken);
+
+            response.CreatedCount++;
+        }
+
+        response.Error = new OperationResult(true, "Import completed successfully.");
+        return response;
+    }
+
+    private async Task<OperationResult> CreateUserProfileAsync(MatchUser user, string userAccessToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userAccessToken);
+
+            var httpResponse = await client.PostAsJsonAsync("api/user/profile", new ProfileCreationRequest(
+                user.Id,
+                new ProfileDto { FirstName = user.Name, LastName = user.Surname, Email = user.Email! }));
+
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Profile creation failed for user {UserId}. StatusCode: {StatusCode}", user.Id, httpResponse.StatusCode);
+
+                var profileResponse = await httpResponse.Content.ReadFromJsonAsync<ProfileCreationResponse>();
+                var errorMessage = profileResponse?.Error.Message ?? "Could not create the user profile.";
+                return new OperationResult(false, errorMessage, profileResponse?.Error.ErrorCode);
+            }
+
+            return new OperationResult(true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService for user {UserId}.", user.Id);
+            return new OperationResult(false, "Could not create the user profile.");
+        }
+    }
+
+    private async Task UpdateUserRoleInUserServiceAsync(string userId, RoleType role, string? adminToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            if (!string.IsNullOrEmpty(adminToken))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+            var roleResponse = await client.PutAsJsonAsync(
+                $"api/user/profile/{userId}/role",
+                new ChangeRoleRequest(role));
+
+            if (!roleResponse.IsSuccessStatusCode)
+                _logger.LogWarning("Role update for user {UserId} failed in UserService. StatusCode: {StatusCode}", userId, roleResponse.StatusCode);
+            else
+                _logger.LogInformation("Role for user {UserId} updated successfully in UserService.", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService during role update for user {UserId}.", userId);
+        }
+    }
+
+    private string? ExtractBearerToken()
+    {
+        var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            return authHeader["Bearer ".Length..].Trim();
+
+        return _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
     }
 
     public async Task<AdminPasswordChangeResponse> ChangeUserPasswordAsync(AdminPasswordChangeRequest request, string currentUserId)
