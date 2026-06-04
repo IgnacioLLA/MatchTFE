@@ -7,27 +7,13 @@
 
             <MudPaper Elevation="1" Class="pa-6 rounded-xl border-all mb-4 text-center">
                 <MudAvatar Size="Size.Large" Class="avatar-xl mb-4 mx-auto" Color="Color.Primary" Variant="Variant.Filled">
-                    @if (!string.IsNullOrWhiteSpace(Profile.AvatarUrl))
-                    {
-                        <MudImage Src="@Profile.AvatarUrl" Alt="@Profile.FirstName" />
-                    }
-                    else
-                    {
-                        <span class="font-weight-bold text-h4">@Profile.FirstName.FirstOrDefault()</span>
-                    }
+                    <span class="font-weight-bold text-h4">@Profile.FirstName.FirstOrDefault()</span>
                 </MudAvatar>
 
                 <MudText Typo="Typo.h5" Class="font-weight-bold">@Profile.FirstName @Profile.LastName</MudText>
 
                 <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-4 font-weight-bold">
-                    @if (Profile.Role == RoleType.Teacher)
-                    {
-                        @(string.IsNullOrWhiteSpace(Profile.Department) ? "Departamento no establecido" : Profile.Department)
-                    }
-                    else
-                    {
-                        @(Profile.Role.ToString())
-                    }
+                    @GetRoleSubtitle(Profile)
                 </MudText>
 
                 <div class="d-flex justify-center align-center gap-4 mud-text-secondary">
@@ -49,6 +35,13 @@
                             </MudText>
                         </div>
                     }
+                    else if (Profile.Role == RoleType.Admin)
+                    {
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Size="Size.Small" Class="mr-1" />
+                            <MudText Typo="Typo.caption">Administrador del sistema</MudText>
+                        </div>
+                    }
                 </div>
             </MudPaper>
 
@@ -64,8 +57,8 @@
                     {
                         @foreach (var skill in Profile.Skills)
                         {
-                            <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg mb-3" style="background-color: var(--app-primary-light);">
-                                <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: var(--app-primary-dark);">@skill.Tag</MudText>
+                            <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg mb-3 chip-surface">
+                                <MudText Typo="Typo.body2" Class="chip-text font-weight-bold">@skill.Tag</MudText>
                                 <MudRating SelectedValue="@skill.Level" MaxValue="5" Color="Color.Primary" Size="Size.Small" ReadOnly="true" />
                             </div>
                         }
@@ -125,4 +118,12 @@
 @code {
     [Parameter, EditorRequired]
     public ProfileDto Profile { get; set; } = default!;
+
+    private static string GetRoleSubtitle(ProfileDto profile) => profile.Role switch
+    {
+        RoleType.Teacher => string.IsNullOrWhiteSpace(profile.Department) ? "Departamento no establecido" : profile.Department,
+        RoleType.Student => "Estudiante",
+        RoleType.Admin => "Administrador del sistema",
+        _ => profile.Role.ToString()
+    };
 }

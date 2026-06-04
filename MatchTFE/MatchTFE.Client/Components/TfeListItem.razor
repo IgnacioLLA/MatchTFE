@@ -1,6 +1,6 @@
 ﻿@using TFELibrary.Shared
 
-<div class="d-flex align-center py-4" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+<div class="d-flex align-center py-4 border-b-default">
     <MudGrid Class="align-center w-100" Spacing="2">
 
         @* TITLE *@
@@ -23,11 +23,21 @@
 
         @* EXPDATE *@
         <MudItem xs="12" md="2" Class="d-none d-md-flex align-center">
-            <div class="d-flex align-center mud-text-secondary">
-                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
-                <MudText Typo="Typo.body2">
-                    @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
-                </MudText>
+            <div class="d-flex flex-column">
+                <div class="d-flex align-center mud-text-secondary">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
+                    <MudText Typo="Typo.body2">
+                        @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                    </MudText>
+                </div>
+
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@GetExpirationStatusColor(Model.ExpirationDate)"
+                         Variant="Variant.Filled"
+                         Class="mt-2 font-weight-bold px-3 align-self-start">
+                    @GetExpirationStatusText(Model.ExpirationDate)
+                </MudChip>
             </div>
         </MudItem>
 
@@ -41,17 +51,13 @@
                     </MudText>
                 </div>
 
-                @if (Model.InterestedAmount > 0)
-                {
-                    <MudButton Variant="Variant.Text"
-                               Color="Color.Primary"
-                               Size="Size.Small"
-                               Href="@($"/tfe/{Model.Id}/candidates")"
-                               Class="font-weight-bold px-2 py-0"
-                               Style="min-width: auto;">
-                        Ver
-                    </MudButton>
-                }
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           Href="@($"/tfe/{Model.Id}/candidates")"
+                           Class="font-weight-bold px-2 py-0">
+                    Ver
+                </MudButton>
             </div>
         </MudItem>
 
@@ -67,7 +73,7 @@
 
         @* ACTIONS *@
         <MudItem xs="6" md="1" Class="d-flex justify-end align-center gap-1">
-            @if (Model.Status != TFEStatus.Cancelled)
+            @if (Model.Status != TfeStatus.Cancelled)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Size="Size.Small"
@@ -98,27 +104,36 @@
         }
     }
 
-    private Color GetStatusColor(TFEStatus status) => status switch
+    private Color GetStatusColor(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => Color.Success,
-        TFEStatus.Open => Color.Default,
-        TFEStatus.Cancelled => Color.Info,
+        TfeStatus.Completed => Color.Success,
+        TfeStatus.Open => Color.Default,
+        TfeStatus.Cancelled => Color.Info,
         _ => Color.Default
     };
 
-    private Variant GetStatusVariant(TFEStatus status) => status switch
+    private Variant GetStatusVariant(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => Variant.Filled,
-        TFEStatus.Open => Variant.Outlined,
-        TFEStatus.Cancelled => Variant.Filled,
+        TfeStatus.Completed => Variant.Filled,
+        TfeStatus.Open => Variant.Outlined,
+        TfeStatus.Cancelled => Variant.Filled,
         _ => Variant.Filled
     };
 
-    private string GetStatusText(TFEStatus status) => status switch
+    private string GetStatusText(TfeStatus status) => status switch
     {
-        TFEStatus.Completed => "• Completado",
-        TFEStatus.Open => "• Abierto",
-        TFEStatus.Cancelled => "• Cancelado",
+        TfeStatus.Completed => "• Completado",
+        TfeStatus.Open => "• Abierto",
+        TfeStatus.Cancelled => "• Cancelado",
         _ => status.ToString()
     };
+
+    private static bool IsExpired(DateTime expirationDate)
+    {
+        return expirationDate != default && expirationDate.Date < DateTime.Today;
+    }
+
+    private Color GetExpirationStatusColor(DateTime expirationDate) => IsExpired(expirationDate) ? Color.Error : Color.Success;
+
+    private string GetExpirationStatusText(DateTime expirationDate) => IsExpired(expirationDate) ? "Caducado" : "Abierto";
 }

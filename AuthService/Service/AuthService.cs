@@ -1,4 +1,5 @@
-﻿using AuthService.Data;
+using AuthService.Data;
+using AuthService.Parsing;
 using AuthService.Repositories;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -7,360 +8,561 @@ using System.Security.Claims;
 using System.Text;
 using TFELibrary.Shared;
 
-namespace AuthService.Service
+namespace AuthService.Service;
+
+public class AuthService : IAuthService
 {
-    public class AuthService : IAuthService
+    public int TokenLifetime { get; } = 15;
+    public int RefreshTokenLifetime { get; } = 25;
+
+    private readonly IAuthRepository _authRepository;
+    private readonly IConfiguration _configuration;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<AuthService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
+
+    public AuthService(IAuthRepository authRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor)
     {
-        public int TokenLifetime { get; } = 15;
-        public int RefreshTokenLifetime { get; } = 25;
+        _authRepository = authRepository;
+        _configuration = configuration;
+        _httpClientFactory = httpClientFactory;
+        _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
-        private readonly IAuthRepository _authRepository;
-        private readonly IConfiguration _configuration;
-        private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<AuthService> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly JwtSecurityTokenHandler _tokenHandler = new JwtSecurityTokenHandler();
+    public async Task<(RegisterResponseDto Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequestDto request)
+    {
+        if (request == null)
+            return (new RegisterResponseDto
+            {
+                Error = new OperationResult(false, "Registration request cannot be null."),
+                AuthData = new AuthResultDto { IsSuccess = false, Message = "Registration request cannot be null." }
+            }, null);
 
-        public AuthService(IAuthRepository authRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<AuthService> logger, IHttpContextAccessor httpContextAccessor)
+        var newUser = new MatchUser
         {
-            _authRepository = authRepository;
-            _configuration = configuration;
-            _httpClientFactory = httpClientFactory;
-            _logger = logger;
-            _httpContextAccessor = httpContextAccessor;
+            UserName = request.Email,
+            Email = request.Email,
+            Name = request.FirstName,
+            Surname = request.LastName
+        };
+
+        var result = await _authRepository.CreateUserAsync(newUser, request.Password);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            var isDuplicateUser = result.Errors.Any(e =>
+                e.Code.Contains("Duplicate", StringComparison.OrdinalIgnoreCase));
+
+            return (new RegisterResponseDto
+            {
+                Error = new OperationResult(false, errors, isDuplicateUser ? "DuplicateEmail" : null),
+                AuthData = new AuthResultDto { IsSuccess = false, Message = errors }
+            }, null);
         }
 
-        public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
+        var roleResult = await _authRepository.AddToRoleAsync(newUser, Roles.User);
+        if (!roleResult.Succeeded)
+            _logger.LogWarning("Failed to assign the 'User' role to user {UserId}.", newUser.Id);
+
+        var (authResult, authTokens) = await GenerateAndSaveTokensAsync(newUser);
+
+        var profileResult = await CreateUserProfileAsync(newUser, authTokens.AccessToken);
+        if (!profileResult.IsSuccess)
         {
-            var newUser = new MatchUser
+            await _authRepository.DeleteUserAsync(newUser);
+            return (new RegisterResponseDto
             {
-                UserName = request.Email,
-                Email = request.Email,
-                Name = request.Name,
-                Surname = request.Surname
-            };
-
-            var result = await _authRepository.CreateUserAsync(newUser, request.Password);
-
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return new RegisterResponseDto { IsSuccess = false, ErrorMessage = errors };
-            }
-
-            var roleResult = await _authRepository.AddToRoleAsync(newUser, "User");
-            if (!roleResult.Succeeded)
-                _logger.LogWarning($"No se pudo asignar el rol 'User' al usuario {newUser.Id}.");
-
-
-            // Generación de tokens para el nuevo usuario
-
-            var authResult = await GenerateAndSaveTokensAsync(newUser);
-            try
-            {
-                var client = _httpClientFactory.CreateClient("UserServiceClient");
-
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.Token);
-
-                ProfileCreationRequest profile = new ProfileCreationRequest(
-
-                    newUser.Id,
-                    new ProfileDto
-                    {
-                        FirstName = newUser.Name,
-                        LastName = newUser.Surname,
-                        Email = newUser.Email
-                    }
-                );
-
-                var response = await client.PostAsJsonAsync("api/user/profile", profile);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    _logger.LogWarning($"Usuario {newUser.Id} registrado, pero falló la creación del perfil en UserService. StatusCode: {response.StatusCode}");
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error crítico conectando con UserService durante el registro.");
-            }
-
-            return new RegisterResponseDto
-            {
-                IsSuccess = true,
-                ErrorMessage = string.Empty,
-                AuthData = authResult
-            };
+                Error = profileResult,
+                AuthData = new AuthResultDto { IsSuccess = false, Message = profileResult.Message }
+            }, null);
         }
 
-        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
+        return (new RegisterResponseDto
         {
-            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+            Error = new OperationResult(true, string.Empty),
+            AuthData = authResult
+        }, authTokens);
+    }
 
-            if (user == null || !await _authRepository.CheckPasswordAsync(user, request.Password))
+    public async Task<(LoginResponseDto Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequestDto request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            return (new LoginResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Email and password are required." } }, null);
+
+        var user = await _authRepository.GetUserByEmailAsync(request.Email);
+
+        if (user == null || !await _authRepository.CheckPasswordAsync(user, request.Password))
+        {
+            return (new LoginResponseDto
             {
-                return new LoginResponseDto
-                {
-                    AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Invalid credentials." }
-                };
-            }
-
-            var authResult = await GenerateAndSaveTokensAsync(user);
-
-            return new LoginResponseDto
-            {
-                Name = user.Name,
-                Surname = user.Surname,
-                AuthData = authResult
-            };
+                AuthData = new AuthResultDto { IsSuccess = false, Message = "Invalid credentials." }
+            }, null);
         }
 
-        public async Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
+        if (await _authRepository.IsLockedOutAsync(user))
         {
-            var refreshSecret = _configuration.GetSection("JwtSettings")["RefreshSecret"]!;
-
-            if (!IsValidToken(request.RefreshToken, refreshSecret))
+            return (new LoginResponseDto
             {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token expirado, falso o incorrecto." } };
-            }
-
-            var user = await _authRepository.GetUserByIdAsync(request.UserId);
-
-            if (user == null)
-            {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "User not found." } };
-            }
-
-            if (await _authRepository.GetRefreshTokenAsync(user) != request.RefreshToken)
-            {
-                return new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, ErrorMessage = "Token revocado o reemplazado." } };
-            }
-
-            var authResult = await GenerateAndSaveTokensAsync(user);
-
-            return new RefreshTokenResponseDto { AuthData = authResult };
+                AuthData = new AuthResultDto { IsSuccess = false, Message = "Account suspended." }
+            }, null);
         }
 
-        private async Task<AuthResultDto> GenerateAndSaveTokensAsync(MatchUser user)
+        var (authResult, authTokens) = await GenerateAndSaveTokensAsync(user);
+
+        return (new LoginResponseDto
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            var accessSecret = jwtSettings["Secret"]!;
-            var refreshSecret = jwtSettings["RefreshSecret"]!;
+            FirstName = user.Name,
+            LastName = user.Surname,
+            AuthData = authResult
+        }, authTokens);
+    }
 
-            var roles = await _authRepository.GetUserRolesAsync(user);
+    public async Task<(RefreshTokenResponseDto Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequestDto request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.UserId) || string.IsNullOrWhiteSpace(request.RefreshToken))
+            return (new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Invalid refresh token request." } }, null);
 
-            var jwtToken = GenerateJwtToken(
-                user,
-                accessSecret,
-                DateTime.UtcNow.AddMinutes(TokenLifetime),
-                roles);
+        var refreshSecret = _configuration.GetSection("JwtSettings")["RefreshSecret"]!;
 
-            var newRefreshToken = GenerateJwtToken(
-                user,
-                refreshSecret,
-                DateTime.UtcNow.AddMinutes(RefreshTokenLifetime),
-                roles);
-
-            await _authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
-
-            return new AuthResultDto
-            {
-                IsSuccess = true,
-                Token = jwtToken,
-                RefreshToken = newRefreshToken,
-                ErrorMessage = string.Empty
-            };
+        if (!IsValidToken(request.RefreshToken, refreshSecret))
+        {
+            return (new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Token expirado, falso o incorrecto." } }, null);
         }
 
-        private string GenerateJwtToken(MatchUser user, string secretKey, DateTime expiration, IList<string> roles)
+        var user = await _authRepository.GetUserByIdAsync(request.UserId);
+
+        if (user == null)
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                //new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-
-            foreach (var role in roles)
-                claims.Add(new Claim(ClaimTypes.Role, role));
-
-            var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
-                claims: claims,
-                expires: expiration,
-                signingCredentials: creds
-            );
-
-            return _tokenHandler.WriteToken(token);
+            return (new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "User not found." } }, null);
         }
 
-        public async Task<bool> LogoutAsync(string id)
+        if (await _authRepository.GetRefreshTokenAsync(user) != request.RefreshToken)
         {
-            //var user = await _authRepository.GetUserByEmailAsync(email);
-            var user = await _authRepository.GetUserByIdAsync(id);
-            if (user == null) return false;
+            return (new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Token revocado o reemplazado." } }, null);
+        }
 
-            await _authRepository.RemoveRefreshTokenAsync(user);
+        var (authResult, authTokens) = await GenerateAndSaveTokensAsync(user);
 
+        return (new RefreshTokenResponseDto { AuthData = authResult }, authTokens);
+    }
+
+    private async Task<(AuthResultDto Result, AuthTokenPair Tokens)> GenerateAndSaveTokensAsync(MatchUser user)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var accessSecret = jwtSettings["Secret"]!;
+        var refreshSecret = jwtSettings["RefreshSecret"]!;
+
+        var roles = await _authRepository.GetUserRolesAsync(user);
+
+        var jwtToken = GenerateJwtToken(
+            user,
+            accessSecret,
+            DateTime.UtcNow.AddMinutes(TokenLifetime),
+            roles);
+
+        var newRefreshToken = GenerateJwtToken(
+            user,
+            refreshSecret,
+            DateTime.UtcNow.AddMinutes(RefreshTokenLifetime),
+            roles);
+
+        await _authRepository.SaveRefreshTokenAsync(user, newRefreshToken);
+
+        return (
+            new AuthResultDto { IsSuccess = true, Message = string.Empty },
+            new AuthTokenPair(jwtToken, newRefreshToken)
+        );
+    }
+
+    private string GenerateJwtToken(MatchUser user, string secretKey, DateTime expiration, IList<string> roles)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        foreach (var role in roles)
+            claims.Add(new Claim(ClaimTypes.Role, role));
+
+        var token = new JwtSecurityToken(
+            issuer: jwtSettings["Issuer"],
+            audience: jwtSettings["Audience"],
+            claims: claims,
+            expires: expiration,
+            signingCredentials: creds
+        );
+
+        return _tokenHandler.WriteToken(token);
+    }
+
+    public async Task<bool> LogoutAsync(string id)
+    {
+        var user = await _authRepository.GetUserByIdAsync(id);
+        if (user == null) return false;
+
+        await _authRepository.RemoveRefreshTokenAsync(user);
+
+        return true;
+    }
+
+    private bool IsValidToken(string token, string secretKey)
+    {
+        var jwtSettings = _configuration.GetSection("JwtSettings");
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidateAudience = true,
+            ValidAudience = jwtSettings["Audience"],
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+
+        try
+        {
+            _tokenHandler.ValidateToken(token, validationParameters, out _);
             return true;
         }
-
-        private bool IsValidToken(string token, string secretKey)
+        catch
         {
-            var jwtSettings = _configuration.GetSection("JwtSettings");
-            
-            var validationParameters = new TokenValidationParameters
+            return false;
+        }
+    }
+
+    public async Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request, string currentUserId)
+    {
+        var response = new UserRoleUpdateResponse();
+        var user = await _authRepository.GetUserByEmailAsync(request.Email);
+
+        if (user == null)
+        {
+            response.Error = new OperationResult(false, $"No user found with email '{request.Email}'.");
+            return response;
+        }
+
+        if (user.Id == currentUserId)
+        {
+            response.Error = new OperationResult(false, "You cannot change your own role.");
+            return response;
+        }
+
+        var newRoleString = request.NewRole.ToString();
+        var currentRoles = await _authRepository.GetUserRolesAsync(user);
+
+        if (currentRoles.Count == 1 && currentRoles.Contains(newRoleString, StringComparer.OrdinalIgnoreCase))
+        {
+            response.Error = new OperationResult(true, "The user already has this role assigned.");
+            return response;
+        }
+
+        var isExecutionOk = true;
+        var errorMessage = string.Empty;
+
+        foreach (var role in currentRoles)
+        {
+            var removeResult = await _authRepository.RemoveFromRoleAsync(user, role);
+            if (!removeResult.Succeeded)
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-                ValidateIssuer = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidateAudience = true,
-                ValidAudience = jwtSettings["Audience"],
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                errorMessage = $"Failed to remove the previous role '{role}'.";
+                isExecutionOk = false;
+                break;
+            }
+        }
+
+        if (isExecutionOk)
+        {
+            newRoleString = GetAspNetRole(request.NewRole);
+            var addResult = await _authRepository.AddToRoleAsync(user, newRoleString);
+            if (!addResult.Succeeded)
+            {
+                errorMessage = $"Failed to assign the new role '{newRoleString}'.";
+                isExecutionOk = false;
+            }
+        }
+
+        if (isExecutionOk)
+        {
+            response.Error = new OperationResult(true, $"Role successfully updated to {newRoleString}.");
+            await UpdateUserRoleInUserServiceAsync(user.Id, request.NewRole, ExtractBearerToken());
+        }
+        else
+        {
+            response.Error = new OperationResult(false, errorMessage);
+        }
+
+        return response;
+    }
+
+    private static string GetAspNetRole(RoleType role)
+    {
+        if (role == RoleType.Admin)
+            return Roles.Admin;
+        if (role == RoleType.Teacher || role == RoleType.Student)
+            return Roles.User;
+        throw new ArgumentException("Invalid role.");
+    }
+
+    public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId)
+    {
+        var response = new BulkUserActionResponse { AffectedCount = 0 };
+
+        if (request == null || request.UserIds == null || !request.UserIds.Any())
+        {
+            response.Error = new OperationResult(false, "Request must include at least one user ID.");
+            return response;
+        }
+
+        if (request.UserIds.Contains(currentUserId))
+        {
+            response.Error = new OperationResult(false, "You cannot perform actions on yourself.");
+            return response;
+        }
+
+        if (request.Action == BulkUserActionType.Delete)
+        {
+            var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            foreach (var user in users)
+            {
+                var result = await _authRepository.DeleteUserAsync(user);
+                if (result.Succeeded)
+                {
+                    response.AffectedCount++;
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to delete user {UserId}: {Errors}", user.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
+                }
+            }
+
+            response.Error = new OperationResult(true, $"Successfully deleted {response.AffectedCount} user(s).");
+        }
+        else if (request.Action == BulkUserActionType.Suspend)
+        {
+            var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            var adminToken = ExtractBearerToken();
+            foreach (var user in users)
+            {
+                await _authRepository.LockUserAsync(user);
+                await UpdateUserSuspensionInUserServiceAsync(user.Id, true, adminToken);
+                response.AffectedCount++;
+            }
+
+            response.Error = new OperationResult(true, $"Successfully suspended {response.AffectedCount} user(s).");
+        }
+        else if (request.Action == BulkUserActionType.Unsuspend)
+        {
+            var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            var adminToken = ExtractBearerToken();
+            foreach (var user in users)
+            {
+                await _authRepository.UnlockUserAsync(user);
+                await UpdateUserSuspensionInUserServiceAsync(user.Id, false, adminToken);
+                response.AffectedCount++;
+            }
+
+            response.Error = new OperationResult(true, $"Successfully reactivated {response.AffectedCount} user(s).");
+        }
+        else
+        {
+            response.Error = new OperationResult(false, "Action not supported.");
+        }
+
+        return response;
+    }
+
+    public async Task<BulkUserImportResponse> BulkImportUsersAsync(BulkUserImportRequest request)
+    {
+        var parseResult = UserImportFileParser.Parse(request.FileContent);
+
+        if (!parseResult.IsValid)
+        {
+            return new BulkUserImportResponse
+            {
+                Error = new OperationResult(false, parseResult.ErrorMessage!, "ParseError")
+            };
+        }
+
+        var adminToken = ExtractBearerToken();
+        var response = new BulkUserImportResponse();
+
+        foreach (var record in parseResult.Records)
+        {
+            var existingUser = await _authRepository.GetUserByEmailAsync(record.Email);
+            if (existingUser != null)
+            {
+                response.SkippedCount++;
+                continue;
+            }
+
+            var newUser = new MatchUser
+            {
+                UserName = record.Email,
+                Email = record.Email,
+                Name = record.FirstName,
+                Surname = record.LastName
             };
 
-            try
+            var createResult = await _authRepository.CreateUserAsync(newUser, record.Password);
+            if (!createResult.Succeeded)
             {
-                _tokenHandler.ValidateToken(token, validationParameters, out _);
-                return true;
+                _logger.LogWarning(
+                    "Failed to create user {Email} during bulk import: {Errors}",
+                    record.Email,
+                    string.Join(", ", createResult.Errors.Select(e => e.Description)));
+                continue;
             }
-            catch
+
+            await _authRepository.AddToRoleAsync(newUser, Roles.User);
+
+            var (_, userTokens) = await GenerateAndSaveTokensAsync(newUser);
+
+            var profileResult = await CreateUserProfileAsync(newUser, userTokens.AccessToken);
+            if (!profileResult.IsSuccess)
             {
-                return false;
+                await _authRepository.DeleteUserAsync(newUser);
+                continue;
             }
+
+            if (record.Role == RoleType.Teacher)
+                await UpdateUserRoleInUserServiceAsync(newUser.Id, RoleType.Teacher, adminToken);
+
+            response.CreatedCount++;
         }
 
-        public async Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request)
+        response.Error = new OperationResult(true, "Import completed successfully.");
+        return response;
+    }
+
+    private async Task<OperationResult> CreateUserProfileAsync(MatchUser user, string userAccessToken)
+    {
+        try
         {
-            var response = new UserRoleUpdateResponse();
-            var user = await _authRepository.GetUserByEmailAsync(request.Email);
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", userAccessToken);
 
-            if (user == null)
+            var httpResponse = await client.PostAsJsonAsync("api/user/profile", new ProfileCreationRequest(
+                user.Id,
+                new ProfileDto { FirstName = user.Name, LastName = user.Surname, Email = user.Email! }));
+
+            if (!httpResponse.IsSuccessStatusCode)
             {
-                response.Success = false;
-                response.Message = $"No user found with email '{request.Email}'.";
-                return response;
+                _logger.LogWarning("Profile creation failed for user {UserId}. StatusCode: {StatusCode}", user.Id, httpResponse.StatusCode);
+
+                var profileResponse = await httpResponse.Content.ReadFromJsonAsync<ProfileCreationResponse>();
+                var errorMessage = profileResponse?.Error.Message ?? "Could not create the user profile.";
+                return new OperationResult(false, errorMessage, profileResponse?.Error.ErrorCode);
             }
 
-            var newRoleString = request.NewRole.ToString();
-            var currentRoles = await _authRepository.GetUserRolesAsync(user);
+            return new OperationResult(true, string.Empty);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService for user {UserId}.", user.Id);
+            return new OperationResult(false, "Could not create the user profile.");
+        }
+    }
 
-            if (currentRoles.Count == 1 && currentRoles.Contains(newRoleString))
-            {
-                response.Success = true;
-                response.Message = "The user already has this role assigned.";
-                return response;
-            }
+    private async Task UpdateUserRoleInUserServiceAsync(string userId, RoleType role, string? adminToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            if (!string.IsNullOrEmpty(adminToken))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
 
-            var isExecutionOk = true;
+            var roleResponse = await client.PutAsJsonAsync(
+                $"api/user/profile/{userId}/role",
+                new ChangeRoleRequest(role));
 
-            foreach (var role in currentRoles)
-            {
-                var removeResult = await _authRepository.RemoveFromRoleAsync(user, role);
-                if (!removeResult.Succeeded)
-                {
-                    response.Message = $"Failed to remove the previous role '{role}'.";
-                    isExecutionOk = false;
-                    break;
-                }
-            }
-
-            if (isExecutionOk)
-            {
-                if (request.NewRole.Equals(RoleType.Teacher) || request.NewRole.Equals(RoleType.Student))
-                    newRoleString = "User";
-                var addResult = await _authRepository.AddToRoleAsync(user, newRoleString);
-                if (!addResult.Succeeded)
-                {
-                    response.Message = $"Failed to assign the new role '{newRoleString}'.";
-                    isExecutionOk = false;
-                }
-            }
-
-            if (isExecutionOk)
-            {
-                response.Success = true;
-                response.Message = $"Role successfully updated to {newRoleString}.";
-
-                try
-                {
-                    var client = _httpClientFactory.CreateClient("UserServiceClient");
-
-                    var token = string.Empty;
-                    var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
-                    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                    {
-                        token = authHeader.Substring("Bearer ".Length).Trim();
-                    }
-                    else
-                    {
-                        token = _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
-                    }
-
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    }
-
-                    var changeRoleReq = new ChangeRoleRequest(request.NewRole);
-                    var apiResponse = await client.PutAsJsonAsync($"api/user/profile/{user.Id}/role", changeRoleReq);
-
-                    if (!apiResponse.IsSuccessStatusCode)
-                    {
-                        _logger.LogWarning($"Role for user {user.Id} was locally updated but failed in UserService. StatusCode: {apiResponse.StatusCode}");
-                    }
-
-                    _logger.LogWarning($"Role for user {user.Id} was locally updated and in UserService. StatusCode: {apiResponse.StatusCode}");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Crítical error connecting to UserService during role change.");
-                }
-            }
+            if (!roleResponse.IsSuccessStatusCode)
+                _logger.LogWarning("Role update for user {UserId} failed in UserService. StatusCode: {StatusCode}", userId, roleResponse.StatusCode);
             else
-            {
-                response.Success = false;
-            }
+                _logger.LogInformation("Role for user {UserId} updated successfully in UserService.", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService during role update for user {UserId}.", userId);
+        }
+    }
 
+    private async Task UpdateUserSuspensionInUserServiceAsync(string userId, bool isSuspended, string? adminToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            if (!string.IsNullOrEmpty(adminToken))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+            var suspensionResponse = await client.PutAsJsonAsync(
+                $"api/user/profile/{userId}/suspension",
+                new SuspensionUpdateRequest(isSuspended));
+
+            if (!suspensionResponse.IsSuccessStatusCode)
+                _logger.LogWarning("Suspension update for user {UserId} failed in UserService. StatusCode: {StatusCode}", userId, suspensionResponse.StatusCode);
+            else
+                _logger.LogInformation("Suspension status for user {UserId} updated to {IsSuspended} in UserService.", userId, isSuspended);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService during suspension update for user {UserId}.", userId);
+        }
+    }
+
+    private string? ExtractBearerToken()
+    {
+        var authHeader = _httpContextAccessor.HttpContext?.Request.Headers["Authorization"].ToString();
+        if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            return authHeader["Bearer ".Length..].Trim();
+
+        return _httpContextAccessor.HttpContext?.Request.Cookies["AccessToken"];
+    }
+
+    public async Task<AdminPasswordChangeResponse> ChangeUserPasswordAsync(AdminPasswordChangeRequest request, string currentUserId)
+    {
+        var response = new AdminPasswordChangeResponse();
+
+        if (request == null || string.IsNullOrWhiteSpace(request.Email))
+        {
+            response.Error = new OperationResult(false, "Email is required.");
             return response;
         }
 
-        public async Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request)
+        if (request.NewPassword != request.ConfirmPassword)
         {
-            var response = new BulkUserActionResponse { Success = true, AffectedCount = 0 };
-
-            if (request.Action == BulkUserActionType.Delete)
-            {
-                foreach (var userId in request.UserIds)
-                {
-                    var user = await _authRepository.GetUserByIdAsync(userId);
-                    if (user != null)
-                    {
-                        var result = await _authRepository.DeleteUserAsync(user);
-                        if (result.Succeeded)
-                        {
-                            response.AffectedCount++;
-                        }
-                    }
-                }
-
-                response.Message = $"Successfully deleted {response.AffectedCount} user(s).";
-            }
-            else
-            {
-                response.Success = false;
-                response.Message = "Action not supported.";
-            }
-
+            response.Error = new OperationResult(false, "Passwords do not match.", "PasswordMismatch");
             return response;
         }
+
+        var user = await _authRepository.GetUserByEmailAsync(request.Email);
+
+        if (user == null)
+        {
+            response.Error = new OperationResult(false, $"No user found with email '{request.Email}'.", "UserNotFound");
+            return response;
+        }
+
+        var result = await _authRepository.ResetPasswordDirectlyAsync(user, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
+            response.Error = new OperationResult(false, errorMessage);
+            return response;
+        }
+
+        response.Error = new OperationResult(true, "Password updated successfully.");
+        return response;
     }
 }

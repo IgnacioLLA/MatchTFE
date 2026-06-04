@@ -4,6 +4,7 @@
 
 @inject IHttpClientFactory ClientFactory
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <MudThemeProvider Theme="MatchTheme.DefaultTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudDialogProvider />
@@ -17,7 +18,7 @@
                 MENÚ PRINCIPAL
             </MudText>
         </div>
-        <NavMenu />
+        <NavMenu Profile="_globalProfile" />
     </MudDrawer>
 
     <MudAppBar Elevation="0" Variant="Variant.Outlined">
@@ -55,7 +56,7 @@
                         @_globalProfile.FirstName @_globalProfile.LastName
                     </MudText>
                     <MudText Typo="Typo.caption" Color="Color.Inherit" Class="app-caption-uppercase">
-                        @(_globalProfile.Role == RoleType.Student ? "ESTUDIANTE" : "PROFESOR")
+                        @GetRoleCaption(_globalProfile.Role)
                     </MudText>
                 </div>
             }
@@ -67,6 +68,14 @@
             @if (_isLoading)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else if (_globalProfile == null && !_isPublicRoute)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-4" />
+            }
+            else if (_globalProfile == null)
+            {
+                @Body
             }
             else
             {
@@ -86,10 +95,29 @@
 
     private ProfileDto? _globalProfile;
     private bool _isLoading = true;
+    private bool _isPublicRoute;
 
     protected override async Task OnInitializedAsync()
     {
+        var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var normalized = string.IsNullOrWhiteSpace(currentPath)
+            ? "/"
+            : $"/{currentPath.TrimStart('/')}";
+
+        _isPublicRoute = IsPublicRoute(normalized);
+
+        if (_isPublicRoute)
+        {
+            _isLoading = false;
+            return;
+        }
+
         await CargarPerfilGlobalAsync();
+
+        if (_globalProfile == null && OperatingSystem.IsBrowser())
+        {
+            Navigation.NavigateTo("/login", replace: true);
+        }
     }
 
     private async Task CargarPerfilGlobalAsync()
@@ -109,4 +137,17 @@
             _isLoading = false;
         }
     }
+
+    private static string GetRoleCaption(RoleType role) => role switch
+    {
+        RoleType.Student => "ESTUDIANTE",
+        RoleType.Teacher => "PROFESOR",
+        RoleType.Admin => "ADMINISTRADOR",
+        _ => "USUARIO"
+    };
+
+    private static bool IsPublicRoute(string normalizedPath)
+        => normalizedPath.Equals("/login", StringComparison.OrdinalIgnoreCase)
+           || normalizedPath.Equals("/register", StringComparison.OrdinalIgnoreCase)
+           || normalizedPath.Equals("/not-found", StringComparison.OrdinalIgnoreCase);
 }

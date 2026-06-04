@@ -95,14 +95,9 @@ namespace MatchService.Data.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserProfileUserId")
-                        .HasColumnType("text");
-
                     b.HasKey("OriginUserId", "TfeId");
 
                     b.HasIndex("TfeId");
-
-                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("TfeProposal");
                 });
@@ -187,11 +182,6 @@ namespace MatchService.Data.Migrations
                     b.Property<string>("AcademicYear")
                         .HasColumnType("text");
 
-                    b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
@@ -212,6 +202,9 @@ namespace MatchService.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -226,7 +219,7 @@ namespace MatchService.Data.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserProfile");
+                    b.ToTable("UserProfile", (string)null);
                 });
 
             modelBuilder.Entity("TFELibrary.Data.InterestProposal", b =>
@@ -262,7 +255,7 @@ namespace MatchService.Data.Migrations
             modelBuilder.Entity("TFELibrary.Data.TFEProposal", b =>
                 {
                     b.HasOne("TFELibrary.Data.UserProfile", "OriginUser")
-                        .WithMany()
+                        .WithMany("TfeProposals")
                         .HasForeignKey("OriginUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -272,10 +265,6 @@ namespace MatchService.Data.Migrations
                         .HasForeignKey("TfeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TFELibrary.Data.UserProfile", null)
-                        .WithMany("TfeProposals")
-                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("OriginUser");
 
@@ -287,7 +276,7 @@ namespace MatchService.Data.Migrations
                     b.HasOne("TFELibrary.Data.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TFELibrary.Data.TFE", "Tfe")

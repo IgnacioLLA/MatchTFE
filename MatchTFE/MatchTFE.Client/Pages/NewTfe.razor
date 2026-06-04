@@ -1,4 +1,4 @@
-﻿@page "/tfe/create"
+@page "/tfe/create"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 
@@ -15,9 +15,13 @@
     </MudText>
 </div>
 
-<TfeForm OnValidSubmit="CreateProposalAsync" />
+<TfeForm OnValidSubmit="CreateProposalAsync"
+         ServerError="@_serverError"
+         ServerErrorChanged="@(v => { _serverError = v; StateHasChanged(); })" />
 
 @code {
+    private string? _serverError;
+
     private async Task CreateProposalAsync(TfeDto newTfe)
     {
         var request = new TfeCreationRequest { Tfe = newTfe };
@@ -36,11 +40,11 @@
             }
 
             var error = await response.Content.ReadAsStringAsync();
-            Snackbar.Add($"No se pudo crear ({(int)response.StatusCode}): {error}", Severity.Error);
+            _serverError = $"No se pudo crear ({(int)response.StatusCode}): {error}";
         }
         catch
         {
-            Snackbar.Add("Error al conectar con el backend al crear.", Severity.Error);
+            _serverError = "Error al conectar con el servidor. Inténtalo de nuevo.";
         }
     }
 }

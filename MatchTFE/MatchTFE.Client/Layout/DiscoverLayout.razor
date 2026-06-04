@@ -2,31 +2,12 @@
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8">
 
-    @* ESCRITORIO *@
-    <div class="d-none d-sm-block">
-        <MudTabs ActivePanelIndex="ActiveIndex" ActivePanelIndexChanged="OnTabChanged" Class="mb-6">
-            <MudTabPanel>
-                <TabContent>
-                    <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
-                    <span>Propuestas de TFE</span>
-                </TabContent>
-            </MudTabPanel>
-            <MudTabPanel>
-                <TabContent>
-                    <MudIcon Icon="@Icons.Material.Filled.People" Class="mr-2" />
-                    <span>Perfiles de Profesores</span>
-                </TabContent>
-            </MudTabPanel>
-        </MudTabs>
+    <div class="mb-6 d-flex align-center">
+        <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
+        <MudText Typo="Typo.h6" Class="font-weight-bold">Propuestas de TFE</MudText>
     </div>
 
-    @* MÓVIL  *@
     <div class="d-block d-sm-none mb-6">
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Size="Size.Large"
-                   StartIcon="@MobileButtonIcon" Class="rounded-lg py-3 font-weight-bold"
-                   OnClick="ToggleMobileView">
-            @MobileButtonText
-        </MudButton>
         <MudText Typo="Typo.h3" Class="mb-2 mt-4 font-weight-bold">@MobileTitle</MudText>
     </div>
 
@@ -35,32 +16,6 @@
 </MudContainer>
 
 @code {
-    [Parameter, EditorRequired] public int ActiveIndex { get; set; }
     [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
-    [Parameter] public string MobileTitle { get; set; } = string.Empty;
-    [Parameter] public string MobileButtonText { get; set; } = string.Empty;
-    [Parameter] public string MobileButtonIcon { get; set; } = Icons.Material.Filled.Sync;
-
-    private void OnTabChanged(int index)
-    {
-        NavigateBasedOnIndex(index);
-    }
-
-    private void ToggleMobileView()
-    {
-        NavigateBasedOnIndex(ActiveIndex == 0 ? 1 : 0);
-    }
-
-    private void NavigateBasedOnIndex(int index)
-    {
-        switch (index)
-        {
-            case 0:
-                NavManager.NavigateTo("/tfe/feed");
-                break;
-            case 1:
-                NavManager.NavigateTo("/profiles/feed");
-                break;
-        }
-    }
+    [Parameter] public string MobileTitle { get; set; } = "Descubrir propuestas";
 }

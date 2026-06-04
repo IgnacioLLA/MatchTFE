@@ -63,7 +63,7 @@
 
     private bool _isLoading = true;
     private TfeDto? _tfe;
-    private List<ProfileDto> _candidates = new();
+    private List<TfeCandidateDto> _candidates = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,7 +82,9 @@
 
             if (response != null && response.Interested != null)
             {
-                _candidates = response.Interested;
+                _candidates = response.Interested
+                    .OrderBy(c => GetStatusSortOrder(c.Status))
+                    .ToList();
             }
         }
         catch (Exception e)
@@ -95,21 +97,73 @@
         }
     }
 
-    private void HandleViewProfile(ProfileDto profile)
+    private static int GetStatusSortOrder(ProposalStatus status) => status switch
     {
-        Navigation.NavigateTo($"/profile/{profile.Id}");
+        ProposalStatus.Pending  => 0,
+        ProposalStatus.Accepted => 1,
+        ProposalStatus.Rejected => 2,
+        _                       => 3
+    };
+
+    private void HandleViewProfile(TfeCandidateDto candidate)
+    {
+        Navigation.NavigateTo($"/profile/{candidate.Profile.Id}?tfeId={TfeId}&allowActions={candidate.CanDecide.ToString().ToLowerInvariant()}");
     }
 
-    private async Task HandleRejectAsync(ProfileDto profile)
+    private async Task HandleRejectAsync(TfeCandidateDto candidate)
     {
-        _candidates.Remove(profile);
-        Snackbar.Add($"Has descartado a {profile.FirstName}.", Severity.Normal);
-        await Task.CompletedTask;
+        await DecideAsync(candidate, ProposalStatus.Rejected);
     }
 
-    private async Task HandleAcceptAsync(ProfileDto profile)
+    private async Task HandleAcceptAsync(TfeCandidateDto candidate)
     {
-        Snackbar.Add($"Has aceptado a {profile.FirstName} para tu propuesta.", Severity.Success);
-        await Task.CompletedTask;
+        await DecideAsync(candidate, ProposalStatus.Accepted);
+    }
+
+    private async Task DecideAsync(TfeCandidateDto candidate, ProposalStatus status)
+    {
+        if (!candidate.CanDecide)
+        {
+            Snackbar.Add("Esta propuesta ya no está disponible para decisión.", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.PutAsJsonAsync("api/match/proposal/tfe/decision", new TfeCandidateDecisionRequest
+            {
+                TfeId = TfeId,
+                CandidateId = candidate.Profile.Id,
+                Status = status
+            });
+
+            if (response.IsSuccessStatusCode)
+            {
+                candidate.Status = status;
+                _candidates = [.. _candidates.OrderBy(c => GetStatusSortOrder(c.Status))];
+                Snackbar.Add(status == ProposalStatus.Accepted
+                    ? $"Has aceptado a {candidate.Profile.FirstName}."
+                    : $"Has descartado a {candidate.Profile.FirstName}.",
+                    status == ProposalStatus.Accepted ? Severity.Success : Severity.Normal);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                Snackbar.Add("Esta propuesta ya fue resuelta.", Severity.Warning);
+                await LoadDataAsync();
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+            {
+                Snackbar.Add("No tienes permisos para decidir sobre este candidato.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Hubo un problema al registrar la decisión.", Severity.Error);
+            }
+        }
+        catch
+        {
+            Snackbar.Add("Error de conexión al servidor.", Severity.Error);
+        }
     }
 }

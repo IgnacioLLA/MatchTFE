@@ -1,120 +1,196 @@
-﻿@page "/match"
+@page "/match"
 @using TFELibrary.Shared
+@inject IHttpClientFactory HttpClientFactory
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8 mb-10 animate-fade-in">
 
     <div class="d-flex align-center mb-6 mt-4">
         <MudText Typo="Typo.h3" Class="font-weight-bold">Mis Matches</MudText>
+        @if (!_isLoading)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-3">
+                @_tfeMatches.Count @(_tfeMatches.Count == 1 ? "match" : "matches")
+            </MudChip>
+        }
     </div>
 
     <MudText Typo="Typo.body1" Class="mud-text-secondary mb-8">
-        Aquí tienes las propuestas y perfiles en los que has mostrado interés. Contacta con ellos para dar el siguiente paso.
+        Aquí puedes ver los proyectos de TFE y candidatos con los que has hecho match. Estos son los proyectos y perfiles que han aceptado tu propuesta.
     </MudText>
 
-    <MudTabs ActivePanelIndex="0" Border="true" Class="mb-6">
-
-        @* PESTAÑA 1: PROYECTOS GUARDADOS *@
-        <MudTabPanel Text="Proyectos de TFE" Icon="@Icons.Material.Filled.Assignment">
-            @if (_savedProposals.Any())
+    @if (_isLoading)
+    {
+        <div class="pa-10 text-center">
+            <MudProgressCircular Indeterminate="true" />
+            <MudText Typo="Typo.body2" Class="mt-4">Cargando matches...</MudText>
+        </div>
+    }
+    else if (!_tfeMatches.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-6">
+            <MudText>Aún no tienes ningún match activo. Explora los proyectos o candidatos disponibles y muestra interés para crear matches.</MudText>
+        </MudAlert>
+    }
+    else
+    {
+        <MudGrid Spacing="4" Class="mt-2">
+            @foreach (var match in _tfeMatches)
             {
-                <MudGrid Spacing="4" Class="mt-2">
-                    @foreach (var proposal in _savedProposals)
-                    {
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
-                                <div class="d-flex align-start justify-space-between mb-3">
-                                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match</MudChip>
-                                </div>
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
+                        <div class="d-flex align-start justify-space-between mb-3">
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match Aceptado</MudChip>
+                        </div>
 
-                                <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@proposal.Title</MudText>
-                                <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">@proposal.TutorName • No department</MudText>
+                        <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@match.TfeTitle</MudText>
+                        <MudText Typo="Typo.h5" Color="Color.Primary" Class="font-weight-bold mb-2 app-title-tight text-truncate">
+                            <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Small" Class="mr-1" />
+                            @match.MatchedUserFullName
+                        </MudText>
 
-                                <MudSpacer />
+                        <div class="mb-2">
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
+                                <span class="font-weight-medium">Tutor:</span>
+                                <span>@match.TfeTutorName</span>
+                            </MudText>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
+                                <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" />
+                                <span class="font-weight-medium">Alumno:</span>
+                                <span>@match.MatchedUserFullName</span>
+                            </MudText>
+                        </div>
 
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@Icons.Material.Filled.Email">
-                                    Contactar Tutor
-                                </MudButton>
-                            </MudPaper>
-                        </MudItem>
-                    }
-                </MudGrid>
+                        @if (!string.IsNullOrEmpty(match.MatchedUserDepartment))
+                        {
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary mb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Domain" Size="Size.Small" Class="mr-1" />
+                                @match.MatchedUserDepartment
+                            </MudText>
+                        }
+
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary mb-4">
+                            <MudIcon Icon="@Icons.Material.Filled.DateRange" Size="Size.Small" Class="mr-1" />
+                            Match desde: @match.MatchDate.ToString("dd/MM/yyyy")
+                        </MudText>
+
+                        <MudSpacer />
+
+                        @if (string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+                        {
+                            <MudTooltip Text="El contacto no tiene dirección de correo registrada." Placement="Placement.Top">
+                                <span>
+                                    <MudButton Variant="Variant.Outlined"
+                                               Color="Color.Default"
+                                               FullWidth="true"
+                                               Class="rounded-lg mt-4"
+                                               StartIcon="@Icons.Material.Filled.MailOutline"
+                                               Disabled="true"
+                                               aria-disabled="true"
+                                               aria-label="Correo no disponible">
+                                        Sin correo disponible
+                                    </MudButton>
+                                </span>
+                            </MudTooltip>
+                        }
+                        else
+                        {
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       FullWidth="true"
+                                       Class="rounded-lg mt-4"
+                                       StartIcon="@GetContactButtonIcon(match)"
+                                       OnClick="@(() => ToggleContactEmail(match))"
+                                       aria-label="@GetContactButtonAriaLabel(match)">
+                                @GetContactButtonText(match)
+                            </MudButton>
+                        }
+                    </MudPaper>
+                </MudItem>
             }
-            else
-            {
-                <div class="pa-10 text-center">
-                    <MudText Typo="Typo.body1" Class="mud-text-secondary">Aún no has guardado ningún proyecto.</MudText>
-                </div>
-            }
-        </MudTabPanel>
-
-        @* PESTAÑA 2: CANDIDATOS GUARDADOS *@
-        <MudTabPanel Text="Perfiles de Candidatos" Icon="@Icons.Material.Filled.People">
-            @if (_savedCandidates.Any())
-            {
-                <MudGrid Spacing="4" Class="mt-2">
-                    @foreach (var candidate in _savedCandidates)
-                    {
-                        <MudItem xs="12" sm="6" md="4">
-                            <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column align-center text-center">
-
-                                <MudAvatar Image="@candidate.AvatarUrl" Class="avatar-lg mb-3" />
-
-                                <MudText Typo="Typo.h6" Class="font-weight-bold">@candidate.FullName</MudText>
-                                <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1 font-weight-bold">@candidate.Degree</MudText>
-                                <MudText Typo="Typo.caption" Class="mud-text-secondary mb-4">@candidate.AcademicYear</MudText>
-
-                                <MudSpacer />
-
-                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true" Class="rounded-lg mt-4" StartIcon="@Icons.Material.Filled.Chat">
-                                    Enviar Mensaje
-                                </MudButton>
-                            </MudPaper>
-                        </MudItem>
-                    }
-                </MudGrid>
-            }
-            else
-            {
-                <div class="pa-10 text-center">
-                    <MudText Typo="Typo.body1" Class="mud-text-secondary">Aún no has guardado ningún candidato.</MudText>
-                </div>
-            }
-        </MudTabPanel>
-
-    </MudTabs>
+        </MudGrid>
+    }
 </MudContainer>
 
 @code {
-    private List<TfeDto> _savedProposals = new();
-    private List<CandidateProfileDto> _savedCandidates = new();
+    private List<AcceptedMatchDto> _tfeMatches = new();
+    private bool _isLoading = true;
+    private readonly HashSet<int> _visibleContactEmails = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        LoadMockMatches();
+        await LoadAcceptedMatches();
     }
 
-    private void LoadMockMatches()
+    private async Task LoadAcceptedMatches()
     {
-        _savedProposals = new List<TfeDto>
+        _isLoading = true;
+        try
         {
-            new () { Title = "Diseño e Implementación de una Red Neuronal...", TutorName = "Dr. Roberto García"},
-            new () { Title = "Auditoría y Seguridad en Smart Contracts", TutorName = "Dra. Elena Belmonte"}
-        };
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.GetAsync("api/match/proposal/tfe/matches");
 
-        _savedCandidates = new List<CandidateProfileDto>
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var result = System.Text.Json.JsonSerializer.Deserialize<GetAcceptedMatchesResponse>(json,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (result?.Error.IsSuccess == true && result.Matches != null)
+                {
+                    _tfeMatches = result.Matches
+                        .DistinctBy(m => m.TfeId)
+                        .OrderByDescending(m => m.MatchDate)
+                        .ToList();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Error al cargar los matches. Status: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
         {
-            new () { Id = 1, FullName = "Carlos Méndez Ruiz", Degree = "Grado en Ing. Informática", AcademicYear = "4º Curso", AvatarUrl = "https://randomuser.me/api/portraits/men/32.jpg" },
-            new () { Id = 3, FullName = "Alejandro Vargas", Degree = "Máster en Ing. de Software", AcademicYear = "1º Año (Máster)", AvatarUrl = "https://randomuser.me/api/portraits/men/85.jpg" }
-        };
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
     }
 
-    private string GetIcon(string iconName)
+    private void ToggleContactEmail(AcceptedMatchDto match)
     {
-        return iconName switch
+        if (!_visibleContactEmails.Add(match.TfeId))
         {
-            "Security" => Icons.Material.Filled.Security,
-            "LocalShipping" => Icons.Material.Filled.LocalShipping,
-            _ => Icons.Material.Filled.Psychology
-        };
+            _visibleContactEmails.Remove(match.TfeId);
+        }
+    }
+
+    private string GetContactButtonText(AcceptedMatchDto match)
+    {
+        if (_visibleContactEmails.Contains(match.TfeId) && !string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+        {
+            return match.MatchedUserEmail;
+        }
+
+        return "Contactar";
+    }
+
+    private string GetContactButtonIcon(AcceptedMatchDto match)
+    {
+        if (_visibleContactEmails.Contains(match.TfeId) && !string.IsNullOrWhiteSpace(match.MatchedUserEmail))
+        {
+            return Icons.Material.Filled.VisibilityOff;
+        }
+
+        return Icons.Material.Filled.Visibility;
+    }
+
+    private string GetContactButtonAriaLabel(AcceptedMatchDto match)
+    {
+        return _visibleContactEmails.Contains(match.TfeId)
+            ? $"Ocultar correo de {match.MatchedUserFullName}"
+            : $"Mostrar correo de {match.MatchedUserFullName}";
     }
 }

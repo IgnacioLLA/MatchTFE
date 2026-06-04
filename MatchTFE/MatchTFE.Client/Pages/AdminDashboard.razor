@@ -29,7 +29,14 @@
             <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
                 Quickly change the system role of a specific user by their email address.
             </MudText>
-            
+
+            @if (!string.IsNullOrEmpty(_roleUpdateError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _roleUpdateError = string.Empty)">
+                    @_roleUpdateError
+                </MudAlert>
+            }
+
             <div class="d-flex flex-wrap gap-3 align-end mt-auto">
                 <MudTextField @bind-Value="_roleUpdateEmail"
                               Label="User Email"
@@ -37,23 +44,22 @@
                               Margin="Margin.Dense"
                               Class="flex-grow-1" />
 
-                <MudSelect T="RoleType?"
-                           @bind-Value="_roleUpdateSelection"
-                           Label="New Role"
-                           Variant="Variant.Outlined"
-                           Margin="Margin.Dense"
-                           Style="min-width: 150px;">
+                    <MudSelect T="RoleType?"
+                               @bind-Value="_roleUpdateSelection"
+                               Label="New Role"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Class="min-w-150">
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
                     <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
                 </MudSelect>
 
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="HandleUpdateRoleAsync"
-                           Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
-                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
-                           Style="height: 40px;">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="HandleUpdateRoleAsync"
+                               Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
+                               Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
                     UPDATE
                 </MudButton>
             </div>
@@ -66,37 +72,123 @@
                 <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Primary" Class="mr-3" />
                 <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Bulk Import Profiles</MudText>
             </div>
-            <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
-                Upload a structured file (.csv or .txt) to automatically generate new user profiles.
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-3">
+                Upload a structured file (.csv or .txt, UTF-8) to automatically generate new user profiles.
             </MudText>
+
+            <MudExpansionPanels Elevation="0" Class="mb-4 border-all rounded-lg">
+                <MudExpansionPanel Text="File format reference" Dense="true" Class="rounded-lg">
+                    <MudText Typo="Typo.caption" Class="app-text-muted mb-1">
+                        One row per user. Header row is optional. Fields must be separated by commas.
+                        Fields containing a comma must be wrapped in double quotes.
+                        <strong>Admin</strong> role is not allowed in import files.
+                    </MudText>
+                    <pre style="font-size:11px; background:var(--mud-palette-background-grey, #f5f5f5); border-radius:6px; padding:8px; margin:6px 0; overflow-x:auto;">student&#64;university.es,Juan,García,Password1!,Student
+teacher&#64;university.es,María,López,Password2!,Teacher</pre>
+                    <MudText Typo="Typo.caption" Class="app-text-muted">
+                        Users that already exist in the system are skipped (not duplicated).
+                        If any row has an invalid format, no users are created and the error is reported.
+                    </MudText>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
+            @if (!string.IsNullOrEmpty(_importError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-3" Dense="true" CloseButton="true" OnClose="@(() => _importError = string.Empty)">
+                    @_importError
+                </MudAlert>
+            }
 
             <div class="d-flex align-center gap-4 mt-auto">
                 <MudFileUpload T="IBrowserFile" FilesChanged="HandleFileSelected" Accept=".txt, .csv" Class="w-100">
-                    <ActivatorContent>
-                        <MudButton Variant="Variant.Outlined"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                                   Class="rounded-lg font-weight-bold w-100 py-2 border-all chip-dashed">
-                            @(_uploadedFile == null ? "BROWSE FILE (.CSV, .TXT)" : _uploadedFile.Name)
-                        </MudButton>
-                    </ActivatorContent>
+                    <MudButton Variant="Variant.Outlined"
+                                Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.CloudUpload"
+                                Class="rounded-lg font-weight-bold w-100 py-2 border-all chip-dashed">
+                        @(_uploadedFile == null ? "BROWSE FILE (.CSV, .TXT)" : _uploadedFile.Name)
+                    </MudButton>
                 </MudFileUpload>
 
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           OnClick="HandleImportUsersAsync"
-                           Disabled="@(_uploadedFile == null)"
-                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow"
-                           Style="height: 40px;">
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="HandleImportUsersAsync"
+                               Disabled="@(_uploadedFile == null)"
+                               Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
                     IMPORT
                 </MudButton>
             </div>
         </MudPaper>
     </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl border-all d-flex flex-column">
+            <div class="d-flex align-center mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Change User Password</MudText>
+            </div>
+            <MudText Typo="Typo.body2" Class="app-text-muted mb-1">
+                Override a user's password directly. The user's active sessions will be invalidated automatically.
+            </MudText>
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
+                Remember to inform the user that their password has been changed.
+            </MudAlert>
+
+            @if (!string.IsNullOrEmpty(_passwordChangeError))
+            {
+                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _passwordChangeError = string.Empty)">
+                    @_passwordChangeError
+                </MudAlert>
+            }
+
+            <div class="d-flex flex-wrap gap-3 align-center mt-auto">
+                <MudTextField @bind-Value="_passwordChangeEmail"
+                              Label="User Email"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Email" />
+
+                <MudTextField @bind-Value="_newPassword"
+                              Label="New Password"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Password" />
+
+                <MudTextField @bind-Value="_confirmPassword"
+                              Label="Confirm Password"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              InputType="InputType.Password"
+                              Error="@(_confirmPassword.Length > 0 && _newPassword != _confirmPassword)"
+                              ErrorText="Passwords do not match" />
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleChangePasswordAsync"
+                           Disabled="@(!CanSubmitPasswordChange)"
+                           Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
+                    CHANGE PASSWORD
+                </MudButton>
+            </div>
+            <MudText Typo="Typo.caption" Class="app-text-muted mt-1">
+                New password must be at least 6 characters.
+            </MudText>
+        </MudPaper>
+    </MudItem>
+
 </MudGrid>
 
-<MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-6">
-    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1" style="border-bottom: 1px solid var(--mud-palette-lines-default);">
+@if (!string.IsNullOrEmpty(_bulkActionSuccess))
+{
+    <MudAlert Severity="Severity.Success" Class="mb-4 animate-fade-in" CloseButton="true" OnClose="@(() => _bulkActionSuccess = string.Empty)">
+        @_bulkActionSuccess
+    </MudAlert>
+}
+
+<MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-10">
+    <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1 border-b-default">
         <MudTextField @bind-Value="SearchQuery"
                       Placeholder="Search by name or email..."
                       Adornment="Adornment.Start"
@@ -106,13 +198,12 @@
                       Class="rounded-lg flex-grow-1" />
 
         <MudSelect T="RoleType?"
-                   @bind-Value="SelectedRoleFilter"
-                   Placeholder="Filter by role..."
-                   Variant="Variant.Outlined"
-                   Margin="Margin.Dense"
-                   Clearable="true"
-                   Class="rounded-lg flex-grow-1"
-                   Style="max-width: 300px;">
+               @bind-Value="SelectedRoleFilter"
+               Placeholder="Filter by role..."
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               Clearable="true"
+               Class="rounded-lg flex-grow-1 max-w-300">
             <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
             <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
             <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
@@ -131,19 +222,13 @@
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">USER</MudText></MudTh>
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">EMAIL</MudText></MudTh>
             <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ROLE</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">STATUS</MudText></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="User">
                 <div class="d-flex align-center">
                     <MudAvatar Size="Size.Small" Color="Color.Primary" Class="mr-3">
-                        @if (!string.IsNullOrWhiteSpace(context.AvatarUrl))
-                        {
-                            <MudImage Src="@context.AvatarUrl" />
-                        }
-                        else
-                        {
-                            @context.FirstName.FirstOrDefault()
-                        }
+                        @context.FirstName.FirstOrDefault()
                     </MudAvatar>
                     <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.FirstName @context.LastName</MudText>
                 </div>
@@ -159,6 +244,14 @@
                     @context.Role.ToString()
                 </MudChip>
             </MudTd>
+            <MudTd DataLabel="Status">
+                <MudChip T="string"
+                         Size="Size.Small"
+                         Color="@(context.IsSuspended ? Color.Warning : Color.Success)"
+                         Class="font-weight-bold">
+                    @(context.IsSuspended ? "Suspended" : "Active")
+                </MudChip>
+            </MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager HideRowsPerPage="false" />
@@ -168,7 +261,13 @@
 
 @if (_selectedUsers.Any())
 {
-    <div class="animate-fade-in">
+    <div class="animate-fade-in mb-10">
+        @if (!string.IsNullOrEmpty(_bulkActionError))
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _bulkActionError = string.Empty)">
+                @_bulkActionError
+            </MudAlert>
+        }
         <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all d-flex justify-space-between align-center">
             <MudText Typo="Typo.body1" Class="font-weight-bold text-main">
                 @_selectedUsers.Count users selected
@@ -182,6 +281,14 @@
                     SUSPEND
                 </MudButton>
 
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Success"
+                           StartIcon="@Icons.Material.Filled.CheckCircle"
+                           OnClick="HandleBulkUnsuspendAsync"
+                           Class="rounded-lg font-weight-bold px-6">
+                    REACTIVATE
+                </MudButton>
+
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Error"
                            StartIcon="@Icons.Material.Filled.Delete"
@@ -193,6 +300,119 @@
         </MudPaper>
     </div>
 }
+
+<div class="mb-6 d-flex justify-space-between align-end animate-fade-in mt-12">
+    <div>
+        <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
+            Tag Management
+        </MudText>
+        <MudText Typo="Typo.body1" Class="app-text-reading">
+            Create, edit, and remove system tags. Click on a row to edit.
+        </MudText>
+    </div>
+</div>
+
+<MudGrid Class="mb-10 animate-fade-in">
+    @* SECTION: CREATE TAG *@
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="pa-4 pa-sm-6 rounded-xl border-all">
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" Class="mr-3" />
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Create Tag</MudText>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row align-stretch align-md-center gap-4">
+                @* Ocultamos el label en móvil para ahorrar espacio *@
+                <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-md-block nowrap">
+                    Tag Name:
+                </MudText>
+
+                @* flex-grow-1 fuerza a que el input ocupe todo el espacio sobrante *@
+                <MudTextField @bind-Value="_newTagName"
+                              Placeholder="Enter new tag name..."
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              FullWidth="true"
+                              Class="flex-grow-1 m-0"
+                              Error="@(!string.IsNullOrEmpty(_tagError))"
+                              ErrorText="@_tagError" />
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="HandleCreateTagAsync"
+                           Disabled="@(string.IsNullOrWhiteSpace(_newTagName))"
+                           Class="rounded-lg font-weight-bold px-md-8 py-2 btn-primary-shadow btn-height-40 nowrap min-w-140">
+                    ADD TAG
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudItem>
+
+    @* SECTION: TAGS LIST *@
+    <MudItem xs="12">
+        <MudPaper Elevation="0" Class="border-all rounded-xl d-flex flex-column">
+            @if (!string.IsNullOrEmpty(_tagEditError))
+            {
+                <MudAlert Severity="Severity.Error" Class="ma-4" CloseButton="true" OnClose="@(() => _tagEditError = string.Empty)">
+                    @_tagEditError
+                </MudAlert>
+            }
+            <div class="pa-4 border-b-1 d-flex flex-column flex-md-row align-stretch align-md-center justify-space-between gap-4 border-b-default">
+
+                @* white-space: nowrap evita que "Current Tags" se rompa en dos renglones *@
+                <div class="d-flex align-center nowrap">
+                    <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Primary" Class="mr-3" />
+                    <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Current Tags</MudText>
+                </div>
+
+                <MudTextField @bind-Value="_tagSearchQuery"
+                              Placeholder="Search tags..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="rounded-lg w-100 m-0 max-w-400" />
+            </div>
+
+            <MudTable Items="@GetFilteredTags()"
+                      Hover="true"
+                      Elevation="0"
+                      Loading="@_isTagsLoading"
+                      Class="transparent-bg"
+                      FixedHeader="true"
+                      Height="400px"
+                      CanCancelEdit="true"
+                      EditTrigger="TableEditTrigger.RowClick"
+                      RowEditCommit="HandleEditTagCommitAsync">
+                <HeaderContent>
+                    <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">TAG NAME</MudText></MudTh>
+                    <MudTh Class="th-actions"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Tag Name">
+                        <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.Name</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Actions" Class="text-right">
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       Size="Size.Small"
+                                       OnClick="@(() => HandleDeleteTagAsync(context))" />
+                    </MudTd>
+                </RowTemplate>
+                <RowEditingTemplate>
+                    <MudTd DataLabel="Tag Name">
+                        <MudTextField @bind-Value="context.Name" Required="true" Margin="Margin.Dense" />
+                    </MudTd>
+                    <MudTd DataLabel="Actions" Class="text-right">
+                    </MudTd>
+                </RowEditingTemplate>
+                <PagerContent>
+                    <MudTablePager HideRowsPerPage="true" />
+                </PagerContent>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 @code {
     private List<ProfileDto> _users = new();
@@ -222,14 +442,34 @@
 
     private string _roleUpdateEmail = string.Empty;
     private RoleType? _roleUpdateSelection;
-
+    private string _roleUpdateError = string.Empty;
     private IBrowserFile? _uploadedFile;
-
+    private string _importError = string.Empty;
     private bool _isLoading = true;
+
+    private List<TagDto> _tags = new();
+    private string _newTagName = string.Empty;
+    private string _tagError = string.Empty;
+    private string _tagEditError = string.Empty;
+    private string _tagSearchQuery = string.Empty;
+    private bool _isTagsLoading = true;
+    private string _bulkActionError = string.Empty;
+    private string _bulkActionSuccess = string.Empty;
+
+    private string _passwordChangeEmail = string.Empty;
+    private string _newPassword = string.Empty;
+    private string _confirmPassword = string.Empty;
+    private string _passwordChangeError = string.Empty;
+
+    private bool CanSubmitPasswordChange =>
+        !string.IsNullOrWhiteSpace(_passwordChangeEmail) &&
+        _newPassword.Length >= 6 &&
+        _newPassword == _confirmPassword;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAsync();
+        await LoadTagsAsync();
     }
 
     private async Task LoadUsersAsync()
@@ -239,7 +479,6 @@
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
             var response = await client.GetFromJsonAsync<GetAllProfilesResponse>("api/user/profiles");
-
 
             if (response != null && response.Profiles != null)
             {
@@ -264,6 +503,29 @@
         }
     }
 
+    private async Task LoadTagsAsync()
+    {
+        _isTagsLoading = true;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
+            
+            if (response != null)
+            {
+                _tags = response.OrderBy(t => t.Name).ToList();
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Error loading tags.", Severity.Error);
+        }
+        finally
+        {
+            _isTagsLoading = false;
+        }
+    }
+
     private IEnumerable<ProfileDto> GetFilteredUsers()
     {
         var result = _users.AsEnumerable();
@@ -285,8 +547,22 @@
         return result;
     }
 
+    private IEnumerable<TagDto> GetFilteredTags()
+    {
+        var result = _tags.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(_tagSearchQuery))
+        {
+            result = result.Where(t => t.Name.Contains(_tagSearchQuery, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return result;
+    }
+
     private async Task HandleUpdateRoleAsync()
     {
+        _roleUpdateError = string.Empty;
+
         if (string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null) return;
 
         try
@@ -301,22 +577,24 @@
             var response = await client.PutAsJsonAsync("api/auth/role", request);
             var result = await response.Content.ReadFromJsonAsync<UserRoleUpdateResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Message, Severity.Success);
-                await LoadUsersAsync(); 
+                Snackbar.Add(result.Error.Message, Severity.Success);
+                await LoadUsersAsync();
                 _roleUpdateEmail = string.Empty;
                 _roleUpdateSelection = null;
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Failed to update role.", Severity.Error);
+                _roleUpdateError = result?.Error.Message ?? "Failed to update role.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while updating role.", Severity.Error);
+            _roleUpdateError = "Connection error while updating role.";
         }
+
+        StateHasChanged();
     }
 
     private void HandleFileSelected(IBrowserFile file)
@@ -327,6 +605,8 @@
     private async Task HandleImportUsersAsync()
     {
         if (_uploadedFile == null) return;
+
+        _importError = string.Empty;
 
         try
         {
@@ -343,25 +623,30 @@
             var response = await client.PostAsJsonAsync("api/auth/import", request);
             var result = await response.Content.ReadFromJsonAsync<BulkUserImportResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add($"{result.Message} ({result.ImportedCount} imported)", Severity.Success);
+                _bulkActionSuccess = $"{result.CreatedCount} user(s) created, {result.SkippedCount} already existed.";
                 _uploadedFile = null;
                 await LoadUsersAsync();
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Failed to import users.", Severity.Error);
+                _importError = result?.Error.Message ?? "Failed to import users.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while importing users.", Severity.Error);
+            _importError = "Connection error while importing users.";
         }
+
+        StateHasChanged();
     }
 
     private async Task HandleBulkActionAsync(BulkUserActionType actionType)
     {
+        _bulkActionError = string.Empty;
+        _bulkActionSuccess = string.Empty;
+
         if (!_selectedUsers.Any()) return;
 
         try
@@ -376,25 +661,145 @@
             var response = await client.PostAsJsonAsync("api/auth/bulk-action", request);
             var result = await response.Content.ReadFromJsonAsync<BulkUserActionResponse>();
 
-            if (result != null && result.Success)
+            if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Message, actionType == BulkUserActionType.Delete ? Severity.Success : Severity.Warning);
+                _bulkActionSuccess = result.Error.Message;
                 _selectedUsers.Clear();
                 await LoadUsersAsync();
             }
             else
             {
-                Snackbar.Add(result?.Message ?? "Bulk action failed.", Severity.Error);
+                _bulkActionError = result?.Error.Message ?? "Bulk action failed.";
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Connection error while executing bulk action.", Severity.Error);
+            _bulkActionError = "Connection error while executing bulk action.";
         }
+
+        StateHasChanged();
     }
 
     private async Task HandleBulkDeleteAsync() => await HandleBulkActionAsync(BulkUserActionType.Delete);
     private async Task HandleBulkSuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Suspend);
+    private async Task HandleBulkUnsuspendAsync() => await HandleBulkActionAsync(BulkUserActionType.Unsuspend);
+
+    private async Task HandleChangePasswordAsync()
+    {
+        _passwordChangeError = string.Empty;
+
+        if (!CanSubmitPasswordChange) return;
+
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var request = new AdminPasswordChangeRequest
+            {
+                Email = _passwordChangeEmail,
+                NewPassword = _newPassword,
+                ConfirmPassword = _confirmPassword
+            };
+
+            var response = await client.PutAsJsonAsync("api/auth/admin/password", request);
+            var result = await response.Content.ReadFromJsonAsync<AdminPasswordChangeResponse>();
+
+            if (result != null && result.Error.IsSuccess)
+            {
+                Snackbar.Add(result.Error.Message, Severity.Success);
+                _passwordChangeEmail = string.Empty;
+                _newPassword = string.Empty;
+                _confirmPassword = string.Empty;
+            }
+            else
+            {
+                _passwordChangeError = result?.Error.Message ?? "Failed to update password.";
+            }
+        }
+        catch (Exception)
+        {
+            _passwordChangeError = "Connection error while updating password.";
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleCreateTagAsync()
+    {
+        _tagError = string.Empty;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var request = new TagCreationRequest { Tag = new TagDto { Name = _newTagName } };
+
+            var response = await client.PostAsJsonAsync("api/match/tag", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _newTagName = string.Empty;
+                await LoadTagsAsync();
+            }
+            else
+            {
+                _tagError = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception)
+        {
+            _tagError = "Connection error while creating tag.";
+        }
+    }
+
+    private async void HandleEditTagCommitAsync(object element)
+    {
+        var tag = (TagDto)element;
+        _tagEditError = string.Empty;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var request = new { Name = tag.Name };
+            var response = await client.PutAsJsonAsync($"api/match/tag/{tag.Id}", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _tags = _tags.OrderBy(t => t.Name).ToList();
+                StateHasChanged();
+            }
+            else
+            {
+                _tagEditError = await response.Content.ReadAsStringAsync();
+                await LoadTagsAsync();
+            }
+        }
+        catch (Exception)
+        {
+            _tagEditError = "Connection error while updating tag.";
+            await LoadTagsAsync();
+        }
+    }
+
+    private async Task HandleDeleteTagAsync(TagDto tag)
+    {
+        _tagEditError = string.Empty;
+        try
+        {
+            var client = HttpClientFactory.CreateClient("GatewayAPI");
+            var response = await client.DeleteAsync($"api/match/tag/{tag.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                _tags.Remove(tag);
+                StateHasChanged();
+            }
+            else
+            {
+                _tagEditError = await response.Content.ReadAsStringAsync();
+            }
+        }
+        catch (Exception)
+        {
+            _tagEditError = "Connection error while deleting tag.";
+        }
+    }
 
     private Color GetRoleColor(RoleType role) => role switch
     {

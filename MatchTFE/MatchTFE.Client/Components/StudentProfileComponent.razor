@@ -1,35 +1,53 @@
-﻿@using MudBlazor
+@using MudBlazor
 @using TFELibrary.Shared
 
+@* --- Tarjeta: Información Académica --- *@
 <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
     <MudCardHeader>
         <CardHeaderAvatar>
             <MudIcon Icon="@Icons.Material.Filled.School" Color="Color.Primary" />
         </CardHeaderAvatar>
-        <CardHeaderContent> 
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Académico y Habilidades</MudText>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Información Académica</MudText>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudGrid Class="mb-6">
+        <MudGrid>
             <MudItem xs="12" sm="6">
-                <MudSelect T="string" @bind-Value="Model.AcademicYear" Label="CURSO ACADÉMICO" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg">
-                    <MudSelectItem Value="@("3º Año")" />
-                    <MudSelectItem Value="@("4º Año")" />
-                    <MudSelectItem Value="@("Máster")" />
-                </MudSelect>
+                <MudTextField @bind-Value="Model.AcademicYear"
+                              Label="CURSO ACADÉMICO"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="rounded-lg"
+                              Placeholder="Ej: 4º Año, Máster..."
+                              HelperText="Indica el curso en el que te encuentras actualmente." />
             </MudItem>
         </MudGrid>
+    </MudCardContent>
+</MudCard>
 
+@* --- Tarjeta: Habilidades Técnicas --- *@
+<MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Secondary" />
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Habilidades Técnicas</MudText>
+            <MudText Typo="Typo.body2" Class="app-text-muted">
+                Los tutores las usarán para valorar tu perfil al buscar candidatos.
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
         @if (!Model.Skills.Any())
         {
-            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Class="mb-6 rounded-lg">
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Class="mb-4 rounded-lg">
                 Aún no has añadido ninguna habilidad técnica. ¡Los tutores las valoran mucho!
             </MudAlert>
         }
 
         <SkillSelector @bind-SelectedSkills="Model.Skills"
-                       Title="HABILIDADES TÉCNICAS"
                        Placeholder="Buscar habilidades..." />
     </MudCardContent>
 </MudCard>

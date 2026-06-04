@@ -5,7 +5,7 @@
         <MudItem xs="12" md="9">
             <div class="d-flex align-center mb-2">
                 <MudIcon Icon="@Icons.Material.Outlined.Computer" Size="Size.Small" Color="Color.Primary" Class="mr-2" />
-                <MudText Typo="Typo.overline" Color="Color.Primary" Class="font-weight-bold" Style="letter-spacing: 1px;">
+                <MudText Typo="Typo.overline" Color="Color.Primary" Class="font-weight-bold letter-sp-1">
                     INGENIERÍA INFORMÁTICA
                 </MudText>
             </div>
@@ -19,7 +19,7 @@
                 <div class="d-flex flex-wrap gap-2 mb-6">
                     @foreach (var topic in Tfe.Topics)
                     {
-                        <MudChip T="string" Size="Size.Small" Style="background-color: #e0f2fe; color: #0284c7; font-weight: 600;" Class="rounded-lg px-3">
+                        <MudChip T="string" Size="Size.Small" Class="rounded-lg px-3 tag-chip">
                             @topic.Name
                         </MudChip>
                     }
@@ -33,7 +33,7 @@
 
             @if (Tfe.RequiredSkills != null && Tfe.RequiredSkills.Any())
             {
-                <ul class="app-text-reading pl-8 mb-0" style="list-style-type: disc;">
+                <ul class="app-text-reading pl-8 mb-0 list-disc">
                     @foreach (var skill in Tfe.RequiredSkills)
                     {
                         <li>@skill.Tag</li>
@@ -43,11 +43,11 @@
         </MudItem>
 
         <MudItem xs="12" md="3" Class="d-flex justify-end align-start">
-            <MudPaper Elevation="0" Class="pa-4 rounded-xl d-flex flex-column align-center justify-center border-all w-100" Style="background-color: #f8fafc; max-width: 220px; aspect-ratio: 16/9;">
+            <MudPaper Elevation="0" Class="pa-4 rounded-xl d-flex flex-column align-center justify-center border-all w-100 metric-box">
                 <MudText Typo="Typo.h3" Color="Color.Primary" Class="font-weight-bold mb-1">
                     @CandidateCount
                 </MudText>
-                <MudText Typo="Typo.caption" Class="app-text-muted font-weight-bold text-center" Style="letter-spacing: 0.5px;">
+                <MudText Typo="Typo.caption" Class="app-text-muted font-weight-bold text-center letter-sp-05">
                     CANDIDATOS INTERESADOS
                 </MudText>
             </MudPaper>

@@ -12,9 +12,14 @@ namespace AuthService.Repositories
         Task<string?> GetRefreshTokenAsync(MatchUser user);
         Task RemoveRefreshTokenAsync(MatchUser user);
         Task<MatchUser?> GetUserByIdAsync(string userId);
+        Task<List<MatchUser>> GetUsersByIdsAsync(IEnumerable<string> userIds);
         Task<IList<string>> GetUserRolesAsync(MatchUser user);
         Task<IdentityResult> AddToRoleAsync(MatchUser user, string role);
         Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role);
         Task<IdentityResult> DeleteUserAsync(MatchUser user);
+        Task<IdentityResult> ResetPasswordDirectlyAsync(MatchUser user, string newPassword);
+        Task LockUserAsync(MatchUser user);
+        Task UnlockUserAsync(MatchUser user);
+        Task<bool> IsLockedOutAsync(MatchUser user);
     }
 }

@@ -33,9 +33,14 @@ namespace UserService.Data.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UserProfileUserId")
+                        .HasColumnType("text");
+
                     b.HasKey("StudentProfileId", "TagId");
 
                     b.HasIndex("TagId");
+
+                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("StudentSkill", (string)null);
                 });
@@ -106,11 +111,6 @@ namespace UserService.Data.Migrations
                     b.Property<string>("AcademicYear")
                         .HasColumnType("text");
 
-                    b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
-
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
@@ -145,6 +145,9 @@ namespace UserService.Data.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("UserId")
                         .IsUnique();
 
@@ -170,7 +173,7 @@ namespace UserService.Data.Migrations
             modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
                 {
                     b.HasOne("TFELibrary.Data.UserProfile", "StudentProfile")
-                        .WithMany("StudentSkills")
+                        .WithMany()
                         .HasForeignKey("StudentProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -178,8 +181,12 @@ namespace UserService.Data.Migrations
                     b.HasOne("TFELibrary.Data.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.UserProfile", null)
+                        .WithMany("StudentSkills")
+                        .HasForeignKey("UserProfileUserId");
 
                     b.Navigation("StudentProfile");
 

@@ -1,4 +1,5 @@
-﻿@using MudBlazor
+@using MudBlazor
+@using TFELibrary.Shared
 
 <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
     <MudCardHeader>
@@ -10,16 +11,24 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudGrid Class="mb-6">
+        <MudGrid Class="mb-2">
             <MudItem xs="12" sm="6">
-                <MudSelect T="string" @bind-Value="Model.Department" Label="DEPARTAMENTO" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg">
-                    <MudSelectItem Value="@("Informática")" />
-                    <MudSelectItem Value="@("Matemáticas")" />
-                    <MudSelectItem Value="@("Ingeniería Eléctrica")" />
-                </MudSelect>
+                <MudTextField @bind-Value="Model.Department"
+                              Label="DEPARTAMENTO"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="rounded-lg"
+                              HelperText="Ej: Departamento de Ciencias de la Computación"
+                              Placeholder="Escribe el nombre de tu departamento" />
             </MudItem>
             <MudItem xs="12" sm="6">
-                <MudTextField @bind-Value="Model.OfficeLocation" Label="DESPACHO / UBICACIÓN" Variant="Variant.Outlined" Margin="Margin.Dense" Class="rounded-lg" />
+                <MudTextField @bind-Value="Model.OfficeLocation"
+                              Label="DESPACHO / UBICACIÓN"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="rounded-lg"
+                              HelperText="Ej: Edificio A, planta 3, sala 302"
+                              Placeholder="Escribe tu ubicación en el campus" />
             </MudItem>
         </MudGrid>
     </MudCardContent>

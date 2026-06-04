@@ -1,0 +1,17 @@
+<section class="home-feature-grid mb-6" aria-labelledby="@SectionId">
+    <div class="mb-4">
+        <h2 id="@SectionId" class="mud-typography mud-typography-h5 app-title-tight mb-2">@Title</h2>
+        <MudText Typo="Typo.body1" Class="home-feature-grid__subtitle">@Subtitle</MudText>
+    </div>
+
+    <MudGrid>
+        @ChildContent
+    </MudGrid>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string SectionId { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Subtitle { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
+}

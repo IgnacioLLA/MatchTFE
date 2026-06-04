@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
-namespace MatchTFE.Client.Handlers
+namespace MatchTFE.Client.Handlers;
+
+public class CookieHandler : DelegatingHandler
 {
-    public class CookieHandler : DelegatingHandler
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
 
-            return base.SendAsync(request, cancellationToken);
-        }
+        return base.SendAsync(request, cancellationToken);
     }
 }

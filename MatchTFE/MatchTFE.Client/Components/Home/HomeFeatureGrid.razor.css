@@ -1,0 +1,4 @@
+.home-feature-grid__subtitle {
+    color: rgba(var(--mud-palette-text-primary-rgb), 0.84);
+    max-width: 70ch;
+}

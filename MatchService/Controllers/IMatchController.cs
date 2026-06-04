@@ -14,6 +14,9 @@ namespace MatchService.Controllers
         [HttpPost("tag")]
         Task<IActionResult> CreateTag([FromBody] TagCreationRequest request);
 
+        [HttpPut("tag/{id}")]
+        Task<IActionResult> UpdateTag(int id, [FromBody] TagUpdateRequest request);
+
         [HttpDelete("tag/{id}")]
         Task<IActionResult> DeleteTag(int id);
 
@@ -35,5 +38,11 @@ namespace MatchService.Controllers
         Task<IActionResult> CreateTfeProposal([FromBody] TfeProposalCreationRequest request);
         [HttpPut("proposal/tfe")]
         Task<IActionResult> UpdateTfeProposal([FromBody] TfeProposalUpdateRequest request);
+
+        [HttpGet("proposal/tfe/matches")]
+        Task<IActionResult> GetAcceptedMatches();
+
+        [HttpPut("proposal/tfe/decision")]
+        Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request);
     }
 }

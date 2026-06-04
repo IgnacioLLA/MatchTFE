@@ -1,16 +1,19 @@
-﻿using TFELibrary.Shared;
+using TFELibrary.Shared;
 
-namespace AuthService.Service
+namespace AuthService.Service;
+
+public sealed record AuthTokenPair(string AccessToken, string RefreshToken);
+
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-        public int TokenLifetime { get; }
-        public int RefreshTokenLifetime { get; }
-        Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
-        Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request);
-        Task<RefreshTokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request);
-        Task<bool> LogoutAsync(string id);
-        Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request);
-        Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request);
-    }
+    int TokenLifetime { get; }
+    int RefreshTokenLifetime { get; }
+    Task<(LoginResponseDto Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequestDto request);
+    Task<(RegisterResponseDto Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequestDto request);
+    Task<(RefreshTokenResponseDto Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequestDto request);
+    Task<bool> LogoutAsync(string id);
+    Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request, string currentUserId);
+    Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId);
+    Task<AdminPasswordChangeResponse> ChangeUserPasswordAsync(AdminPasswordChangeRequest request, string currentUserId);
+    Task<BulkUserImportResponse> BulkImportUsersAsync(BulkUserImportRequest request);
 }

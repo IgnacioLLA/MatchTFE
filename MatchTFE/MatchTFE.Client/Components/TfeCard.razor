@@ -82,7 +82,7 @@
             <div class="d-flex flex-wrap gap-4">
                 @foreach (var skill in Proposal.RequiredSkills)
                 {
-                    <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: rgba(var(--mud-palette-primary-rgb), 0.1); min-width: 200px;">
+                                <div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg chip-surface-primary chip-min-200">
                         <MudText Typo="Typo.body2" Class="font-weight-bold mr-4" Color="Color.Primary">@skill.Tag</MudText>
                         <MudRating SelectedValue="@skill.Level" MaxValue="5" Color="Color.Primary" Size="Size.Small" ReadOnly="true" />
                     </div>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using TFELibrary.Shared;
 
 namespace UserService.Controllers
@@ -14,14 +14,17 @@ namespace UserService.Controllers
         [HttpPut("profile")]
         Task<ActionResult<ProfileUpdateResponse>> UpdateProfile(ProfileUpdateRequest request);
 
-        [HttpGet("tfe/{TfeId}/candidates")]
-        Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] ProfileByTfeInterestRequest request);
+        [HttpGet("tfe/{tfeId}/candidates")]
+        Task<ActionResult<ProfileByTfeInterestResponse>> GetInterestedCandidates([FromRoute] int tfeId);
 
         [HttpGet("profile/{userId}")]
         Task<ActionResult<ProfileResponse>> GetProfileById([FromRoute] string userId);
 
         [HttpPut("profile/{userId}/role")]
         Task<ActionResult<RoleUpdateResponse>> ChangeRole([FromRoute] string userId, [FromBody] ChangeRoleRequest request);
+
+        [HttpPut("profile/{userId}/suspension")]
+        Task<ActionResult<SuspensionUpdateResponse>> UpdateSuspension([FromRoute] string userId, [FromBody] SuspensionUpdateRequest request);
 
         [HttpGet("profiles")]
         Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();

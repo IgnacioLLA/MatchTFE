@@ -13,6 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddIdentityCore<MatchUser>(options =>
 {
     options.User.RequireUniqueEmail = true;
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<AuthDbContext>();

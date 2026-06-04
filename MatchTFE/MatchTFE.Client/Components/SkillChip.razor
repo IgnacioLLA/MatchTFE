@@ -1,7 +1,7 @@
 ﻿@using MudBlazor
 
-<div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg" style="background-color: var(--app-primary-light);">
-    <MudText Typo="Typo.body2" Class="font-weight-bold" Style="color: var(--app-primary-dark);">@Skill.Tag</MudText>
+<div class="d-flex align-center justify-space-between pa-3 border-all rounded-lg chip-surface">
+    <MudText Typo="Typo.body2" Class="chip-text font-weight-bold">@Skill.Tag</MudText>
 
     <div class="d-flex align-center gap-4">
         <MudRating SelectedValue="@Skill.Level" SelectedValueChanged="OnLevelChanged" MaxValue="5" Color="Color.Primary" Size="Size.Small" />

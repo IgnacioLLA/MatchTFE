@@ -1,42 +1,30 @@
-﻿@using TFELibrary.Shared
+@using TFELibrary.Shared
 
 <MudPaper Elevation="0" Class="pa-4 rounded-xl border-all mb-4 d-flex flex-column flex-md-row align-center justify-space-between gap-4 transition-all hover-shadow">
 
-    @* Datos del Candidato *@
+    @* Info *@
     <div class="d-flex align-center w-100">
         <MudAvatar Size="Size.Large" Class="mr-4" Color="Color.Primary" Variant="Variant.Filled">
-            @if (!string.IsNullOrWhiteSpace(Candidate.AvatarUrl))
-            {
-                <MudImage Src="@Candidate.AvatarUrl" Alt="@Candidate.FirstName" />
-            }
-            else
-            {
-                <span class="font-weight-bold" style="font-size: 1.2rem;">@Candidate.FirstName.FirstOrDefault()</span>
-            }
+            <span class="font-weight-bold candidate-initial">@Candidate.Profile.FirstName.FirstOrDefault()</span>
         </MudAvatar>
 
         <div>
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main" Style="line-height: 1.2;">
-                @Candidate.FirstName @Candidate.LastName
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main line-tight">
+                @Candidate.Profile.FirstName @Candidate.Profile.LastName
             </MudText>
 
             <MudText Typo="Typo.body2" Class="app-text-muted mt-1">
-                @if (Candidate.Role == RoleType.Teacher)
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Class="mr-1" Style="vertical-align: sub;" />
-                    @Candidate.Department
-                }
-                else
-                {
-                    <MudIcon Icon="@Icons.Material.Filled.School" Size="Size.Small" Class="mr-1" Style="vertical-align: sub;" />
-                    @Candidate.AcademicYear
-                }
+                @GetProfileSubtitle(Candidate.Profile)
             </MudText>
         </div>
     </div>
 
-    @* Botones de Acción *@
+    @* Actions *@
     <div class="d-flex align-center gap-3 w-100 justify-md-end">
+        <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(Candidate.Status)" Variant="Variant.Filled">
+            @GetStatusLabel(Candidate.Status)
+        </MudChip>
+
         <MudButton Variant="Variant.Outlined"
                    Color="Color.Default"
                    Class="rounded-lg font-weight-bold px-4"
@@ -44,27 +32,75 @@
             Ver Perfil
         </MudButton>
 
-        <MudIconButton Icon="@Icons.Material.Filled.Close"
-                       Variant="Variant.Outlined"
+        @if (Candidate.CanDecide)
+        {
+            <MudButton Variant="Variant.Outlined"
                        Color="Color.Error"
-                       Class="rounded-lg"
-                       Style="border-color: var(--mud-palette-error);"
-                       OnClick="() => OnReject.InvokeAsync(Candidate)" />
+                       Class="rounded-lg font-weight-bold px-4"
+                       OnClick="() => OnReject.InvokeAsync(Candidate)">
+                No me interesa
+            </MudButton>
 
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Success"
-                   Class="rounded-lg font-weight-bold px-6"
-                   OnClick="() => OnAccept.InvokeAsync(Candidate)">
-            Me interesa
-        </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Success"
+                       Class="rounded-lg font-weight-bold px-6"
+                       OnClick="() => OnAccept.InvokeAsync(Candidate)">
+                Me interesa
+            </MudButton>
+        }
     </div>
 </MudPaper>
 
 @code {
     [Parameter, EditorRequired]
-    public ProfileDto Candidate { get; set; } = default!;
+    public TfeCandidateDto Candidate { get; set; } = default!;
 
-    [Parameter] public EventCallback<ProfileDto> OnViewProfile { get; set; }
-    [Parameter] public EventCallback<ProfileDto> OnReject { get; set; }
-    [Parameter] public EventCallback<ProfileDto> OnAccept { get; set; }
+    [Parameter] public EventCallback<TfeCandidateDto> OnViewProfile { get; set; }
+    [Parameter] public EventCallback<TfeCandidateDto> OnReject { get; set; }
+    [Parameter] public EventCallback<TfeCandidateDto> OnAccept { get; set; }
+
+    private static string GetStatusLabel(ProposalStatus status) => status switch
+    {
+        ProposalStatus.Pending  => "Pendiente",
+        ProposalStatus.Accepted => "Aceptado",
+        ProposalStatus.Rejected => "Rechazado",
+        ProposalStatus.Expired  => "Expirado",
+        _                       => status.ToString()
+    };
+
+    private static Color GetStatusColor(ProposalStatus status) => status switch
+    {
+        ProposalStatus.Pending  => Color.Info,
+        ProposalStatus.Accepted => Color.Success,
+        ProposalStatus.Rejected => Color.Error,
+        _                       => Color.Secondary
+    };
+
+    private static RenderFragment GetProfileSubtitle(ProfileDto profile) => builder =>
+    {
+        var content = profile.Role switch
+        {
+            RoleType.Teacher => string.IsNullOrWhiteSpace(profile.Department) ? "Departamento no establecido" : profile.Department,
+            RoleType.Student => string.IsNullOrWhiteSpace(profile.AcademicYear) ? "Año no establecido" : profile.AcademicYear,
+            RoleType.Admin => "Administrador del sistema",
+            _ => profile.Role.ToString()
+        };
+
+        var icon = profile.Role switch
+        {
+            RoleType.Teacher => Icons.Material.Filled.Business,
+            RoleType.Student => Icons.Material.Filled.School,
+            RoleType.Admin => Icons.Material.Filled.AdminPanelSettings,
+            _ => Icons.Material.Filled.Badge
+        };
+
+        builder.OpenComponent<MudIcon>(0);
+        builder.AddAttribute(1, "Icon", icon);
+        builder.AddAttribute(2, "Size", Size.Small);
+        builder.AddAttribute(3, "Class", "mr-1");
+        builder.AddAttribute(4, "Style", "vertical-align: sub;");
+        builder.CloseComponent();
+
+        builder.AddContent(5, content);
+    };
 }

@@ -1,66 +1,53 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace TFELibrary.Shared;
 
-namespace TFELibrary.Shared
-{
-    public record ProfileResponse(
-        ProfileDto Profile
-    );
+public record ProfileResponse(
+    OperationResult Error,
+    ProfileDto? Profile = null
+);
 
-    public record ProfileCreationRequest(
-        string UserId,
-        ProfileDto Profile
-    );
+public record ProfileCreationRequest(
+    string UserId,
+    ProfileDto Profile
+);
 
-    public record ProfileCreationResponse(
-        bool IsSuccess,
-        string Message, 
-        string? UserId = null
-    );
+public record ProfileCreationResponse(
+    OperationResult Error,
+    string? UserId = null
+);
 
-    public record ProfileUpdateRequest(
-        ProfileDto Profile
-    );
+public record ProfileUpdateRequest(
+    ProfileDto Profile
+);
 
-    public record ProfileUpdateResponse(
-        bool IsSuccess,
-        string Message,
-        ProfileDto? UpdatedProfile = null
-    );
+public record ProfileUpdateResponse(
+    OperationResult Error,
+    ProfileDto? UpdatedProfile = null
+);
 
-    public record ProfileLogoutRequest(
+public record ProfileLogoutRequest();
 
-    );
+public record ProfileByTfeInterestRequest(
+    int TfeId
+);
 
-    public record ProfileLogoutResponse(
-        bool IsSuccess,
-        string Message
-    );
+public record ProfileByTfeInterestResponse(
+    OperationResult Error,
+    List<TfeCandidateDto> Interested
+);
 
-    public record ProfileByTfeInterestRequest(
-        int TfeId
-    );
+public record ChangeRoleRequest(
+    RoleType NewRole
+);
 
-    public record ProfileByTfeInterestResponse(
-        List<ProfileDto> Interested
-    );
+public record GetAllProfilesRequest();
 
-    public record ChangeRoleRequest(
-        RoleType NewRole
-    );
+public record GetAllProfilesResponse(
+    OperationResult Error,
+    List<ProfileDto> Profiles
+);
 
-    public record ChangeRoleResponse(
-        bool IsSuccess,
-        string Message
-    );
+public record RoleUpdateResponse(OperationResult Error);
 
-    public record GetAllProfilesRequest();
+public record SuspensionUpdateRequest(bool IsSuspended);
 
-    public record GetAllProfilesResponse(
-        List<ProfileDto> Profiles
-    );
-
-    public record RoleUpdateResponse(bool IsSuccess, string Message);
-
-}
+public record SuspensionUpdateResponse(OperationResult Error);

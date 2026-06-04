@@ -1,6 +1,7 @@
 ﻿using AuthService.Repositories;
 using AuthService.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MatchTFE.AuthService.Repositories;
 
@@ -51,6 +52,14 @@ public class AuthRepository : IAuthRepository
     {
         return await _userManager.FindByIdAsync(userId);
     }
+
+    public async Task<List<MatchUser>> GetUsersByIdsAsync(IEnumerable<string> userIds)
+    {
+        var idList = userIds.ToList();
+        return await _userManager.Users
+            .Where(u => idList.Contains(u.Id))
+            .ToListAsync();
+    }
     public async Task<IList<string>> GetUserRolesAsync(MatchUser user)
     {
         return await _userManager.GetRolesAsync(user);
@@ -63,5 +72,31 @@ public class AuthRepository : IAuthRepository
     public async Task<IdentityResult> RemoveFromRoleAsync(MatchUser user, string role)
     {
         return await _userManager.RemoveFromRoleAsync(user, role);
+    }
+
+    public async Task<IdentityResult> ResetPasswordDirectlyAsync(MatchUser user, string newPassword)
+    {
+        var removeResult = await _userManager.RemovePasswordAsync(user);
+        if (!removeResult.Succeeded)
+            return removeResult;
+
+        return await _userManager.AddPasswordAsync(user, newPassword);
+    }
+
+    public async Task LockUserAsync(MatchUser user)
+    {
+        await _userManager.SetLockoutEnabledAsync(user, true);
+        await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+    }
+
+    public async Task UnlockUserAsync(MatchUser user)
+    {
+        await _userManager.SetLockoutEndDateAsync(user, null);
+        await _userManager.SetLockoutEnabledAsync(user, false);
+    }
+
+    public async Task<bool> IsLockedOutAsync(MatchUser user)
+    {
+        return await _userManager.IsLockedOutAsync(user);
     }
 }
