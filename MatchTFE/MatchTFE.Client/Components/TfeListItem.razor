@@ -1,4 +1,6 @@
-﻿@using TFELibrary.Shared
+@using TFELibrary.Shared
+
+@inject IStringLocalizer<SharedResources> L
 
 <div class="d-flex align-center py-4 border-b-default">
     <MudGrid Class="align-center w-100" Spacing="2">
@@ -27,7 +29,7 @@
                 <div class="d-flex align-center mud-text-secondary">
                     <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-2" />
                     <MudText Typo="Typo.body2">
-                        @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                        @(Model.ExpirationDate != default ? Model.ExpirationDate.ToString("dd MMM, yyyy") : L["MyTfes_NoDate"].Value)
                     </MudText>
                 </div>
 
@@ -56,7 +58,7 @@
                            Size="Size.Small"
                            Href="@($"/tfe/{Model.Id}/candidates")"
                            Class="font-weight-bold px-2 py-0">
-                    Ver
+                    @L["TfeListItem_ViewBtn"]
                 </MudButton>
             </div>
         </MudItem>
@@ -66,7 +68,7 @@
             <div class="d-flex align-center mud-text-secondary">
                 <MudIcon Icon="@Icons.Material.Filled.EventAvailable" Size="Size.Small" Class="mr-2" />
                 <MudText Typo="Typo.body2">
-                    @(Model.CreationDate != default ? Model.CreationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                    @(Model.CreationDate != default ? Model.CreationDate.ToString("dd MMM, yyyy") : L["MyTfes_NoDate"].Value)
                 </MudText>
             </div>
         </MudItem>
@@ -122,9 +124,9 @@
 
     private string GetStatusText(TfeStatus status) => status switch
     {
-        TfeStatus.Completed => "• Completado",
-        TfeStatus.Open => "• Abierto",
-        TfeStatus.Cancelled => "• Cancelado",
+        TfeStatus.Completed => L["TfeStatus_Completed"].Value,
+        TfeStatus.Open => L["TfeStatus_Open"].Value,
+        TfeStatus.Cancelled => L["TfeStatus_Cancelled"].Value,
         _ => status.ToString()
     };
 
@@ -135,5 +137,6 @@
 
     private Color GetExpirationStatusColor(DateTime expirationDate) => IsExpired(expirationDate) ? Color.Error : Color.Success;
 
-    private string GetExpirationStatusText(DateTime expirationDate) => IsExpired(expirationDate) ? "Caducado" : "Abierto";
+    private string GetExpirationStatusText(DateTime expirationDate) =>
+        IsExpired(expirationDate) ? L["TfeStatus_Expired"].Value : L["TfeStatus_Active"].Value;
 }

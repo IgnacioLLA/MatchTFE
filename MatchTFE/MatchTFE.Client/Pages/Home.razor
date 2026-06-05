@@ -1,5 +1,7 @@
-﻿@page "/"
+@page "/"
 @using MatchTFE.Client.Components.Home
+
+@inject IStringLocalizer<SharedResources> L
 
 <main class="home-root animate-fade-in" aria-label="Inicio de MATCH-TFE">
     @if (GlobalProfile == null)
@@ -21,7 +23,7 @@
     else
     {
         <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
-            No se pudo identificar el rol de usuario.
+            @L["Home_RoleError"]
         </MudAlert>
     }
 </main>

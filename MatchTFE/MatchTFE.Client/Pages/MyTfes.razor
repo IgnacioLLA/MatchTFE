@@ -1,18 +1,19 @@
-﻿@page "/tfe/author"
+@page "/tfe/author"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
+@inject IStringLocalizer<SharedResources> L
 
 <div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
     <div>
         <MudText Typo="Typo.h4" Class="app-title-tight mb-2 font-weight-extrabold">
-            Mis Publicaciones
+            @L["MyTfes_Title"]
         </MudText>
         <MudText Typo="Typo.body1" Class="mud-text-secondary">
-            Gestiona y supervisa tus propuestas de TFE.
+            @L["MyTfes_Subtitle"]
         </MudText>
     </div>
     <MudButton Variant="Variant.Filled"
@@ -20,7 +21,7 @@
                StartIcon="@Icons.Material.Filled.AddCircleOutline"
                Class="rounded-lg font-weight-bold px-4 py-2 btn-primary-shadow"
                Href="/tfe/create">
-        Crear Nueva Propuesta
+        @L["MyTfes_CreateBtn"]
     </MudButton>
 </div>
 
@@ -29,7 +30,7 @@
     @* FILTERS *@
     <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section">
         <MudTextField @bind-Value="SearchQuery"
-                      Placeholder="Buscar por título o etiqueta..."
+                      Placeholder="@L["MyTfes_SearchPlaceholder"]"
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Variant="Variant.Outlined"
@@ -40,7 +41,7 @@
                    MultiSelection="true"
                    SelectedValues="SelectedFilterTags"
                    SelectedValuesChanged="OnSelectedTagsChanged"
-                   Placeholder="Filtrar por tags..."
+                   Placeholder="@L["MyTfes_FilterByTags"]"
                    Variant="Variant.Outlined"
                    Margin="Margin.Dense"
                    Class="rounded-lg flex-grow-1 tfe-filter-select">
@@ -53,12 +54,12 @@
         <MudSpacer />
 
         <div class="d-flex align-center">
-            <MudText Typo="Typo.body2" Class="mud-text-secondary mr-2">Ordenar por:</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mr-2">@L["MyTfes_SortBy"]</MudText>
             <MudSelect T="string" @bind-Value="SelectedSort" Variant="Variant.Text" Margin="Margin.Dense" Class="font-weight-bold">
-                <MudSelectItem Value="@("Más reciente")" />
-                <MudSelectItem Value="@("Más antiguo")" />
-                <MudSelectItem Value="@("Estado")" />
-                <MudSelectItem Value="@("Fecha de Creación")" />
+                <MudSelectItem Value="@("newest")">@L["MyTfes_SortNewest"]</MudSelectItem>
+                <MudSelectItem Value="@("oldest")">@L["MyTfes_SortOldest"]</MudSelectItem>
+                <MudSelectItem Value="@("status")">@L["MyTfes_SortStatus"]</MudSelectItem>
+                <MudSelectItem Value="@("creation")">@L["MyTfes_SortCreation"]</MudSelectItem>
             </MudSelect>
         </div>
     </div>
@@ -66,12 +67,12 @@
     @* TABLE HEADERS *@
     <div class="px-6 py-3 mud-text-secondary font-weight-bold tfe-column-headers d-none d-md-block">
         <MudGrid>
-            <MudItem xs="12" md="3">DETALLES DEL PROYECTO</MudItem>
-            <MudItem xs="6" md="2">ESTADO</MudItem>
-            <MudItem xs="6" md="2">VENCIMIENTO</MudItem>
-            <MudItem xs="6" md="2">INTERESADOS</MudItem>
-            <MudItem xs="12" md="2">CREACIÓN</MudItem>
-            <MudItem xs="12" md="1" Class="d-flex justify-end">ACCIONES</MudItem>
+            <MudItem xs="12" md="3">@L["MyTfes_ColProject"]</MudItem>
+            <MudItem xs="6" md="2">@L["MyTfes_ColStatus"]</MudItem>
+            <MudItem xs="6" md="2">@L["MyTfes_ColExpiry"]</MudItem>
+            <MudItem xs="6" md="2">@L["MyTfes_ColInterested"]</MudItem>
+            <MudItem xs="12" md="2">@L["MyTfes_ColCreation"]</MudItem>
+            <MudItem xs="12" md="1" Class="d-flex justify-end">@L["MyTfes_ColActions"]</MudItem>
         </MudGrid>
     </div>
     <MudDivider Class="d-none d-md-block" />
@@ -87,13 +88,13 @@
     @* FOOTER *@
     <div class="pa-4 d-flex justify-space-between align-center tfe-footer-section">
         <MudText Typo="Typo.body2" Class="mud-text-secondary">
-            Mostrando @GetPaginatedProposals().Count() de @GetFilteredProposals().Count() publicaciones
+            @L["MyTfes_ShowingOf", GetPaginatedProposals().Count(), GetFilteredProposals().Count()]
         </MudText>
         <MudPagination Count="@GetTotalPages()"
                        @bind-Selected="_currentPage"
                        Color="Color.Primary"
                        Variant="Variant.Outlined"
-                       Shape="Shape.Rounded" />
+                       />
     </div>
 
 </MudPaper>
@@ -118,7 +119,7 @@
 
     private IReadOnlyCollection<string> SelectedFilterTags { get; set; } = new HashSet<string>();
 
-    private string _selectedSort = "Más reciente";
+    private string _selectedSort = "newest";
     public string SelectedSort
     {
         get => _selectedSort;
@@ -139,7 +140,7 @@
         }
         catch
         {
-            Snackbar.Add("Error al conectar con el backend al obtener los datos.", Severity.Error);
+            Snackbar.Add(L["MyTfes_LoadError"].Value, Severity.Error);
         }
     }
 
@@ -164,9 +165,9 @@
 
         result = SelectedSort switch
         {
-            "Más antiguo" => result.OrderBy(p => p.ExpirationDate),
-            "Estado" => result.OrderBy(p => p.Status),
-            "Fecha de Creación" => result.OrderByDescending(p => p.CreationDate),
+            "oldest" => result.OrderBy(p => p.ExpirationDate),
+            "status" => result.OrderBy(p => p.Status),
+            "creation" => result.OrderByDescending(p => p.CreationDate),
             _ => result.OrderByDescending(p => p.ExpirationDate)
         };
 
@@ -203,7 +204,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Propuesta eliminada correctamente.", Severity.Success);
+                Snackbar.Add(L["MyTfes_DeleteSuccess"].Value, Severity.Success);
 
                 _proposals.RemoveAll(p => p.Id == tfeId);
 
@@ -218,12 +219,12 @@
             else
             {
                 var error = await response.Content.ReadAsStringAsync();
-                Snackbar.Add($"No se pudo eliminar la propuesta: {error}", Severity.Error);
+                Snackbar.Add(L["MyTfes_DeleteError", error].Value, Severity.Error);
             }
         }
         catch
         {
-            Snackbar.Add("Error de conexión al intentar eliminar.", Severity.Error);
+            Snackbar.Add(L["MyTfes_DeleteConnectionError"].Value, Severity.Error);
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿@inject NavigationManager NavManager
+@inject IStringLocalizer<SharedResources> L
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8">
 
     <div class="mb-6 d-flex align-center">
         <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
-        <MudText Typo="Typo.h6" Class="font-weight-bold">Propuestas de TFE</MudText>
+        <MudText Typo="Typo.h6" Class="font-weight-bold">@L["DiscoverLayout_Title"]</MudText>
     </div>
 
     <div class="d-block d-sm-none mb-6">
@@ -17,5 +18,5 @@
 
 @code {
     [Parameter, EditorRequired] public RenderFragment ChildContent { get; set; } = default!;
-    [Parameter] public string MobileTitle { get; set; } = "Descubrir propuestas";
+    [Parameter] public string MobileTitle { get; set; } = string.Empty;
 }

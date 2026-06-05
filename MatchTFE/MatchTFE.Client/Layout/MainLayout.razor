@@ -1,10 +1,12 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using TFELibrary.Shared
 @using MatchTFE.Client.Themes
 
 @inject IHttpClientFactory ClientFactory
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResources> L
+@inject IJSRuntime JS
 
 <MudThemeProvider Theme="MatchTheme.DefaultTheme" @bind-IsDarkMode="_isDarkMode" />
 <MudDialogProvider />
@@ -15,13 +17,13 @@
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1" Variant="@DrawerVariant.Responsive">
         <div class="pa-4 mt-2">
             <MudText Typo="Typo.overline" Class="mud-text-secondary font-weight-bold">
-                MENÚ PRINCIPAL
+                @L["Nav_MenuTitle"]
             </MudText>
         </div>
         <NavMenu Profile="_globalProfile" />
     </MudDrawer>
 
-    <MudAppBar Elevation="0" Variant="Variant.Outlined">
+    <MudAppBar Elevation="0">
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="DrawerToggle" />
 
         <MudLink Href="/" Underline="Underline.None" Color="Color.Inherit" Class="d-flex align-center">
@@ -36,10 +38,29 @@
                              Icon="@Icons.Material.Filled.WbSunny"
                              Color="Color.Inherit"
                              ToggledIcon="@Icons.Material.Filled.DarkMode"
-                             ToggledColor="Color.Inherit"
-                             Title="Cambiar modo de luz" />
+                             ToggledColor="Color.Inherit" />
 
-        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Class="mx-2" />
+        <MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Class="mx-2"
+                 Dense="true">
+            <MudMenuItem OnClick="@(() => SetCultureAsync("es-ES"))">
+                <div class="d-flex align-center gap-2">
+                    @if (CurrentCulture.StartsWith("es"))
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+                    }
+                    🇪🇸 @L["Lang_Spanish"]
+                </div>
+            </MudMenuItem>
+            <MudMenuItem OnClick="@(() => SetCultureAsync("en"))">
+                <div class="d-flex align-center gap-2">
+                    @if (CurrentCulture.StartsWith("en"))
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+                    }
+                    🇬🇧 @L["Lang_English"]
+                </div>
+            </MudMenuItem>
+        </MudMenu>
 
         <MudButton Variant="Variant.Text" Color="Color.Inherit" Class="px-2" Href="/profile">
             @if (_isLoading)
@@ -97,6 +118,14 @@
     private bool _isLoading = true;
     private bool _isPublicRoute;
 
+    private string CurrentCulture => System.Globalization.CultureInfo.CurrentCulture.Name;
+
+    private async Task SetCultureAsync(string culture)
+    {
+        await JS.InvokeVoidAsync("blazorCulture.set", culture);
+        Navigation.NavigateTo(Navigation.Uri, forceLoad: true);
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
@@ -130,7 +159,7 @@
         }
         catch (Exception)
         {
-            Snackbar.Add("Error al conectar con el servidor de perfil.", Severity.Error);
+            Snackbar.Add(L["Layout_ProfileLoadError"], Severity.Error);
         }
         finally
         {
@@ -138,12 +167,12 @@
         }
     }
 
-    private static string GetRoleCaption(RoleType role) => role switch
+    private string GetRoleCaption(RoleType role) => role switch
     {
-        RoleType.Student => "ESTUDIANTE",
-        RoleType.Teacher => "PROFESOR",
-        RoleType.Admin => "ADMINISTRADOR",
-        _ => "USUARIO"
+        RoleType.Student => L["Role_Student"].Value.ToUpperInvariant(),
+        RoleType.Teacher => L["Role_Teacher"].Value.ToUpperInvariant(),
+        RoleType.Admin => L["Role_Admin"].Value.ToUpperInvariant(),
+        _ => L["Role_User"].Value.ToUpperInvariant()
     };
 
     private static bool IsPublicRoute(string normalizedPath)

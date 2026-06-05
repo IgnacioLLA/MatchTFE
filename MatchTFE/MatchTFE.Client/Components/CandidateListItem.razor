@@ -1,5 +1,7 @@
 @using TFELibrary.Shared
 
+@inject IStringLocalizer<SharedResources> L
+
 <MudPaper Elevation="0" Class="pa-4 rounded-xl border-all mb-4 d-flex flex-column flex-md-row align-center justify-space-between gap-4 transition-all hover-shadow">
 
     @* Info *@
@@ -29,7 +31,7 @@
                    Color="Color.Default"
                    Class="rounded-lg font-weight-bold px-4"
                    OnClick="() => OnViewProfile.InvokeAsync(Candidate)">
-            Ver Perfil
+            @L["CandidateListItem_ViewProfile"]
         </MudButton>
 
         @if (Candidate.CanDecide)
@@ -38,14 +40,14 @@
                        Color="Color.Error"
                        Class="rounded-lg font-weight-bold px-4"
                        OnClick="() => OnReject.InvokeAsync(Candidate)">
-                No me interesa
+                @L["CandidateListItem_Reject"]
             </MudButton>
 
             <MudButton Variant="Variant.Filled"
                        Color="Color.Success"
                        Class="rounded-lg font-weight-bold px-6"
                        OnClick="() => OnAccept.InvokeAsync(Candidate)">
-                Me interesa
+                @L["CandidateListItem_Accept"]
             </MudButton>
         }
     </div>
@@ -59,12 +61,12 @@
     [Parameter] public EventCallback<TfeCandidateDto> OnReject { get; set; }
     [Parameter] public EventCallback<TfeCandidateDto> OnAccept { get; set; }
 
-    private static string GetStatusLabel(ProposalStatus status) => status switch
+    private string GetStatusLabel(ProposalStatus status) => status switch
     {
-        ProposalStatus.Pending  => "Pendiente",
-        ProposalStatus.Accepted => "Aceptado",
-        ProposalStatus.Rejected => "Rechazado",
-        ProposalStatus.Expired  => "Expirado",
+        ProposalStatus.Pending  => L["CandidateStatus_Pending"].Value,
+        ProposalStatus.Accepted => L["CandidateStatus_Accepted"].Value,
+        ProposalStatus.Rejected => L["CandidateStatus_Rejected"].Value,
+        ProposalStatus.Expired  => L["CandidateStatus_Expired"].Value,
         _                       => status.ToString()
     };
 
@@ -76,31 +78,18 @@
         _                       => Color.Secondary
     };
 
-    private static RenderFragment GetProfileSubtitle(ProfileDto profile) => builder =>
+    private string GetProfileSubtitle(ProfileDto profile)
     {
-        var content = profile.Role switch
+        return profile.Role switch
         {
-            RoleType.Teacher => string.IsNullOrWhiteSpace(profile.Department) ? "Departamento no establecido" : profile.Department,
-            RoleType.Student => string.IsNullOrWhiteSpace(profile.AcademicYear) ? "Año no establecido" : profile.AcademicYear,
-            RoleType.Admin => "Administrador del sistema",
+            RoleType.Teacher => string.IsNullOrWhiteSpace(profile.Department)
+                ? L["ProfileCard_NoDept"].Value
+                : profile.Department,
+            RoleType.Student => string.IsNullOrWhiteSpace(profile.AcademicYear)
+                ? L["ProfileCard_NoYear"].Value
+                : profile.AcademicYear,
+            RoleType.Admin => L["ProfileCard_AdminLabel"].Value,
             _ => profile.Role.ToString()
         };
-
-        var icon = profile.Role switch
-        {
-            RoleType.Teacher => Icons.Material.Filled.Business,
-            RoleType.Student => Icons.Material.Filled.School,
-            RoleType.Admin => Icons.Material.Filled.AdminPanelSettings,
-            _ => Icons.Material.Filled.Badge
-        };
-
-        builder.OpenComponent<MudIcon>(0);
-        builder.AddAttribute(1, "Icon", icon);
-        builder.AddAttribute(2, "Size", Size.Small);
-        builder.AddAttribute(3, "Class", "mr-1");
-        builder.AddAttribute(4, "Style", "vertical-align: sub;");
-        builder.CloseComponent();
-
-        builder.AddContent(5, content);
-    };
+    }
 }

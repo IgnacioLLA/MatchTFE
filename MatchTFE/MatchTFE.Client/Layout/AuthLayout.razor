@@ -1,5 +1,7 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using MatchTFE.Client.Themes
+
+@inject IStringLocalizer<SharedResources> L
 
 <MudThemeProvider Theme="MatchTheme.DefaultTheme" />
 <MudDialogProvider />
@@ -23,10 +25,10 @@
 
     <div class="page-footer">
         <div class="footer-links">
-            <MudLink Href="/privacidad" Typo="Typo.caption" Underline="Underline.Hover">Privacidad</MudLink>
-            <MudLink Href="/terminos" Typo="Typo.caption" Underline="Underline.Hover">Términos de servicio</MudLink>
-            <MudLink Href="/ayuda" Typo="Typo.caption" Underline="Underline.Hover">Ayuda</MudLink>
+            <MudLink Href="/privacidad" Typo="Typo.caption" Underline="Underline.Hover">@L["Footer_Privacy"]</MudLink>
+            <MudLink Href="/terminos" Typo="Typo.caption" Underline="Underline.Hover">@L["Footer_Terms"]</MudLink>
+            <MudLink Href="/ayuda" Typo="Typo.caption" Underline="Underline.Hover">@L["Footer_Help"]</MudLink>
         </div>
-        <MudText Typo="Typo.caption" Class="copyright-text">© 2026 MATCH-TFE. Todos los derechos reservados.</MudText>
+        <MudText Typo="Typo.caption" Class="copyright-text">@L["Footer_Copyright"]</MudText>
     </div>
 </div>

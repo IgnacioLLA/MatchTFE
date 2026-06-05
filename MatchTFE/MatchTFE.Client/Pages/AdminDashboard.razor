@@ -1,4 +1,4 @@
-﻿@page "/admin"
+@page "/admin"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 @using Microsoft.AspNetCore.Components.Forms
@@ -7,14 +7,15 @@
 @inject IHttpClientFactory HttpClientFactory
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResources> L
 
 <div class="mb-6 d-flex justify-space-between align-end animate-fade-in">
     <div>
         <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
-            User Management
+            @L["Admin_UserManagementTitle"]
         </MudText>
         <MudText Typo="Typo.body1" Class="app-text-reading">
-            Manage system users, roles, and perform bulk actions.
+            @L["Admin_UserManagementSubtitle"]
         </MudText>
     </div>
 </div>
@@ -24,35 +25,35 @@
         <MudPaper Elevation="0" Class="pa-6 h-100 rounded-xl border-all d-flex flex-column">
             <div class="d-flex align-center mb-4">
                 <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Update User Role</MudText>
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Admin_UpdateRoleTitle"]</MudText>
             </div>
             <MudText Typo="Typo.body2" Class="app-text-muted mb-4">
-                Quickly change the system role of a specific user by their email address.
+                @L["Admin_UpdateRoleSubtitle"]
             </MudText>
 
             @if (!string.IsNullOrEmpty(_roleUpdateError))
             {
-                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _roleUpdateError = string.Empty)">
+                <MudAlert Severity="Severity.Error" Class="mb-4">
                     @_roleUpdateError
                 </MudAlert>
             }
 
             <div class="d-flex flex-wrap gap-3 align-end mt-auto">
                 <MudTextField @bind-Value="_roleUpdateEmail"
-                              Label="User Email"
+                              Label="@L["Admin_UserEmailLabel"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               Class="flex-grow-1" />
 
                     <MudSelect T="RoleType?"
                                @bind-Value="_roleUpdateSelection"
-                               Label="New Role"
+                               Label="@L["Admin_NewRoleLabel"]"
                                Variant="Variant.Outlined"
                                Margin="Margin.Dense"
                                Class="min-w-150">
-                    <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
-                    <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
-                    <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">@L["Role_Student"]</MudSelectItem>
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">@L["Role_Teacher"]</MudSelectItem>
+                    <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">@L["Role_Admin"]</MudSelectItem>
                 </MudSelect>
 
                     <MudButton Variant="Variant.Filled"
@@ -60,7 +61,7 @@
                                OnClick="HandleUpdateRoleAsync"
                                Disabled="@(string.IsNullOrWhiteSpace(_roleUpdateEmail) || _roleUpdateSelection == null)"
                                Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
-                    UPDATE
+                    @L["Admin_UpdateBtn"]
                 </MudButton>
             </div>
         </MudPaper>
@@ -70,14 +71,14 @@
         <MudPaper Elevation="0" Class="pa-6 h-100 rounded-xl border-all d-flex flex-column">
             <div class="d-flex align-center mb-4">
                 <MudIcon Icon="@Icons.Material.Filled.GroupAdd" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Bulk Import Profiles</MudText>
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Admin_BulkImportTitle"]</MudText>
             </div>
             <MudText Typo="Typo.body2" Class="app-text-muted mb-3">
-                Upload a structured file (.csv or .txt, UTF-8) to automatically generate new user profiles.
+                @L["Admin_BulkImportSubtitle"]
             </MudText>
 
             <MudExpansionPanels Elevation="0" Class="mb-4 border-all rounded-lg">
-                <MudExpansionPanel Text="File format reference" Dense="true" Class="rounded-lg">
+                <MudExpansionPanel Text="@L["Admin_FormatReference"]" Dense="true" Class="rounded-lg">
                     <MudText Typo="Typo.caption" Class="app-text-muted mb-1">
                         One row per user. Header row is optional. Fields must be separated by commas.
                         Fields containing a comma must be wrapped in double quotes.
@@ -94,19 +95,21 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             @if (!string.IsNullOrEmpty(_importError))
             {
-                <MudAlert Severity="Severity.Error" Class="mb-3" Dense="true" CloseButton="true" OnClose="@(() => _importError = string.Empty)">
+                <MudAlert Severity="Severity.Error" Class="mb-3" Dense="true">
                     @_importError
                 </MudAlert>
             }
 
             <div class="d-flex align-center gap-4 mt-auto">
                 <MudFileUpload T="IBrowserFile" FilesChanged="HandleFileSelected" Accept=".txt, .csv" Class="w-100">
-                    <MudButton Variant="Variant.Outlined"
-                                Color="Color.Primary"
-                                StartIcon="@Icons.Material.Filled.CloudUpload"
-                                Class="rounded-lg font-weight-bold w-100 py-2 border-all chip-dashed">
-                        @(_uploadedFile == null ? "BROWSE FILE (.CSV, .TXT)" : _uploadedFile.Name)
-                    </MudButton>
+                    <CustomContent>
+                        <MudButton Variant="Variant.Outlined"
+                                    Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.CloudUpload"
+                                    Class="rounded-lg font-weight-bold w-100 py-2 border-all chip-dashed">
+                            @(_uploadedFile == null ? L["Admin_BrowseFile"].Value : _uploadedFile.Name)
+                        </MudButton>
+                    </CustomContent>
                 </MudFileUpload>
 
                     <MudButton Variant="Variant.Filled"
@@ -114,7 +117,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                                OnClick="HandleImportUsersAsync"
                                Disabled="@(_uploadedFile == null)"
                                Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
-                    IMPORT
+                    @L["Admin_ImportBtn"]
                 </MudButton>
             </div>
         </MudPaper>
@@ -124,56 +127,56 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         <MudPaper Elevation="0" Class="pa-6 rounded-xl border-all d-flex flex-column">
             <div class="d-flex align-center mb-2">
                 <MudIcon Icon="@Icons.Material.Filled.Lock" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Change User Password</MudText>
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Admin_ChangePasswordTitle"]</MudText>
             </div>
             <MudText Typo="Typo.body2" Class="app-text-muted mb-1">
-                Override a user's password directly. The user's active sessions will be invalidated automatically.
+                @L["Admin_ChangePasswordSubtitle"]
             </MudText>
             <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
-                Remember to inform the user that their password has been changed.
+                @L["Admin_ChangePasswordInfo"]
             </MudAlert>
 
             @if (!string.IsNullOrEmpty(_passwordChangeError))
             {
-                <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _passwordChangeError = string.Empty)">
+                <MudAlert Severity="Severity.Error" Class="mb-4">
                     @_passwordChangeError
                 </MudAlert>
             }
 
             <div class="d-flex flex-wrap gap-3 align-center mt-auto">
                 <MudTextField @bind-Value="_passwordChangeEmail"
-                              Label="User Email"
+                              Label="@L["Admin_UserEmailLabel"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               Class="flex-grow-1"
                               InputType="InputType.Email" />
 
                 <MudTextField @bind-Value="_newPassword"
-                              Label="New Password"
+                              Label="@L["Admin_NewPasswordLabel"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               Class="flex-grow-1"
                               InputType="InputType.Password" />
 
                 <MudTextField @bind-Value="_confirmPassword"
-                              Label="Confirm Password"
+                              Label="@L["Admin_ConfirmPasswordLabel"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               Class="flex-grow-1"
                               InputType="InputType.Password"
                               Error="@(_confirmPassword.Length > 0 && _newPassword != _confirmPassword)"
-                              ErrorText="Passwords do not match" />
+                              ErrorText="@L["Admin_PasswordMismatch"]" />
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
                            OnClick="HandleChangePasswordAsync"
                            Disabled="@(!CanSubmitPasswordChange)"
                            Class="rounded-lg font-weight-bold px-6 py-2 btn-primary-shadow btn-height-40">
-                    CHANGE PASSWORD
+                    @L["Admin_ChangePasswordBtn"]
                 </MudButton>
             </div>
             <MudText Typo="Typo.caption" Class="app-text-muted mt-1">
-                New password must be at least 6 characters.
+                @L["Admin_PasswordMinChars"]
             </MudText>
         </MudPaper>
     </MudItem>
@@ -182,7 +185,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
 @if (!string.IsNullOrEmpty(_bulkActionSuccess))
 {
-    <MudAlert Severity="Severity.Success" Class="mb-4 animate-fade-in" CloseButton="true" OnClose="@(() => _bulkActionSuccess = string.Empty)">
+    <MudAlert Severity="Severity.Success" Class="mb-4 animate-fade-in">
         @_bulkActionSuccess
     </MudAlert>
 }
@@ -190,7 +193,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 <MudPaper Elevation="0" Class="border-all rounded-xl animate-fade-in mb-10">
     <div class="pa-4 d-flex flex-wrap gap-4 align-center tfe-filter-section border-b-1 border-b-default">
         <MudTextField @bind-Value="SearchQuery"
-                      Placeholder="Search by name or email..."
+                      Placeholder="@L["Admin_SearchPlaceholder"]"
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Variant="Variant.Outlined"
@@ -199,14 +202,14 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
         <MudSelect T="RoleType?"
                @bind-Value="SelectedRoleFilter"
-               Placeholder="Filter by role..."
+               Placeholder="@L["Admin_FilterByRole"]"
                Variant="Variant.Outlined"
                Margin="Margin.Dense"
                Clearable="true"
                Class="rounded-lg flex-grow-1 max-w-300">
-            <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">Student</MudSelectItem>
-            <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">Teacher</MudSelectItem>
-            <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">Admin</MudSelectItem>
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Student)">@L["Role_Student"]</MudSelectItem>
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Teacher)">@L["Role_Teacher"]</MudSelectItem>
+            <MudSelectItem T="RoleType?" Value="@(RoleType.Admin)">@L["Role_Admin"]</MudSelectItem>
         </MudSelect>
     </div>
 
@@ -219,13 +222,13 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
               Loading="@_isLoading"
               Class="transparent-bg">
         <HeaderContent>
-            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">USER</MudText></MudTh>
-            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">EMAIL</MudText></MudTh>
-            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ROLE</MudText></MudTh>
-            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">STATUS</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColUser"]</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColEmail"]</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColRole"]</MudText></MudTh>
+            <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColStatus"]</MudText></MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="User">
+            <MudTd DataLabel="@L["Admin_ColUser"]">
                 <div class="d-flex align-center">
                     <MudAvatar Size="Size.Small" Color="Color.Primary" Class="mr-3">
                         @context.FirstName.FirstOrDefault()
@@ -233,10 +236,10 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                     <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.FirstName @context.LastName</MudText>
                 </div>
             </MudTd>
-            <MudTd DataLabel="Email">
+            <MudTd DataLabel="@L["Admin_ColEmail"]">
                 <MudText Typo="Typo.body2" Class="app-text-muted">@context.Email</MudText>
             </MudTd>
-            <MudTd DataLabel="Role">
+            <MudTd DataLabel="@L["Admin_ColRole"]">
                 <MudChip T="string"
                          Size="Size.Small"
                          Color="@GetRoleColor(context.Role)"
@@ -244,12 +247,12 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                     @context.Role.ToString()
                 </MudChip>
             </MudTd>
-            <MudTd DataLabel="Status">
+            <MudTd DataLabel="@L["Admin_ColStatus"]">
                 <MudChip T="string"
                          Size="Size.Small"
                          Color="@(context.IsSuspended ? Color.Warning : Color.Success)"
                          Class="font-weight-bold">
-                    @(context.IsSuspended ? "Suspended" : "Active")
+                    @(context.IsSuspended ? L["Admin_StatusSuspended"].Value : L["Admin_StatusActive"].Value)
                 </MudChip>
             </MudTd>
         </RowTemplate>
@@ -264,13 +267,13 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
     <div class="animate-fade-in mb-10">
         @if (!string.IsNullOrEmpty(_bulkActionError))
         {
-            <MudAlert Severity="Severity.Error" Class="mb-4" CloseButton="true" OnClose="@(() => _bulkActionError = string.Empty)">
+            <MudAlert Severity="Severity.Error" Class="mb-4">
                 @_bulkActionError
             </MudAlert>
         }
         <MudPaper Elevation="0" Class="pa-4 rounded-xl app-actions-bar border-all d-flex justify-space-between align-center">
             <MudText Typo="Typo.body1" Class="font-weight-bold text-main">
-                @_selectedUsers.Count users selected
+                @L["Admin_UsersSelected", _selectedUsers.Count]
             </MudText>
             <div class="d-flex gap-3">
                 <MudButton Variant="Variant.Outlined"
@@ -278,7 +281,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                            StartIcon="@Icons.Material.Filled.Block"
                            OnClick="HandleBulkSuspendAsync"
                            Class="rounded-lg font-weight-bold px-6">
-                    SUSPEND
+                    @L["Admin_SuspendBtn"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Outlined"
@@ -286,7 +289,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                            StartIcon="@Icons.Material.Filled.CheckCircle"
                            OnClick="HandleBulkUnsuspendAsync"
                            Class="rounded-lg font-weight-bold px-6">
-                    REACTIVATE
+                    @L["Admin_ReactivateBtn"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Filled"
@@ -294,7 +297,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                            StartIcon="@Icons.Material.Filled.Delete"
                            OnClick="HandleBulkDeleteAsync"
                            Class="rounded-lg font-weight-bold px-6 btn-primary-shadow">
-                    DELETE
+                    @L["Admin_DeleteBtn"]
                 </MudButton>
             </div>
         </MudPaper>
@@ -304,10 +307,10 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 <div class="mb-6 d-flex justify-space-between align-end animate-fade-in mt-12">
     <div>
         <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
-            Tag Management
+            @L["Admin_TagManagementTitle"]
         </MudText>
         <MudText Typo="Typo.body1" Class="app-text-reading">
-            Create, edit, and remove system tags. Click on a row to edit.
+            @L["Admin_TagManagementSubtitle"]
         </MudText>
     </div>
 </div>
@@ -318,18 +321,16 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         <MudPaper Elevation="0" Class="pa-4 pa-sm-6 rounded-xl border-all">
             <div class="d-flex align-center mb-4">
                 <MudIcon Icon="@Icons.Material.Filled.LocalOffer" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Create Tag</MudText>
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Admin_CreateTagTitle"]</MudText>
             </div>
 
             <div class="d-flex flex-column flex-md-row align-stretch align-md-center gap-4">
-                @* Ocultamos el label en móvil para ahorrar espacio *@
                 <MudText Typo="Typo.body1" Class="font-weight-bold text-main d-none d-md-block nowrap">
-                    Tag Name:
+                    @L["Admin_TagNameLabel"]
                 </MudText>
 
-                @* flex-grow-1 fuerza a que el input ocupe todo el espacio sobrante *@
                 <MudTextField @bind-Value="_newTagName"
-                              Placeholder="Enter new tag name..."
+                              Placeholder="@L["Admin_TagNamePlaceholder"]"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
                               FullWidth="true"
@@ -342,7 +343,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                            OnClick="HandleCreateTagAsync"
                            Disabled="@(string.IsNullOrWhiteSpace(_newTagName))"
                            Class="rounded-lg font-weight-bold px-md-8 py-2 btn-primary-shadow btn-height-40 nowrap min-w-140">
-                    ADD TAG
+                    @L["Admin_AddTagBtn"]
                 </MudButton>
             </div>
         </MudPaper>
@@ -353,20 +354,19 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         <MudPaper Elevation="0" Class="border-all rounded-xl d-flex flex-column">
             @if (!string.IsNullOrEmpty(_tagEditError))
             {
-                <MudAlert Severity="Severity.Error" Class="ma-4" CloseButton="true" OnClose="@(() => _tagEditError = string.Empty)">
+                <MudAlert Severity="Severity.Error" Class="ma-4">
                     @_tagEditError
                 </MudAlert>
             }
             <div class="pa-4 border-b-1 d-flex flex-column flex-md-row align-stretch align-md-center justify-space-between gap-4 border-b-default">
 
-                @* white-space: nowrap evita que "Current Tags" se rompa en dos renglones *@
                 <div class="d-flex align-center nowrap">
                     <MudIcon Icon="@Icons.Material.Filled.List" Color="Color.Primary" Class="mr-3" />
-                    <MudText Typo="Typo.h6" Class="font-weight-bold text-main">Current Tags</MudText>
+                    <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Admin_CurrentTagsTitle"]</MudText>
                 </div>
 
                 <MudTextField @bind-Value="_tagSearchQuery"
-                              Placeholder="Search tags..."
+                              Placeholder="@L["Admin_SearchTagsPlaceholder"]"
                               Adornment="Adornment.Start"
                               AdornmentIcon="@Icons.Material.Filled.Search"
                               Variant="Variant.Outlined"
@@ -385,14 +385,14 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                       EditTrigger="TableEditTrigger.RowClick"
                       RowEditCommit="HandleEditTagCommitAsync">
                 <HeaderContent>
-                    <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">TAG NAME</MudText></MudTh>
-                    <MudTh Class="th-actions"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">ACTIONS</MudText></MudTh>
+                    <MudTh><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColTagName"]</MudText></MudTh>
+                    <MudTh Class="th-actions"><MudText Typo="Typo.subtitle2" Class="font-weight-bold app-text-muted">@L["Admin_ColTagActions"]</MudText></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Tag Name">
+                    <MudTd DataLabel="@L["Admin_ColTagName"]">
                         <MudText Typo="Typo.body2" Class="font-weight-bold text-main">@context.Name</MudText>
                     </MudTd>
-                    <MudTd DataLabel="Actions" Class="text-right">
+                    <MudTd DataLabel="@L["Admin_ColTagActions"]" Class="text-right">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
                                        Size="Size.Small"
@@ -400,10 +400,10 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                     </MudTd>
                 </RowTemplate>
                 <RowEditingTemplate>
-                    <MudTd DataLabel="Tag Name">
+                    <MudTd DataLabel="@L["Admin_ColTagName"]">
                         <MudTextField @bind-Value="context.Name" Required="true" Margin="Margin.Dense" />
                     </MudTd>
-                    <MudTd DataLabel="Actions" Class="text-right">
+                    <MudTd DataLabel="@L["Admin_ColTagActions"]" Class="text-right">
                     </MudTd>
                 </RowEditingTemplate>
                 <PagerContent>
@@ -491,7 +491,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (HttpRequestException e)
         {
-            Snackbar.Add("Error loading users.", Severity.Error);
+            Snackbar.Add(L["Admin_LoadUsersError"].Value, Severity.Error);
             if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
                 Navigation.NavigateTo("");
@@ -510,7 +510,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
             var response = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
-            
+
             if (response != null)
             {
                 _tags = response.OrderBy(t => t.Name).ToList();
@@ -518,7 +518,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (Exception)
         {
-            Snackbar.Add("Error loading tags.", Severity.Error);
+            Snackbar.Add(L["Admin_LoadTagsError"].Value, Severity.Error);
         }
         finally
         {
@@ -586,12 +586,12 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
             }
             else
             {
-                _roleUpdateError = result?.Error.Message ?? "Failed to update role.";
+                _roleUpdateError = result?.Error.Message ?? L["Admin_UpdateRoleError"].Value;
             }
         }
         catch (Exception)
         {
-            _roleUpdateError = "Connection error while updating role.";
+            _roleUpdateError = L["Admin_ConnectionError"].Value;
         }
 
         StateHasChanged();
@@ -625,18 +625,18 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                _bulkActionSuccess = $"{result.CreatedCount} user(s) created, {result.SkippedCount} already existed.";
+                _bulkActionSuccess = L["Admin_ImportSuccess", result.CreatedCount, result.SkippedCount].Value;
                 _uploadedFile = null;
                 await LoadUsersAsync();
             }
             else
             {
-                _importError = result?.Error.Message ?? "Failed to import users.";
+                _importError = result?.Error.Message ?? L["Admin_ImportError"].Value;
             }
         }
         catch (Exception)
         {
-            _importError = "Connection error while importing users.";
+            _importError = L["Admin_ConnectionError"].Value;
         }
 
         StateHasChanged();
@@ -669,12 +669,12 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
             }
             else
             {
-                _bulkActionError = result?.Error.Message ?? "Bulk action failed.";
+                _bulkActionError = result?.Error.Message ?? L["Admin_BulkActionError"].Value;
             }
         }
         catch (Exception)
         {
-            _bulkActionError = "Connection error while executing bulk action.";
+            _bulkActionError = L["Admin_ConnectionError"].Value;
         }
 
         StateHasChanged();
@@ -712,12 +712,12 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
             }
             else
             {
-                _passwordChangeError = result?.Error.Message ?? "Failed to update password.";
+                _passwordChangeError = result?.Error.Message ?? L["Admin_PasswordUpdateError"].Value;
             }
         }
         catch (Exception)
         {
-            _passwordChangeError = "Connection error while updating password.";
+            _passwordChangeError = L["Admin_ConnectionError"].Value;
         }
 
         StateHasChanged();
@@ -745,7 +745,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (Exception)
         {
-            _tagError = "Connection error while creating tag.";
+            _tagError = L["Admin_TagConnectionError"].Value;
         }
     }
 
@@ -772,7 +772,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (Exception)
         {
-            _tagEditError = "Connection error while updating tag.";
+            _tagEditError = L["Admin_TagConnectionError"].Value;
             await LoadTagsAsync();
         }
     }
@@ -797,7 +797,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (Exception)
         {
-            _tagEditError = "Connection error while deleting tag.";
+            _tagEditError = L["Admin_TagConnectionError"].Value;
         }
     }
 

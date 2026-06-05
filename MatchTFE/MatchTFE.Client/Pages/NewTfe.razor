@@ -5,13 +5,14 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
+@inject IStringLocalizer<SharedResources> L
 
 <div class="mb-8 animate-fade-in">
     <MudText Typo="Typo.h4" Class="app-title-tight text-main mb-2">
-        Nueva Propuesta de TFE
+        @L["TfeForm_NewTitle"]
     </MudText>
     <MudText Typo="Typo.body1" Class="app-text-reading">
-        Define los detalles académicos para atraer a los estudiantes con mejor perfil para tu investigación.
+        @L["TfeForm_NewSubtitle"]
     </MudText>
 </div>
 
@@ -34,17 +35,17 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Propuesta publicada correctamente.", Severity.Success);
+                Snackbar.Add(L["TfeForm_PublishedSuccess"].Value, Severity.Success);
                 Navigation.NavigateTo("/tfe/author");
                 return;
             }
 
             var error = await response.Content.ReadAsStringAsync();
-            _serverError = $"No se pudo crear ({(int)response.StatusCode}): {error}";
+            _serverError = L["TfeForm_CreateError", (int)response.StatusCode, error].Value;
         }
         catch
         {
-            _serverError = "Error al conectar con el servidor. Inténtalo de nuevo.";
+            _serverError = L["TfeForm_ConnectionError"].Value;
         }
     }
 }

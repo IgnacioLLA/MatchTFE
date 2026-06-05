@@ -1,12 +1,13 @@
-﻿    @page "/tfe/feed"
+    @page "/tfe/feed"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IHttpClientFactory HttpClientFactory
+@inject IStringLocalizer<SharedResources> L
 
-<DiscoverLayout MobileTitle="Descubrir propuestas de TFE">
+<DiscoverLayout MobileTitle="@L["Feed_MobileTitle"].Value">
 
     @if (_proposalsQueue.Any())
     {
@@ -20,13 +21,13 @@
                 <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
                            OnClick="@(() => HandleActionAsync(false))"
                            Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Close">
-                    DESCARTAR
+                    @L["Feed_Discard"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
                            OnClick="@(() => HandleActionAsync(true))"
                            Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Favorite">
-                    ME INTERESA
+                    @L["Feed_Interested"]
                 </MudButton>
             </div>
         </MudPaper>
@@ -35,11 +36,11 @@
     {
         <div class="d-flex flex-column align-center justify-center mt-15 text-center">
             <MudIcon Icon="@Icons.Material.Filled.AutoAwesome" Class="icon-huge mb-4" />
-            <MudText Typo="Typo.h4" Class="font-weight-bold">¡Has visto todo por hoy!</MudText>
+            <MudText Typo="Typo.h4" Class="font-weight-bold">@L["Feed_AllSeenTitle"]</MudText>
             <MudText Typo="Typo.body1" Class="mud-text-secondary mb-6">
-                Parece que has revisado todas las propuestas por ahora.<br />Vuelve más tarde para ver nuevos proyectos.
+                @L["Feed_AllSeenBody"]
             </MudText>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AppendTfesAsync(clearQueue: true)">Recargar Propuestas</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => AppendTfesAsync(clearQueue: true)">@L["Feed_Reload"]</MudButton>
         </div>
     }
 </DiscoverLayout>
@@ -76,8 +77,8 @@
         catch
         {
             var errorMsg = clearQueue
-                ? "Error al conectar con el backend al obtener los proyectos."
-                : "Error al cargar más proyectos.";
+                ? L["Feed_LoadError"].Value
+                : L["Feed_LoadMoreError"].Value;
             Snackbar.Add(errorMsg, Severity.Error);
         }
         finally
@@ -113,12 +114,12 @@
             }
             else
             {
-                Snackbar.Add("Hubo un problema al registrar tu decisión.", Severity.Error);
+                Snackbar.Add(L["Feed_DecisionError"].Value, Severity.Error);
             }
         }
         catch
         {
-            Snackbar.Add("Error de conexión al servidor.", Severity.Error);
+            Snackbar.Add(L["Feed_ConnectionError"].Value, Severity.Error);
         }
         finally
         {

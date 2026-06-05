@@ -1,17 +1,19 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Inicio</MudNavLink>
+@inject IStringLocalizer<SharedResources> L
+
+<MudNavMenu>
+    <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@L["Nav_Home"]</MudNavLink>
     @if (IsStudentOrTeacher)
     {
-        <MudNavLink Href="/tfe/feed" Icon="@Icons.Material.Filled.Explore" IconColor="Color.Primary">Descubrir</MudNavLink>
-        <MudNavLink Href="/match" Icon="@Icons.Material.Filled.Layers">Mis Matches</MudNavLink>
-        <MudNavLink Href="/tfe/create" Icon="@Icons.Material.Filled.AddCircle">Crear Propuesta</MudNavLink>
-        <MudNavLink Href="/tfe/author" Icon="@Icons.Material.Filled.AddCircle">Ver mis propuestas</MudNavLink>
+        <MudNavLink Href="/tfe/feed" Icon="@Icons.Material.Filled.Explore" IconColor="Color.Primary">@L["Nav_Discover"]</MudNavLink>
+        <MudNavLink Href="/match" Icon="@Icons.Material.Filled.Layers">@L["Nav_MyMatches"]</MudNavLink>
+        <MudNavLink Href="/tfe/create" Icon="@Icons.Material.Filled.AddCircle">@L["Nav_CreateProposal"]</MudNavLink>
+        <MudNavLink Href="/tfe/author" Icon="@Icons.Material.Filled.AddCircle">@L["Nav_MyProposals"]</MudNavLink>
     }
     @if (Profile?.Role == RoleType.Admin)
     {
-        <MudNavLink Href="/admin" Icon="@Icons.Material.Filled.AdminPanelSettings">Administración</MudNavLink>
+        <MudNavLink Href="/admin" Icon="@Icons.Material.Filled.AdminPanelSettings">@L["Nav_Admin"]</MudNavLink>
     }
-    <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">Mi Perfil</MudNavLink>
+    <MudNavLink Href="/profile" Icon="@Icons.Material.Filled.Person">@L["Nav_Profile"]</MudNavLink>
 </MudNavMenu>
 
 @code {

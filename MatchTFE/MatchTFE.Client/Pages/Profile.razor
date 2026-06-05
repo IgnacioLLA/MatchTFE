@@ -6,19 +6,20 @@
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResources> L
 
 @if (_isLoading || _profileDto == null)
 {
     <div class="d-flex justify-center align-center center-height-50vh">
         <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
-        <MudText Typo="Typo.h6" Class="ml-4 mud-text-secondary">Cargando perfil...</MudText>
+        <MudText Typo="Typo.h6" Class="ml-4 mud-text-secondary">@L["Profile_Loading"]</MudText>
     </div>
 }
 else
 {
     <div class="d-flex justify-space-between align-center mb-6">
         <MudText Typo="Typo.h5" Class="font-weight-extrabold">
-            Mi Perfil
+            @L["Profile_Title"]
         </MudText>
     </div>
 
@@ -41,13 +42,13 @@ else
         <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
             <MudCardHeader>
                 <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.Badge" Color="Color.Primary" /></CardHeaderAvatar>
-                <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">Datos Personales</MudText></CardHeaderContent>
+                <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">@L["Profile_PersonalData"]</MudText></CardHeaderContent>
             </MudCardHeader>
             <MudCardContent>
                 <MudGrid>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_profileDto.FirstName"
-                                      Label="NOMBRE"
+                                      Label="@L["Profile_Name"]"
                                       Variant="Variant.Outlined"
                                       Margin="Margin.Dense"
                                       Class="rounded-lg"
@@ -55,7 +56,7 @@ else
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudTextField @bind-Value="_profileDto.LastName"
-                                      Label="APELLIDOS"
+                                      Label="@L["Profile_LastName"]"
                                       Variant="Variant.Outlined"
                                       Margin="Margin.Dense"
                                       Class="rounded-lg"
@@ -63,20 +64,20 @@ else
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="_profileDto.Email"
-                                      Label="EMAIL INSTITUCIONAL"
+                                      Label="@L["Profile_InstitutionalEmail"]"
                                       Variant="Variant.Outlined"
                                       Margin="Margin.Dense"
                                       ReadOnly="true"
                                       Class="rounded-lg"
-                                      HelperText="El email institucional no puede modificarse desde aquí." />
+                                      HelperText="@L["Profile_EmailHelper"]" />
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="_profileDto.Bio"
-                                      Label="BIOGRAFÍA / SOBRE MÍ"
+                                      Label="@L["Profile_Bio"]"
                                       Variant="Variant.Outlined"
                                       Lines="4"
                                       Class="rounded-lg"
-                                      HelperText="Preséntate a posibles compañeros de proyecto o tutores." />
+                                      HelperText="@L["Profile_BioHelper"]" />
                     </MudItem>
                 </MudGrid>
             </MudCardContent>
@@ -88,11 +89,11 @@ else
             <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
                 <MudCardContent>
                     <TagSelector @bind-SelectedTags="_profileDto.Interests"
-                                 Title="Intereses"
+                                 Title="@L["Profile_Interests"]"
                                  Icon="@Icons.Material.Filled.LocalOffer"
-                                 Placeholder="Buscar intereses..." />
+                                 Placeholder="@L["Profile_InterestsPlaceholder"]" />
                     <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
-                        Tus intereses ayudan al sistema a recomendarte proyectos y perfiles afines.
+                        @L["Profile_InterestsHelper"]
                     </MudText>
                 </MudCardContent>
             </MudCard>
@@ -114,25 +115,25 @@ else
                            Color="Color.Default"
                            Class="font-weight-bold"
                            OnClick="DiscardChanges">
-                    Descartar
+                    @L["Profile_Discard"]
                 </MudButton>
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Primary"
-                           DisableElevation="true"
+                           DropShadow="false"
                            Class="rounded-lg font-weight-bold px-6"
                            OnClick="SaveChanges">
-                    Guardar Cambios
+                    @L["Profile_SaveChanges"]
                 </MudButton>
             </div>
 
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Error"
-                       DisableElevation="true"
+                       DropShadow="false"
                        Class="rounded-lg font-weight-bold px-6"
                        OnClick="Logout"
-                       aria-label="Cerrar sesión y salir de la aplicación">
-                Cerrar sesión
+                       aria-label="@L["Profile_Logout"]">
+                @L["Profile_Logout"]
             </MudButton>
         </div>
     </div>
@@ -164,14 +165,14 @@ else
             }
             else
             {
-                Snackbar.Add("No se encontraron los datos del perfil.", Severity.Warning);
+                Snackbar.Add(L["Profile_NotFound"].Value, Severity.Warning);
             }
 
             await LoadTagsAsync();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar el perfil: {ex.Message}", Severity.Error);
+            Snackbar.Add(L["Profile_LoadError", ex.Message].Value, Severity.Error);
         }
         finally
         {
@@ -194,7 +195,7 @@ else
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar las etiquetas: {ex.Message}", Severity.Warning);
+            Snackbar.Add(L["Profile_TagsLoadError", ex.Message].Value, Severity.Warning);
         }
     }
 
@@ -225,7 +226,7 @@ else
         {
             var json = JsonSerializer.Serialize(GlobalProfile);
             _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
-            Snackbar.Add("Cambios descartados.", Severity.Info);
+            Snackbar.Add(L["Profile_DiscardedMessage"].Value, Severity.Info);
         }
     }
 
@@ -245,21 +246,21 @@ else
                 {
                     SyncGlobalProfile(result.UpdatedProfile);
                     _profileDto = result.UpdatedProfile;
-                    Snackbar.Add("Perfil actualizado correctamente.", Severity.Success);
+                    Snackbar.Add(L["Profile_SavedSuccess"].Value, Severity.Success);
                 }
                 else
                 {
-                    Snackbar.Add(result?.Error.Message ?? "Error al procesar la respuesta.", Severity.Warning);
+                    Snackbar.Add(result?.Error.Message ?? L["Profile_SaveError"].Value, Severity.Warning);
                 }
             }
             else
             {
-                Snackbar.Add($"Error del servidor: {response.StatusCode}", Severity.Error);
+                Snackbar.Add(L["Profile_ServerError", response.StatusCode].Value, Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error de conexión: {ex.Message}", Severity.Error);
+            Snackbar.Add(L["Profile_ConnectionError", ex.Message].Value, Severity.Error);
         }
         finally
         {
@@ -280,12 +281,12 @@ else
             }
             else
             {
-                Snackbar.Add($"Error del servidor: {response.StatusCode}", Severity.Error);
+                Snackbar.Add(L["Profile_ServerError", response.StatusCode].Value, Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error de conexión: {ex.Message}", Severity.Error);
+            Snackbar.Add(L["Profile_ConnectionError", ex.Message].Value, Severity.Error);
         }
         finally
         {
@@ -313,11 +314,11 @@ else
         }).ToList();
     }
 
-    private static string GetRoleDescription(RoleType role) => role switch
+    private string GetRoleDescription(RoleType role) => role switch
     {
-        RoleType.Student => "Estudiante Universitario",
-        RoleType.Teacher => "Profesor Universitario",
-        RoleType.Admin => "Administrador del sistema",
-        _ => "Usuario"
+        RoleType.Student => L["Role_StudentDesc"].Value,
+        RoleType.Teacher => L["Role_TeacherDesc"].Value,
+        RoleType.Admin => L["Role_AdminDesc"].Value,
+        _ => L["Role_User"].Value
     };
 }

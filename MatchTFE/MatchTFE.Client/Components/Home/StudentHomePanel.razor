@@ -1,49 +1,51 @@
+@inject IStringLocalizer<SharedResources> L
+
 <div class="home-panel">
-    <HomeHero Tag="ESTUDIANTE"
-              Title="Convierte tu TFE en una oportunidad real"
-              Subtitle="MATCH-TFE te ayuda a descubrir propuestas de TFE, conectar con tutores y seguir tus matches con claridad."
-              PrimaryText="Descubrir proyectos"
+    <HomeHero Tag="@L["StudentHome_Tag"].Value"
+              Title="@L["StudentHome_Title"].Value"
+              Subtitle="@L["StudentHome_Subtitle"].Value"
+              PrimaryText="@L["StudentHome_PrimaryBtn"].Value"
               PrimaryHref="/tfe/feed"
               PrimaryIcon="@Icons.Material.Filled.Explore"
-              SecondaryText="Ver mis matches"
+              SecondaryText="@L["StudentHome_SecondaryBtn"].Value"
               SecondaryHref="/match"
               SecondaryIcon="@Icons.Material.Filled.Layers" />
 
     <HomeFeatureGrid SectionId="student-capabilities"
-                     Title="Que puedes hacer desde aqui"
-                     Subtitle="Navega por propuestas, muestra tu candidatura en segundos y concentra la informacion clave de tu proceso en un solo lugar.">
+                     Title="@L["StudentHome_GridTitle"].Value"
+                     Subtitle="@L["StudentHome_GridSubtitle"].Value">
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.AutoStories" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Explorar propuestas relevantes</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Encuentra propuestas de TFE por tematica, requisitos y estado.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card1"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card1Desc"]</MudText>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Success" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Hacer match con criterio</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Muestra tu candidatura de forma guiada y sigue el estado de cada propuesta sin friccion.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card2"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card2Desc"]</MudText>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Info" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Potenciar tu perfil</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Mejora tu visibilidad para que tus capacidades destaquen frente al profesorado.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card3"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card3Desc"]</MudText>
             </MudPaper>
         </MudItem>
     </HomeFeatureGrid>
 
     <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
-        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Siguiente mejor paso</MudText>
+        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Cta"]</MudText>
         <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
-            Completa tu perfil y revisa propuestas recientes para aumentar tus posibilidades de lograr un match de calidad.
+            @L["StudentHome_CtaDesc"]
         </MudText>
         <MudButton Href="/profile" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Class="rounded-lg font-weight-bold">
-            Actualizar mi perfil
+            @L["StudentHome_CtaBtn"]
         </MudButton>
     </MudPaper>
 </div>
