@@ -12,6 +12,7 @@ namespace AuthService.Controllers;
 public class AuthController : ControllerBase, IAuthController
 {
     private int TokenCookieLifetime;
+    private int RefreshCookieLifetime;
 
     private readonly IAuthService _authService;
     private readonly ILogger<AuthController> _logger;
@@ -21,6 +22,7 @@ public class AuthController : ControllerBase, IAuthController
         _authService = authService;
         _logger = logger;
         TokenCookieLifetime = _authService.TokenLifetime;
+        RefreshCookieLifetime = _authService.RefreshTokenLifetime;
     }
 
     [HttpPost("login")]
@@ -39,7 +41,7 @@ public class AuthController : ControllerBase, IAuthController
         var jwtCookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            // Secure = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
         };
@@ -47,9 +49,9 @@ public class AuthController : ControllerBase, IAuthController
         var refreshCookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            // Secure = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+            Expires = DateTime.UtcNow.AddMinutes(RefreshCookieLifetime)
         };
 
         if (tokens != null)
@@ -83,16 +85,24 @@ public class AuthController : ControllerBase, IAuthController
 
         if (tokens != null)
         {
-            var cookieOptions = new CookieOptions
+            var accessCookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                // Secure = true,
+                Secure = true,
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
             };
 
-            Response.Cookies.Append("AccessToken", tokens.AccessToken, cookieOptions);
-            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, cookieOptions);
+            var refreshCookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddMinutes(RefreshCookieLifetime)
+            };
+
+            Response.Cookies.Append("AccessToken", tokens.AccessToken, accessCookieOptions);
+            Response.Cookies.Append("RefreshToken", tokens.RefreshToken, refreshCookieOptions);
         }
 
         return Ok(result);
@@ -142,7 +152,7 @@ public class AuthController : ControllerBase, IAuthController
         var jwtCookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            // Secure = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
             Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
         };
@@ -150,9 +160,9 @@ public class AuthController : ControllerBase, IAuthController
         var refreshCookieOptions = new CookieOptions
         {
             HttpOnly = true,
-            // Secure = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTime.UtcNow.AddMinutes(TokenCookieLifetime)
+            Expires = DateTime.UtcNow.AddMinutes(RefreshCookieLifetime)
         };
 
         if (tokens != null)
@@ -181,6 +191,7 @@ public class AuthController : ControllerBase, IAuthController
         var cookieOptions = new CookieOptions
         {
             HttpOnly = true,
+            Secure = true,
             SameSite = SameSiteMode.Strict,
         };
 
