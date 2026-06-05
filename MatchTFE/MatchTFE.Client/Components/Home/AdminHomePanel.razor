@@ -1,46 +1,48 @@
+@inject IStringLocalizer<SharedResources> L
+
 <div class="home-panel">
-    <HomeHero Tag="ADMINISTRACION"
-              Title="Controla la plataforma desde una vista central"
-              Subtitle="Supervisa usuarios, manten la calidad operativa del ecosistema y actua rapido ante incidencias para garantizar una experiencia fiable."
-              PrimaryText="Ir al panel de administracion"
+    <HomeHero Tag="@L["AdminHome_Tag"].Value"
+              Title="@L["AdminHome_Title"].Value"
+              Subtitle="@L["AdminHome_Subtitle"].Value"
+              PrimaryText="@L["AdminHome_PrimaryBtn"].Value"
               PrimaryHref="/admin"
               PrimaryIcon="@Icons.Material.Filled.AdminPanelSettings" />
 
     <HomeFeatureGrid SectionId="admin-capabilities"
-                     Title="Vision operativa de MATCH-TFE"
-                     Subtitle="Accede a los procesos clave de moderacion y seguimiento sin perder contexto del estado general de la plataforma.">
+                     Title="@L["AdminHome_GridTitle"].Value"
+                     Subtitle="@L["AdminHome_GridSubtitle"].Value">
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.ManageAccounts" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Gestion de usuarios</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Administra roles y visibilidad para mantener orden y trazabilidad en el sistema.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["AdminHome_Card1"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["AdminHome_Card1Desc"]</MudText>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.Insights" Color="Color.Info" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Importa nuevos usuarios al sistema</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Crea altas de usuarios de forma ordenada para mantener el acceso centralizado y actualizado.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["AdminHome_Card2"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["AdminHome_Card2Desc"]</MudText>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="12" md="4">
             <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
                 <MudIcon Icon="@Icons.Material.Filled.Subject" Color="Color.Success" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Gestiona las temáticas disponibles para la aplicación</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">Organiza y actualiza los contenidos temáticos para mantener la aplicación alineada con su actividad.</MudText>
+                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["AdminHome_Card3"]</MudText>
+                <MudText Typo="Typo.body2" Class="home-card__description">@L["AdminHome_Card3Desc"]</MudText>
             </MudPaper>
         </MudItem>
     </HomeFeatureGrid>
 
     <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
-        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">Prioridad sugerida</MudText>
+        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["AdminHome_Cta"]</MudText>
         <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
-            Consulta el dashboard de administracion para revisar altas recientes y estado operativo.
+            @L["AdminHome_CtaDesc"]
         </MudText>
         <MudButton Href="/admin" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Dashboard" Class="rounded-lg font-weight-bold">
-            Abrir administracion
+            @L["AdminHome_CtaBtn"]
         </MudButton>
     </MudPaper>
 </div>

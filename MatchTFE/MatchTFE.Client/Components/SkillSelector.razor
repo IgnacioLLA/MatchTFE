@@ -1,8 +1,9 @@
-﻿@using TFELibrary.Shared
+@using TFELibrary.Shared
 @using System.Net.Http.Json
 
 @inject IHttpClientFactory ClientFactory
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResources> L
 
 @if (!string.IsNullOrWhiteSpace(Title))
 {
@@ -67,7 +68,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error cargando habilidades: {ex.Message}", Severity.Warning);
+            Snackbar.Add(L["SkillSelector_LoadError", ex.Message].Value, Severity.Warning);
         }
         finally
         {
@@ -86,7 +87,7 @@
     {
         if (!string.IsNullOrEmpty(selectedTag) && !SelectedSkills.Any(s => s.Tag == selectedTag))
         {
-            SelectedSkills.Add(new SkillDto { Tag = selectedTag, Level = 1 }); // Nivel 1 por defecto
+            SelectedSkills.Add(new SkillDto { Tag = selectedTag, Level = 1 });
             await SelectedSkillsChanged.InvokeAsync(SelectedSkills);
         }
         _searchQuery = string.Empty;

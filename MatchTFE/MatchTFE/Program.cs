@@ -12,6 +12,7 @@ builder.Services.AddHttpClient("GatewayAPI", client =>
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 builder.Services.AddMudServices();
+builder.Services.AddLocalization();
 
 var app = builder.Build();
 
@@ -26,6 +27,13 @@ else
     app.UseHsts();
 }
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
+var supportedCultures = new[] { "es-ES", "en" };
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture("es-ES")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures));
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();

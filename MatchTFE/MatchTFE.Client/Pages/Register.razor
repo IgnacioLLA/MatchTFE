@@ -1,40 +1,41 @@
-﻿@page "/register"
+@page "/register"
 @using System.ComponentModel.DataAnnotations
 @using TFELibrary.Shared
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
+@inject IStringLocalizer<SharedResources> L
 
 @layout AuthLayout
 
 <MudCard Class="auth-card register-card">
     <MudCardContent Class="auth-card-content">
-        <MudText Typo="Typo.h5" Class="auth-title">Crea tu cuenta</MudText>
-        <MudText Typo="Typo.body2" Class="auth-subtitle">Únete para buscar tu Trabajos de Fin de Estudios</MudText>
+        <MudText Typo="Typo.h5" Class="auth-title">@L["Register_Title"]</MudText>
+        <MudText Typo="Typo.body2" Class="auth-subtitle">@L["Register_Subtitle"]</MudText>
 
         <EditForm Model="@_registerModel" OnValidSubmit="HandleRegisterAsync">
             <DataAnnotationsValidator />
 
             <div class="form-row-2">
                 <MudTextField @bind-Value="_registerModel.FirstName"
-                              Label="Nombre"
-                              Placeholder="Tu nombre"
+                              Label="@L["Register_FirstName"]"
+                              Placeholder="@L["Register_FirstNamePlaceholder"]"
                               Variant="Variant.Outlined"
                               Class="auth-input"
                               For="@(() => _registerModel.FirstName)" />
 
                 <MudTextField @bind-Value="_registerModel.LastName"
-                              Label="Apellidos"
-                              Placeholder="Tus apellidos"
+                              Label="@L["Register_LastName"]"
+                              Placeholder="@L["Register_LastNamePlaceholder"]"
                               Variant="Variant.Outlined"
                               Class="auth-input"
                               For="@(() => _registerModel.LastName)" />
             </div>
 
             <MudTextField @bind-Value="_registerModel.Email"
-                          Label="Email Institucional"
-                          Placeholder="ejemplo@institucion.edu"
+                          Label="@L["Register_Email"]"
+                          Placeholder="@L["Register_EmailPlaceholder"]"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Outlined.Email"
@@ -42,8 +43,8 @@
                           For="@(() => _registerModel.Email)" />
 
             <MudTextField @bind-Value="_registerModel.ConfirmEmail"
-                          Label="Confirmar Email"
-                          Placeholder="Repite tu email institucional"
+                          Label="@L["Register_ConfirmEmail"]"
+                          Placeholder="@L["Register_ConfirmEmailPlaceholder"]"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Outlined.MarkEmailRead"
@@ -51,20 +52,18 @@
                           For="@(() => _registerModel.ConfirmEmail)" />
 
             <MudTextField @bind-Value="_registerModel.Password"
-                          Label="Contraseña"
-                          Placeholder="Mínimo 6 caracteres"
+                          Label="@L["Register_Password"]"
+                          Placeholder="@L["Register_PasswordPlaceholder"]"
                           Variant="Variant.Outlined"
                           InputType="@_passwordInput"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Outlined.Lock"
-                          AdornmentEnd="Adornment.End"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@_passwordIcon"
                           OnAdornmentClick="TogglePasswordVisibility"
-                          AdornmentIconEnd="@_passwordIcon"
                           Class="auth-input register-password-input"
                           For="@(() => _registerModel.Password)" />
 
             <MudText Typo="Typo.caption" Class="password-hint">
-                Debe tener al menos 6 caracteres, incluir una mayúscula, un número y un carácter especial.
+                @L["Register_PasswordHint"]
             </MudText>
 
             <MudButton ButtonType="ButtonType.Submit"
@@ -76,18 +75,18 @@
                 @if (_isLoading)
                 {
                     <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
-                    <span class="loading-text">Creando cuenta...</span>
+                    <span class="loading-text">@L["Register_Loading"]</span>
                 }
                 else
                 {
-                    <span class="button-content">Crear cuenta <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
+                    <span class="button-content">@L["Register_Submit"] <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
                 }
             </MudButton>
         </EditForm>
 
         <div class="auth-bottom-section">
-            <MudText Typo="Typo.body2" Class="auth-bottom-text">¿Ya tienes cuenta?</MudText>
-            <MudLink Href="/login" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">Iniciar sesión</MudLink>
+            <MudText Typo="Typo.body2" Class="auth-bottom-text">@L["Register_AlreadyHaveAccount"]</MudText>
+            <MudLink Href="/login" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">@L["Register_SignIn"]</MudLink>
         </div>
     </MudCardContent>
 </MudCard>
@@ -143,18 +142,18 @@
 
                 if (result != null && result.Error.IsSuccess)
                 {
-                    Snackbar.Add("¡Cuenta creada con éxito! Ya puedes iniciar sesión.", Severity.Success);
+                    Snackbar.Add(L["Register_SuccessMessage"].Value, Severity.Success);
                     Navigation.NavigateTo("/");
                 }
                 else
                 {
-                    Snackbar.Add(result?.Error.Message ?? "No se pudo registrar la cuenta.", Severity.Warning);
+                    Snackbar.Add(result?.Error.Message ?? L["Register_DefaultError"].Value, Severity.Warning);
                 }
             }
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
-                Snackbar.Add(errorResult?.Error.Message ?? "Error al procesar el registro.", Severity.Error);
+                Snackbar.Add(errorResult?.Error.Message ?? L["Register_ProcessError"].Value, Severity.Error);
             }
         }
         finally

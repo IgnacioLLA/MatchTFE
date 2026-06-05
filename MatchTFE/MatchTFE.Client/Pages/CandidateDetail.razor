@@ -1,10 +1,11 @@
-﻿@page "/profile/{UserId}"
+@page "/profile/{UserId}"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 
 @inject IHttpClientFactory HttpClientFactory
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
+@inject IStringLocalizer<SharedResources> L
 
 <div class="animate-fade-in max-w-5xl mx-auto pb-10">
 
@@ -12,7 +13,7 @@
                Color="Color.Default"
                Class="mb-6 font-weight-bold"
                OnClick="GoBack">
-        Volver
+        @L["CandidateDetail_Back"]
     </MudButton>
 
     @if (_isLoading)
@@ -24,7 +25,7 @@
     else if (_profile == null)
     {
         <MudAlert Severity="Severity.Error" Class="mt-4 rounded-lg">
-            No se ha podido cargar el perfil del usuario.
+            @L["CandidateDetail_ProfileNotFound"]
         </MudAlert>
     }
     else
@@ -38,13 +39,13 @@
                     <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Large"
                                OnClick="@(() => HandleDecision(false))"
                                Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Close">
-                        DESCARTAR
+                        @L["CandidateDetail_Discard"]
                     </MudButton>
 
                     <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Large"
                                OnClick="@(() => HandleDecision(true))"
                                Class="rounded-lg px-8 py-3 font-weight-bold w-100 w-sm-auto" StartIcon="@Icons.Material.Filled.Favorite">
-                        ME INTERESA
+                        @L["CandidateDetail_Interested"]
                     </MudButton>
                 </div>
             </MudPaper>
@@ -85,16 +86,16 @@
             }
             else
             {
-                Snackbar.Add("El perfil devuelto está vacío.", Severity.Warning);
+                Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Warning);
             }
         }
         catch (HttpRequestException)
         {
-            Snackbar.Add("User not found.", Severity.Error);
+            Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Error);
         }
         catch (Exception)
         {
-            Snackbar.Add("Error.", Severity.Error);
+            Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Error);
         }
         finally
         {
@@ -111,7 +112,7 @@
     {
         if (_profile == null || !TfeId.HasValue)
         {
-            Snackbar.Add("No se puede decidir sobre este candidato sin contexto de TFE.", Severity.Warning);
+            Snackbar.Add(L["CandidateDetail_NoContextError"].Value, Severity.Warning);
             return;
         }
 
@@ -128,28 +129,28 @@
             if (response.IsSuccessStatusCode)
             {
                 Snackbar.Add(isInterested
-                    ? $"Has aceptado a {_profile.FirstName} para tu propuesta."
-                    : $"Has descartado a {_profile.FirstName}.",
+                    ? L["CandidateDetail_AcceptedMsg", _profile.FirstName].Value
+                    : L["CandidateDetail_RejectedMsg", _profile.FirstName].Value,
                     isInterested ? Severity.Success : Severity.Normal);
 
                 await GoBack();
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
             {
-                Snackbar.Add("Esta propuesta ya fue resuelta.", Severity.Warning);
+                Snackbar.Add(L["CandidateDetail_AlreadyResolved"].Value, Severity.Warning);
             }
             else if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
             {
-                Snackbar.Add("No tienes permisos para decidir sobre este candidato.", Severity.Error);
+                Snackbar.Add(L["CandidateDetail_NoPermission"].Value, Severity.Error);
             }
             else
             {
-                Snackbar.Add("Hubo un problema al registrar la decisión.", Severity.Error);
+                Snackbar.Add(L["CandidateDetail_DecisionError"].Value, Severity.Error);
             }
         }
         catch
         {
-            Snackbar.Add("Error de conexión al servidor.", Severity.Error);
+            Snackbar.Add(L["CandidateDetail_ConnectionError"].Value, Severity.Error);
         }
     }
 }

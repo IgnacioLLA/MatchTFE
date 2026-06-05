@@ -1,5 +1,7 @@
 @using TFELibrary.Shared
 
+@inject IStringLocalizer<SharedResources> L
+
 <div class="animate-fade-in tfe-card-container">
     <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
         <MudGrid Spacing="4">
@@ -21,7 +23,7 @@
                     </MudAvatar>
                     <div>
                         <MudText Typo="Typo.body2" Class="font-weight-bold">@Proposal.TutorName</MudText>
-                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Tutor del Proyecto</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@L["TfeCard_Tutor"]</MudText>
                     </div>
                 </div>
 
@@ -40,7 +42,7 @@
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Outlined.Timer" Size="Size.Small" Class="mr-2 mud-text-secondary" />
                             <div>
-                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Duración Estimada</MudText>
+                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">@L["TfeCard_EstimatedDuration"]</MudText>
                                 <MudText Typo="Typo.body2" Class="font-weight-bold">@GetDurationText()</MudText>
                             </div>
                         </div>
@@ -49,9 +51,9 @@
                         <div class="d-flex align-center">
                             <MudIcon Icon="@Icons.Material.Outlined.CalendarToday" Size="Size.Small" Class="mr-2 mud-text-secondary" />
                             <div>
-                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">Fecha Límite</MudText>
+                                <MudText Typo="Typo.caption" Class="app-caption-uppercase mud-text-secondary">@L["TfeCard_Deadline"]</MudText>
                                 <MudText Typo="Typo.body2" Class="font-weight-bold">
-                                    @(Proposal.ExpirationDate != default ? Proposal.ExpirationDate.ToString("dd MMM, yyyy") : "Sin fecha")
+                                    @(Proposal.ExpirationDate != default ? Proposal.ExpirationDate.ToString("dd MMM, yyyy") : L["TfeCard_NoDate"].Value)
                                 </MudText>
                             </div>
                         </div>
@@ -64,7 +66,7 @@
     <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
         <div class="d-flex align-center mb-6">
             <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Class="mr-3" />
-            <MudText Typo="Typo.h6"><b>Descripción del Proyecto</b></MudText>
+            <MudText Typo="Typo.h6"><b>@L["TfeCard_ProjectDescription"]</b></MudText>
         </div>
         <MudText Typo="Typo.body1" Class="app-text-reading mb-4">
             @Proposal.Description
@@ -76,7 +78,7 @@
         <MudPaper Elevation="1" Class="pa-6 pa-sm-10 rounded-xl border-all mb-6">
             <div class="d-flex align-center mb-6">
                 <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Primary" Class="mr-3" />
-                <MudText Typo="Typo.h6"><b>Requisitos Técnicos</b></MudText>
+                <MudText Typo="Typo.h6"><b>@L["TfeCard_TechnicalRequirements"]</b></MudText>
             </div>
 
             <div class="d-flex flex-wrap gap-4">
@@ -98,11 +100,13 @@
 
     private string GetDurationText()
     {
-        if (Proposal.EstimatedDelivery == default) return "No especificada";
+        if (Proposal.EstimatedDelivery == default) return L["TfeCard_DurationNotSpecified"].Value;
 
         var months = ((Proposal.EstimatedDelivery.Year - DateTime.Today.Year) * 12) +
                        Proposal.EstimatedDelivery.Month - DateTime.Today.Month;
 
-        return months > 0 ? $"{months} meses" : "Menos de 1 mes";
+        return months > 0
+            ? L["TfeCard_DurationMonths", months].Value
+            : L["TfeCard_DurationLessThan1Month"].Value;
     }
 }

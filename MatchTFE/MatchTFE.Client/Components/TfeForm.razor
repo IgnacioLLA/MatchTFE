@@ -1,45 +1,45 @@
 @using System.Globalization
 @using TFELibrary.Shared
 
+@inject IStringLocalizer<SharedResources> L
+
 <MudGrid Spacing="4" Class="animate-fade-in">
     @* --- LEFT COLUMN --- *@
     <MudItem xs="12" md="7" lg="7">
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-all h-100">
             <div class="d-flex align-center mb-2">
-                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">Título del TFE</MudText>
-                <MudTooltip Text="Escribe un título descriptivo y atractivo que identifique claramente el proyecto. Máx. 400 caracteres."
-                            Placement="Placement.Right">
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_TitleLabel"]</MudText>
+                <MudTooltip Text="@L["TfeForm_TitleTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
                              Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="Ayuda sobre el campo Título del TFE" />
+                             aria-label="@L["TfeForm_TitleLabel"]" />
                 </MudTooltip>
             </div>
             <MudTextField @bind-Value="_title"
                           T="string"
-                          Label="Título del proyecto"
+                          Label="@L["TfeForm_TitleFieldLabel"]"
                           Variant="Variant.Outlined"
                           Margin="Margin.Dense"
-                          HelperText="Ej: Sistema de recomendación de TFE con inteligencia artificial"
+                          HelperText="@L["TfeForm_TitleHelper"]"
                           Error="@(!string.IsNullOrWhiteSpace(_titleError))"
                           ErrorText="@_titleError"
                           Class="mb-8 rounded-lg"
                           aria-required="true" />
 
             <div class="d-flex align-center mb-2">
-                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">Descripción Detallada</MudText>
-                <MudTooltip Text="Explica los objetivos, metodología y contexto del proyecto. Máx. 4000 caracteres."
-                            Placement="Placement.Right">
+                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_DescriptionLabel"]</MudText>
+                <MudTooltip Text="@L["TfeForm_DescriptionTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
                              Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="Ayuda sobre el campo Descripción" />
+                             aria-label="@L["TfeForm_DescriptionLabel"]" />
                 </MudTooltip>
             </div>
             <MudTextField @bind-Value="_description"
                           T="string"
-                          Label="Descripción del proyecto"
+                          Label="@L["TfeForm_DescriptionFieldLabel"]"
                           Variant="Variant.Outlined"
                           Lines="15"
-                          HelperText="Describe el problema, objetivos y tecnologías previstas"
+                          HelperText="@L["TfeForm_DescriptionHelper"]"
                           Error="@(!string.IsNullOrWhiteSpace(_descriptionError))"
                           ErrorText="@_descriptionError"
                           Class="rounded-lg"
@@ -53,24 +53,23 @@
             <div class="d-flex align-center mb-4">
                 <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" Class="mr-3 app-text-muted" />
                 <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
-                    Fecha de Caducidad de la Propuesta
+                    @L["TfeForm_ExpirationLabel"]
                 </MudText>
-                <MudTooltip Text="Fecha hasta la que tu propuesta estará visible para los estudiantes. Mínimo mañana."
-                            Placement="Placement.Right">
+                <MudTooltip Text="@L["TfeForm_ExpirationTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
                              Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="Ayuda sobre la fecha de caducidad" />
+                             aria-label="@L["TfeForm_ExpirationLabel"]" />
                 </MudTooltip>
             </div>
 
             <div class="mb-2">
                 <MudTextField T="string"
                               @bind-Value="_expirationDateText"
-                              Label="Fecha de caducidad"
+                              Label="@L["TfeForm_ExpirationFieldLabel"]"
                               InputType="InputType.Date"
                               Variant="Variant.Outlined"
                               Margin="Margin.Dense"
-                              InputAttributes="_expirationDateInputAttributes"
+                              UserAttributes="_expirationDateInputAttributes"
                               Error="@(!string.IsNullOrWhiteSpace(_expirationDateError))"
                               ErrorText="@_expirationDateError"
                               Class="rounded-lg" />
@@ -94,61 +93,61 @@
                                        Size="Size.Small"
                                        StartIcon="@Icons.Material.Filled.Autorenew"
                                        OnClick="RenewExpirationDateByThreeMonths"
-                                       aria-label="Renovar la fecha de caducidad 3 meses desde hoy">
-                                Renovar 3 meses
+                                       aria-label="@L["TfeForm_RenewBtn"]">
+                                @L["TfeForm_RenewBtn"]
                             </MudButton>
                         }
                 </div>
             }
 
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
-                Selecciona una fecha de cierre para tu propuesta.
+                @L["TfeForm_ExpirationCaption"]
             </MudText>
 
             <div class="d-flex align-center mt-6 mb-2">
                 <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">
-                    Duración Estimada
+                    @L["TfeForm_DurationLabel"]
                 </MudText>
-                <MudTooltip Text="Duración orientativa para estimar cuándo podría entregarse el trabajo." Placement="Placement.Right">
+                <MudTooltip Text="@L["TfeForm_DurationTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
                              Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="Ayuda sobre la duración estimada" />
+                             aria-label="@L["TfeForm_DurationLabel"]" />
                 </MudTooltip>
             </div>
             <MudSelect T="string"
                        @bind-Value="_estimatedDuration"
-                       Label="Duración estimada"
+                       Label="@L["TfeForm_DurationFieldLabel"]"
                        Variant="Variant.Outlined"
                        AnchorOrigin="Origin.BottomCenter"
-                       Placeholder="Seleccione un rango..."
+                       Placeholder="@L["TfeForm_DurationPlaceholder"]"
                        Margin="Margin.Dense"
                        Error="@(!string.IsNullOrWhiteSpace(_estimatedDurationError))"
                        ErrorText="@_estimatedDurationError"
                        Class="rounded-lg">
-                <MudSelectItem Value="@("3 meses")" />
-                <MudSelectItem Value="@("6 meses")" />
-                <MudSelectItem Value="@("9 meses")" />
-                <MudSelectItem Value="@("12 meses")" />
+                <MudSelectItem Value="@("3")">@L["TfeForm_Duration3M"]</MudSelectItem>
+                <MudSelectItem Value="@("6")">@L["TfeForm_Duration6M"]</MudSelectItem>
+                <MudSelectItem Value="@("9")">@L["TfeForm_Duration9M"]</MudSelectItem>
+                <MudSelectItem Value="@("12")">@L["TfeForm_Duration12M"]</MudSelectItem>
             </MudSelect>
         </MudPaper>
 
         <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
             <TagSelector @bind-SelectedTags="_selectedTopics"
-                         Title="Temática Principal"
+                         Title="@L["TfeForm_TopicsLabel"]"
                          Icon="@Icons.Material.Filled.Category"
-                         Placeholder="Ej: Inteligencia Artificial, Web..." />
+                         Placeholder="@L["TfeForm_TopicsPlaceholder"].Value" />
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
-                Selecciona las áreas de conocimiento que mejor describen tu proyecto.
+                @L["TfeForm_TopicsCaption"]
             </MudText>
         </MudPaper>
 
         <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
             <SkillSelector @bind-SelectedSkills="_requiredSkills"
-                           Title="Requisitos Técnicos (Skills)"
+                           Title="@L["TfeForm_SkillsLabel"]"
                            Icon="@Icons.Material.Filled.Build"
-                           Placeholder="Ej: C#, Python, React..." />
+                           Placeholder="@L["TfeForm_SkillsPlaceholder"].Value" />
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
-                Especifica las tecnologías o conocimientos que debería tener el estudiante.
+                @L["TfeForm_SkillsCaption"]
             </MudText>
         </MudPaper>
 
@@ -159,7 +158,7 @@
                    EndIcon="@Icons.Material.Filled.Send"
                    Class="rounded-xl py-3 mt-2 btn-primary-shadow"
                    OnClick="HandleSubmitAsync">
-            @(IsEditMode ? "Actualizar Propuesta" : "Publicar Propuesta")
+            @(IsEditMode ? L["TfeForm_UpdateBtn"].Value : L["TfeForm_PublishBtn"].Value)
         </MudButton>
 
         @if (!string.IsNullOrWhiteSpace(ServerError))
@@ -226,7 +225,7 @@
             {
                 var months = ((Tfe.EstimatedDelivery.Year - DateTime.Today.Year) * 12) +
                                Tfe.EstimatedDelivery.Month - DateTime.Today.Month;
-                _estimatedDuration = $"{Math.Max(3, months)} meses";
+                _estimatedDuration = $"{Math.Max(3, months)}";
             }
         }
     }
@@ -264,7 +263,7 @@
 
     private static int ParseEstimatedMonths(string estimatedDuration)
     {
-        if (int.TryParse(estimatedDuration.Split(' ')[0], out int result))
+        if (int.TryParse(estimatedDuration, out int result))
             return result;
         return 12;
     }
@@ -280,12 +279,12 @@
         {
             if (string.IsNullOrWhiteSpace(_title))
             {
-                _titleError = "El título es obligatorio.";
+                _titleError = L["TfeForm_TitleError"].Value;
             }
 
             if (string.IsNullOrWhiteSpace(_description))
             {
-                _descriptionError = "La descripción es obligatoria.";
+                _descriptionError = L["TfeForm_DescriptionError"].Value;
             }
 
             return false;
@@ -294,19 +293,19 @@
         if (string.IsNullOrWhiteSpace(_expirationDateText) ||
             !DateOnly.TryParseExact(_expirationDateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var expirationDate))
         {
-            _expirationDateError = "Debes seleccionar una fecha de caducidad válida.";
+            _expirationDateError = L["TfeForm_ExpirationError"].Value;
             return false;
         }
 
         if (!IsExpirationDateAllowed(expirationDate))
         {
-            _expirationDateError = $"La fecha de caducidad debe ser, como mínimo, el {TfeDateRules.MinimumExpirationDate.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)}.";
+            _expirationDateError = L["TfeForm_ExpirationMinError", TfeDateRules.MinimumExpirationDate.ToString("dd/MM/yyyy", CultureInfo.CurrentCulture)].Value;
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(_estimatedDuration))
         {
-            _estimatedDurationError = "Debes seleccionar una duración estimada.";
+            _estimatedDurationError = L["TfeForm_DurationError"].Value;
             return false;
         }
 
@@ -345,6 +344,6 @@
     private string GetEditExpirationStatusText()
     {
         if (!IsEditMode) return string.Empty;
-        return IsCurrentDateExpired() ? "Caducado" : "Abierto";
+        return IsCurrentDateExpired() ? L["TfeForm_ExpiredStatus"].Value : L["TfeForm_OpenStatus"].Value;
     }
 }

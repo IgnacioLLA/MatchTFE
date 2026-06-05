@@ -1,20 +1,21 @@
-﻿@page "/login"
+@page "/login"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 @layout AuthLayout
 
 @inject IHttpClientFactory ClientFactory
 @inject NavigationManager Navigation
+@inject IStringLocalizer<SharedResources> L
 
 <MudCard Class="auth-card">
     <MudCardContent Class="auth-card-content">
-        <MudText Typo="Typo.h5" Class="auth-title">Bienvenido de nuevo</MudText>
-        <MudText Typo="Typo.body2" Class="auth-subtitle">Introduce tus credenciales universitarias</MudText>
+        <MudText Typo="Typo.h5" Class="auth-title">@L["Login_Title"]</MudText>
+        <MudText Typo="Typo.body2" Class="auth-subtitle">@L["Login_Subtitle"]</MudText>
 
         @if (_isSuspended)
         {
             <MudAlert Severity="Severity.Warning" Icon="@Icons.Material.Filled.Block" Class="mb-4" Dense="true">
-                Tu cuenta ha sido suspendida. Contacta con el administrador.
+                @L["Login_SuspendedMessage"]
             </MudAlert>
         }
         else if (!string.IsNullOrEmpty(_loginError))
@@ -28,8 +29,8 @@
             <DataAnnotationsValidator />
 
             <MudTextField @bind-Value="_loginModel.Email"
-                          Label="Email Institucional"
-                          Placeholder="usuario@universidad.edu"
+                          Label="@L["Login_EmailLabel"]"
+                          Placeholder="@L["Login_EmailPlaceholder"]"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Outlined.Email"
@@ -37,19 +38,17 @@
                           For="@(() => _loginModel.Email)" />
 
             <div class="password-header">
-                <MudText Typo="Typo.body2" Class="password-label">Contraseña</MudText>
-                <MudLink Href="/forgot-password" Typo="Typo.caption" Underline="Underline.Hover" Class="forgot-link">¿Has olvidado tu contraseña?</MudLink>
+                <MudText Typo="Typo.body2" Class="password-label">@L["Login_PasswordLabel"]</MudText>
+                <MudLink Href="/forgot-password" Typo="Typo.caption" Underline="Underline.Hover" Class="forgot-link">@L["Login_ForgotPassword"]</MudLink>
             </div>
 
             <MudTextField @bind-Value="_loginModel.Password"
                           Placeholder="••••••••"
                           Variant="Variant.Outlined"
                           InputType="@_passwordInput"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Outlined.Lock"
-                          AdornmentEnd="Adornment.End"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@_passwordIcon"
                           OnAdornmentClick="TogglePasswordVisibility"
-                          AdornmentIconEnd="@_passwordIcon"
                           Class="auth-input login-password-input"
                           For="@(() => _loginModel.Password)" />
 
@@ -63,18 +62,18 @@
                 @if (_isLoading)
                 {
                     <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
-                    <span class="loading-text">Cargando...</span>
+                    <span class="loading-text">@L["Login_Loading"]</span>
                 }
                 else
                 {
-                    <span class="button-content">Entrar <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
+                    <span class="button-content">@L["Login_Submit"] <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
                 }
             </MudButton>
         </EditForm>
 
         <div class="auth-bottom-section">
-            <MudText Typo="Typo.body2" Class="auth-bottom-text">¿Aún no tienes cuenta?</MudText>
-            <MudLink Href="/register" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">Crear una cuenta</MudLink>
+            <MudText Typo="Typo.body2" Class="auth-bottom-text">@L["Login_NoAccount"]</MudText>
+            <MudLink Href="/register" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">@L["Login_CreateAccount"]</MudLink>
         </div>
     </MudCardContent>
 </MudCard>
@@ -119,7 +118,7 @@
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-                var message = errorResult?.AuthData?.Message ?? "Email o contraseña incorrectos.";
+                var message = errorResult?.AuthData?.Message ?? L["Login_ErrorDefault"].Value;
 
                 if (message == "Account suspended.")
                     _isSuspended = true;
@@ -129,7 +128,7 @@
         }
         catch (Exception)
         {
-            _loginError = "No se pudo conectar con el servidor. Revisa tu conexión.";
+            _loginError = L["Login_ConnectionError"].Value;
         }
         finally
         {

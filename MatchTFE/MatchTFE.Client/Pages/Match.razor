@@ -1,11 +1,12 @@
 @page "/match"
 @using TFELibrary.Shared
 @inject IHttpClientFactory HttpClientFactory
+@inject IStringLocalizer<SharedResources> L
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="pt-4 px-4 px-sm-8 mb-10 animate-fade-in">
 
     <div class="d-flex align-center mb-6 mt-4">
-        <MudText Typo="Typo.h3" Class="font-weight-bold">Mis Matches</MudText>
+        <MudText Typo="Typo.h3" Class="font-weight-bold">@L["Match_Title"]</MudText>
         @if (!_isLoading)
         {
             <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="ml-3">
@@ -15,20 +16,20 @@
     </div>
 
     <MudText Typo="Typo.body1" Class="mud-text-secondary mb-8">
-        Aquí puedes ver los proyectos de TFE y candidatos con los que has hecho match. Estos son los proyectos y perfiles que han aceptado tu propuesta.
+        @L["Match_Subtitle"]
     </MudText>
 
     @if (_isLoading)
     {
         <div class="pa-10 text-center">
             <MudProgressCircular Indeterminate="true" />
-            <MudText Typo="Typo.body2" Class="mt-4">Cargando matches...</MudText>
+            <MudText Typo="Typo.body2" Class="mt-4">@L["Match_Loading"]</MudText>
         </div>
     }
     else if (!_tfeMatches.Any())
     {
         <MudAlert Severity="Severity.Info" Class="mb-6">
-            <MudText>Aún no tienes ningún match activo. Explora los proyectos o candidatos disponibles y muestra interés para crear matches.</MudText>
+            <MudText>@L["Match_Empty"]</MudText>
         </MudAlert>
     }
     else
@@ -39,7 +40,7 @@
                 <MudItem xs="12" sm="6" md="4" lg="3">
                     <MudPaper Elevation="1" Class="pa-5 rounded-xl border-all h-100 d-flex flex-column">
                         <div class="d-flex align-start justify-space-between mb-3">
-                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">Match Aceptado</MudChip>
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">@L["Match_Accepted"]</MudChip>
                         </div>
 
                         <MudText Typo="Typo.h6" Class="font-weight-bold mb-2 app-title-tight">@match.TfeTitle</MudText>
@@ -51,12 +52,12 @@
                         <div class="mb-2">
                             <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
                                 <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
-                                <span class="font-weight-medium">Tutor:</span>
+                                <span class="font-weight-medium">@L["Match_Tutor"]</span>
                                 <span>@match.TfeTutorName</span>
                             </MudText>
                             <MudText Typo="Typo.caption" Class="mud-text-secondary d-flex align-center gap-1">
                                 <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" />
-                                <span class="font-weight-medium">Alumno:</span>
+                                <span class="font-weight-medium">@L["Match_Student"]</span>
                                 <span>@match.MatchedUserFullName</span>
                             </MudText>
                         </div>
@@ -71,14 +72,14 @@
 
                         <MudText Typo="Typo.caption" Class="mud-text-secondary mb-4">
                             <MudIcon Icon="@Icons.Material.Filled.DateRange" Size="Size.Small" Class="mr-1" />
-                            Match desde: @match.MatchDate.ToString("dd/MM/yyyy")
+                            @L["Match_Since"] @match.MatchDate.ToString("dd/MM/yyyy")
                         </MudText>
 
                         <MudSpacer />
 
                         @if (string.IsNullOrWhiteSpace(match.MatchedUserEmail))
                         {
-                            <MudTooltip Text="El contacto no tiene dirección de correo registrada." Placement="Placement.Top">
+                            <MudTooltip Text="@L["Match_NoEmailTooltip"]" Placement="Placement.Top">
                                 <span>
                                     <MudButton Variant="Variant.Outlined"
                                                Color="Color.Default"
@@ -87,8 +88,8 @@
                                                StartIcon="@Icons.Material.Filled.MailOutline"
                                                Disabled="true"
                                                aria-disabled="true"
-                                               aria-label="Correo no disponible">
-                                        Sin correo disponible
+                                               aria-label="@L["Match_NoEmail"]">
+                                        @L["Match_NoEmail"]
                                     </MudButton>
                                 </span>
                             </MudTooltip>
@@ -174,7 +175,7 @@
             return match.MatchedUserEmail;
         }
 
-        return "Contactar";
+        return L["Match_Contact"].Value;
     }
 
     private string GetContactButtonIcon(AcceptedMatchDto match)
@@ -190,7 +191,7 @@
     private string GetContactButtonAriaLabel(AcceptedMatchDto match)
     {
         return _visibleContactEmails.Contains(match.TfeId)
-            ? $"Ocultar correo de {match.MatchedUserFullName}"
-            : $"Mostrar correo de {match.MatchedUserFullName}";
+            ? L["Match_HideEmail", match.MatchedUserFullName].Value
+            : L["Match_ShowEmail", match.MatchedUserFullName].Value;
     }
 }

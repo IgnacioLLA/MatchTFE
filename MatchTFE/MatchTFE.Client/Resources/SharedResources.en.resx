@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Layout / Nav -->
+  <data name="Nav_MenuTitle"><value>MAIN MENU</value></data>
+  <data name="Nav_Home"><value>Home</value></data>
+  <data name="Nav_Discover"><value>Discover</value></data>
+  <data name="Nav_MyMatches"><value>My Matches</value></data>
+  <data name="Nav_CreateProposal"><value>Create Proposal</value></data>
+  <data name="Nav_MyProposals"><value>My Proposals</value></data>
+  <data name="Nav_Admin"><value>Administration</value></data>
+  <data name="Nav_Profile"><value>My Profile</value></data>
+  <data name="DarkModeToggle_Title"><value>Toggle light mode</value></data>
+  <data name="Lang_SelectLanguage"><value>Select language</value></data>
+  <data name="Lang_Spanish"><value>Spanish</value></data>
+  <data name="Lang_English"><value>English</value></data>
+  <data name="Footer_Privacy"><value>Privacy</value></data>
+  <data name="Footer_Terms"><value>Terms of Service</value></data>
+  <data name="Footer_Help"><value>Help</value></data>
+  <data name="Footer_Copyright"><value>© 2026 MATCH-TFE. All rights reserved.</value></data>
+  <data name="Role_Student"><value>Student</value></data>
+  <data name="Role_Teacher"><value>Teacher</value></data>
+  <data name="Role_Admin"><value>Admin</value></data>
+  <data name="Role_User"><value>User</value></data>
+  <data name="Role_StudentDesc"><value>University Student</value></data>
+  <data name="Role_TeacherDesc"><value>University Professor</value></data>
+  <data name="Role_AdminDesc"><value>System Administrator</value></data>
+  <data name="Layout_ProfileLoadError"><value>Error connecting to the profile server.</value></data>
+
+  <!-- Login -->
+  <data name="Login_Title"><value>Welcome back</value></data>
+  <data name="Login_Subtitle"><value>Enter your university credentials</value></data>
+  <data name="Login_EmailLabel"><value>Institutional Email</value></data>
+  <data name="Login_EmailPlaceholder"><value>user@university.edu</value></data>
+  <data name="Login_PasswordLabel"><value>Password</value></data>
+  <data name="Login_ForgotPassword"><value>Forgot your password?</value></data>
+  <data name="Login_Submit"><value>Sign in</value></data>
+  <data name="Login_Loading"><value>Loading...</value></data>
+  <data name="Login_NoAccount"><value>Don't have an account yet?</value></data>
+  <data name="Login_CreateAccount"><value>Create an account</value></data>
+  <data name="Login_SuspendedMessage"><value>Your account has been suspended. Contact the administrator.</value></data>
+  <data name="Login_ErrorDefault"><value>Incorrect email or password.</value></data>
+  <data name="Login_ConnectionError"><value>Could not connect to the server. Check your connection.</value></data>
+
+  <!-- Register -->
+  <data name="Register_Title"><value>Create your account</value></data>
+  <data name="Register_Subtitle"><value>Join to find your Final Degree Project</value></data>
+  <data name="Register_FirstName"><value>First Name</value></data>
+  <data name="Register_FirstNamePlaceholder"><value>Your first name</value></data>
+  <data name="Register_LastName"><value>Last Name</value></data>
+  <data name="Register_LastNamePlaceholder"><value>Your last name</value></data>
+  <data name="Register_Email"><value>Institutional Email</value></data>
+  <data name="Register_EmailPlaceholder"><value>example@institution.edu</value></data>
+  <data name="Register_ConfirmEmail"><value>Confirm Email</value></data>
+  <data name="Register_ConfirmEmailPlaceholder"><value>Repeat your institutional email</value></data>
+  <data name="Register_Password"><value>Password</value></data>
+  <data name="Register_PasswordPlaceholder"><value>Minimum 6 characters</value></data>
+  <data name="Register_PasswordHint"><value>Must be at least 6 characters with an uppercase letter, a number, and a special character.</value></data>
+  <data name="Register_Submit"><value>Create account</value></data>
+  <data name="Register_Loading"><value>Creating account...</value></data>
+  <data name="Register_AlreadyHaveAccount"><value>Already have an account?</value></data>
+  <data name="Register_SignIn"><value>Sign in</value></data>
+  <data name="Register_SuccessMessage"><value>Account created successfully! You can now sign in.</value></data>
+  <data name="Register_DefaultError"><value>Could not register the account.</value></data>
+  <data name="Register_ProcessError"><value>Error processing the registration.</value></data>
+  <data name="Register_ConfirmEmailRequired"><value>Please confirm your email.</value></data>
+  <data name="Register_EmailMismatch"><value>Email addresses do not match.</value></data>
+
+  <!-- Profile -->
+  <data name="Profile_Title"><value>My Profile</value></data>
+  <data name="Profile_Loading"><value>Loading profile...</value></data>
+  <data name="Profile_PersonalData"><value>Personal Data</value></data>
+  <data name="Profile_Name"><value>FIRST NAME</value></data>
+  <data name="Profile_LastName"><value>LAST NAME</value></data>
+  <data name="Profile_InstitutionalEmail"><value>INSTITUTIONAL EMAIL</value></data>
+  <data name="Profile_EmailHelper"><value>Institutional email cannot be changed here.</value></data>
+  <data name="Profile_Bio"><value>BIOGRAPHY / ABOUT ME</value></data>
+  <data name="Profile_BioHelper"><value>Introduce yourself to potential project partners or supervisors.</value></data>
+  <data name="Profile_Interests"><value>Interests</value></data>
+  <data name="Profile_InterestsPlaceholder"><value>Search interests...</value></data>
+  <data name="Profile_InterestsHelper"><value>Your interests help the system recommend relevant projects and profiles.</value></data>
+  <data name="Profile_Discard"><value>Discard</value></data>
+  <data name="Profile_SaveChanges"><value>Save Changes</value></data>
+  <data name="Profile_Logout"><value>Log out</value></data>
+  <data name="Profile_DiscardedMessage"><value>Changes discarded.</value></data>
+  <data name="Profile_SavedSuccess"><value>Profile updated successfully.</value></data>
+  <data name="Profile_NotFound"><value>Profile data not found.</value></data>
+  <data name="Profile_LoadError"><value>Error loading profile: {0}</value></data>
+  <data name="Profile_SaveError"><value>Error processing the response.</value></data>
+  <data name="Profile_TagsLoadError"><value>Error loading tags: {0}</value></data>
+  <data name="Profile_ServerError"><value>Server error: {0}</value></data>
+  <data name="Profile_ConnectionError"><value>Connection error: {0}</value></data>
+  <data name="Profile_AcademicData"><value>Academic Information</value></data>
+  <data name="Profile_AcademicYear"><value>ACADEMIC YEAR</value></data>
+  <data name="Profile_AcademicYearHelper"><value>Enter your current academic year.</value></data>
+  <data name="Profile_TechnicalSkills"><value>Technical Skills</value></data>
+  <data name="Profile_TechnicalSkillsSubtitle"><value>Supervisors will use these to evaluate your profile when looking for candidates.</value></data>
+  <data name="Profile_NoSkillsWarning"><value>No technical skills added yet. Supervisors value them highly!</value></data>
+  <data name="Profile_TeacherAcademicData"><value>Academic Data</value></data>
+  <data name="Profile_Department"><value>DEPARTMENT</value></data>
+  <data name="Profile_DepartmentHelper"><value>E.g.: Department of Computer Science</value></data>
+  <data name="Profile_DepartmentPlaceholder"><value>Enter your department name</value></data>
+  <data name="Profile_Office"><value>OFFICE / LOCATION</value></data>
+  <data name="Profile_OfficeHelper"><value>E.g.: Building A, floor 3, room 302</value></data>
+  <data name="Profile_OfficePlaceholder"><value>Enter your campus location</value></data>
+
+  <!-- Home Panels -->
+  <data name="StudentHome_Tag"><value>STUDENT</value></data>
+  <data name="StudentHome_Title"><value>Turn your Final Project into a real opportunity</value></data>
+  <data name="StudentHome_Subtitle"><value>MATCH-TFE helps you discover TFE proposals, connect with supervisors, and track your matches clearly.</value></data>
+  <data name="StudentHome_PrimaryBtn"><value>Discover projects</value></data>
+  <data name="StudentHome_SecondaryBtn"><value>See my matches</value></data>
+  <data name="StudentHome_GridTitle"><value>What you can do from here</value></data>
+  <data name="StudentHome_GridSubtitle"><value>Browse proposals, submit your candidacy in seconds, and keep the key information about your process in one place.</value></data>
+  <data name="StudentHome_Card1"><value>Explore relevant proposals</value></data>
+  <data name="StudentHome_Card1Desc"><value>Find TFE proposals by topic, requirements, and status.</value></data>
+  <data name="StudentHome_Card2"><value>Match with intent</value></data>
+  <data name="StudentHome_Card2Desc"><value>Submit your candidacy in a guided way and track each proposal's status without friction.</value></data>
+  <data name="StudentHome_Card3"><value>Boost your profile</value></data>
+  <data name="StudentHome_Card3Desc"><value>Improve your visibility so your skills stand out to faculty.</value></data>
+  <data name="StudentHome_Cta"><value>Next best step</value></data>
+  <data name="StudentHome_CtaDesc"><value>Complete your profile and review recent proposals to increase your chances of a quality match.</value></data>
+  <data name="StudentHome_CtaBtn"><value>Update my profile</value></data>
+
+  <data name="TeacherHome_Tag"><value>TEACHER</value></data>
+  <data name="TeacherHome_Title"><value>Find the ideal candidate for your TFE</value></data>
+  <data name="TeacherHome_Subtitle"><value>Publish and manage proposals with a simple workflow, review compatible profiles, and speed up decisions with an experience focused on academic supervision.</value></data>
+  <data name="TeacherHome_PrimaryBtn"><value>Discover projects</value></data>
+  <data name="TeacherHome_SecondaryBtn"><value>Go to my proposals</value></data>
+  <data name="TeacherHome_GridTitle"><value>Tools for efficient supervision</value></data>
+  <data name="TeacherHome_GridSubtitle"><value>From a single screen you can review candidates, follow your proposal statuses, and make decisions with context.</value></data>
+  <data name="TeacherHome_Card1"><value>Manage proposals</value></data>
+  <data name="TeacherHome_Card1Desc"><value>Create, adjust, and keep your TFE lines active with clear information for students.</value></data>
+  <data name="TeacherHome_Card2"><value>Evaluate candidates</value></data>
+  <data name="TeacherHome_Card2Desc"><value>Analyse skills and experience to select profiles truly aligned with your proposal.</value></data>
+  <data name="TeacherHome_Card3"><value>Decide with agility</value></data>
+  <data name="TeacherHome_Card3Desc"><value>Manage each application's status and reduce friction in academic coordination.</value></data>
+  <data name="TeacherHome_Cta"><value>Recommended action</value></data>
+  <data name="TeacherHome_CtaDesc"><value>Review the list of pending candidates in your proposals to advance decisions this week.</value></data>
+  <data name="TeacherHome_CtaBtn"><value>Review my TFEs</value></data>
+
+  <data name="AdminHome_Tag"><value>ADMINISTRATION</value></data>
+  <data name="AdminHome_Title"><value>Control the platform from a central view</value></data>
+  <data name="AdminHome_Subtitle"><value>Monitor users, maintain operational quality of the ecosystem, and act quickly on incidents to ensure a reliable experience.</value></data>
+  <data name="AdminHome_PrimaryBtn"><value>Go to administration panel</value></data>
+  <data name="AdminHome_GridTitle"><value>Operational view of MATCH-TFE</value></data>
+  <data name="AdminHome_GridSubtitle"><value>Access key moderation and monitoring processes without losing context of the platform's overall status.</value></data>
+  <data name="AdminHome_Card1"><value>User management</value></data>
+  <data name="AdminHome_Card1Desc"><value>Manage roles and visibility to maintain order and traceability in the system.</value></data>
+  <data name="AdminHome_Card2"><value>Import new users to the system</value></data>
+  <data name="AdminHome_Card2Desc"><value>Create user registrations in an orderly manner to keep access centralised and up to date.</value></data>
+  <data name="AdminHome_Card3"><value>Manage topics available for the application</value></data>
+  <data name="AdminHome_Card3Desc"><value>Organise and update thematic content to keep the application aligned with its activity.</value></data>
+  <data name="AdminHome_Cta"><value>Suggested priority</value></data>
+  <data name="AdminHome_CtaDesc"><value>Check the administration dashboard to review recent registrations and operational status.</value></data>
+  <data name="AdminHome_CtaBtn"><value>Open administration</value></data>
+
+  <!-- TFE Feed -->
+  <data name="Feed_Discard"><value>DISCARD</value></data>
+  <data name="Feed_Interested"><value>I'M INTERESTED</value></data>
+  <data name="Feed_AllSeenTitle"><value>You've seen everything for today!</value></data>
+  <data name="Feed_AllSeenBody"><value>It looks like you've reviewed all proposals for now. Come back later to see new projects.</value></data>
+  <data name="Feed_Reload"><value>Reload Proposals</value></data>
+  <data name="Feed_LoadError"><value>Error connecting to backend when fetching projects.</value></data>
+  <data name="Feed_LoadMoreError"><value>Error loading more projects.</value></data>
+  <data name="Feed_DecisionError"><value>There was a problem recording your decision.</value></data>
+  <data name="Feed_ConnectionError"><value>Connection error to the server.</value></data>
+
+  <!-- Match -->
+  <data name="Match_Title"><value>My Matches</value></data>
+  <data name="Match_Subtitle"><value>Here you can see the TFE projects and candidates you have matched with. These are the projects and profiles that have accepted your proposal.</value></data>
+  <data name="Match_Loading"><value>Loading matches...</value></data>
+  <data name="Match_Empty"><value>You don't have any active matches yet. Explore available projects or candidates and show interest to create matches.</value></data>
+  <data name="Match_Accepted"><value>Match Accepted</value></data>
+  <data name="Match_Contact"><value>Contact</value></data>
+  <data name="Match_NoEmail"><value>No email available</value></data>
+  <data name="Match_NoEmailTooltip"><value>This contact has no registered email address.</value></data>
+  <data name="Match_Tutor"><value>Supervisor:</value></data>
+  <data name="Match_Student"><value>Student:</value></data>
+  <data name="Match_Since"><value>Match since:</value></data>
+
+  <!-- MyTfes -->
+  <data name="MyTfes_Title"><value>My Publications</value></data>
+  <data name="MyTfes_Subtitle"><value>Manage and supervise your TFE proposals.</value></data>
+  <data name="MyTfes_CreateBtn"><value>Create New Proposal</value></data>
+  <data name="MyTfes_SearchPlaceholder"><value>Search by title or tag...</value></data>
+  <data name="MyTfes_FilterByTags"><value>Filter by tags...</value></data>
+  <data name="MyTfes_SortBy"><value>Sort by:</value></data>
+  <data name="MyTfes_SortNewest"><value>Newest</value></data>
+  <data name="MyTfes_SortOldest"><value>Oldest</value></data>
+  <data name="MyTfes_SortStatus"><value>Status</value></data>
+  <data name="MyTfes_SortCreation"><value>Creation Date</value></data>
+  <data name="MyTfes_ColProject"><value>PROJECT DETAILS</value></data>
+  <data name="MyTfes_ColStatus"><value>STATUS</value></data>
+  <data name="MyTfes_ColExpiry"><value>EXPIRY</value></data>
+  <data name="MyTfes_ColInterested"><value>INTERESTED</value></data>
+  <data name="MyTfes_ColCreation"><value>CREATION</value></data>
+  <data name="MyTfes_ColActions"><value>ACTIONS</value></data>
+  <data name="MyTfes_ShowingOf"><value>Showing {0} of {1} publications</value></data>
+  <data name="MyTfes_LoadError"><value>Error connecting to backend when fetching data.</value></data>
+  <data name="MyTfes_DeleteSuccess"><value>Proposal deleted successfully.</value></data>
+  <data name="MyTfes_DeleteError"><value>Could not delete the proposal: {0}</value></data>
+  <data name="MyTfes_DeleteConnectionError"><value>Connection error when trying to delete.</value></data>
+  <data name="MyTfes_NoDate"><value>No date</value></data>
+  <data name="TfeStatus_Completed"><value>• Completed</value></data>
+  <data name="TfeStatus_Open"><value>• Open</value></data>
+  <data name="TfeStatus_Cancelled"><value>• Cancelled</value></data>
+  <data name="TfeStatus_Expired"><value>Expired</value></data>
+  <data name="TfeStatus_Active"><value>Open</value></data>
+
+  <!-- TfeCard / TfeSummary -->
+  <data name="TfeCard_Tutor"><value>Project Supervisor</value></data>
+  <data name="TfeCard_EstimatedDuration"><value>Estimated Duration</value></data>
+  <data name="TfeCard_Deadline"><value>Deadline</value></data>
+  <data name="TfeCard_NoDate"><value>No date</value></data>
+  <data name="TfeCard_ProjectDescription"><value>Project Description</value></data>
+  <data name="TfeCard_TechnicalRequirements"><value>Technical Requirements</value></data>
+  <data name="TfeCard_DurationMonths"><value>{0} months</value></data>
+  <data name="TfeCard_DurationLessThan1Month"><value>Less than 1 month</value></data>
+  <data name="TfeCard_DurationNotSpecified"><value>Not specified</value></data>
+  <data name="TfeSummary_Discipline"><value>COMPUTER ENGINEERING</value></data>
+  <data name="TfeSummary_InterestedCandidates"><value>INTERESTED CANDIDATES</value></data>
+  <data name="TfeSummary_RequiredSkills"><value>Required Skills</value></data>
+
+  <!-- TfeForm -->
+  <data name="TfeForm_NewTitle"><value>New TFE Proposal</value></data>
+  <data name="TfeForm_NewSubtitle"><value>Define the academic details to attract students with the best profile for your research.</value></data>
+  <data name="TfeForm_EditTitle"><value>Edit Proposal</value></data>
+  <data name="TfeForm_EditSubtitle"><value>Update the details of your TFE proposal.</value></data>
+  <data name="TfeForm_TitleLabel"><value>TFE Title</value></data>
+  <data name="TfeForm_TitleFieldLabel"><value>Project title</value></data>
+  <data name="TfeForm_TitleTooltip"><value>Write a descriptive and appealing title that clearly identifies the project. Max 400 characters.</value></data>
+  <data name="TfeForm_TitleHelper"><value>E.g.: TFE recommendation system with artificial intelligence</value></data>
+  <data name="TfeForm_TitleError"><value>Title is required.</value></data>
+  <data name="TfeForm_DescriptionLabel"><value>Detailed Description</value></data>
+  <data name="TfeForm_DescriptionFieldLabel"><value>Project description</value></data>
+  <data name="TfeForm_DescriptionTooltip"><value>Explain the objectives, methodology, and context of the project. Max 4000 characters.</value></data>
+  <data name="TfeForm_DescriptionHelper"><value>Describe the problem, objectives, and planned technologies</value></data>
+  <data name="TfeForm_DescriptionError"><value>Description is required.</value></data>
+  <data name="TfeForm_ExpirationLabel"><value>Proposal Expiry Date</value></data>
+  <data name="TfeForm_ExpirationTooltip"><value>Date until which your proposal will be visible to students. Minimum tomorrow.</value></data>
+  <data name="TfeForm_ExpirationFieldLabel"><value>Expiry date</value></data>
+  <data name="TfeForm_ExpirationCaption"><value>Select a closing date for your proposal.</value></data>
+  <data name="TfeForm_ExpirationError"><value>You must select a valid expiry date.</value></data>
+  <data name="TfeForm_ExpirationMinError"><value>The expiry date must be at least {0}.</value></data>
+  <data name="TfeForm_RenewBtn"><value>Renew 3 months</value></data>
+  <data name="TfeForm_DurationLabel"><value>Estimated Duration</value></data>
+  <data name="TfeForm_DurationTooltip"><value>Approximate duration to estimate when the work could be delivered.</value></data>
+  <data name="TfeForm_DurationFieldLabel"><value>Estimated duration</value></data>
+  <data name="TfeForm_DurationPlaceholder"><value>Select a range...</value></data>
+  <data name="TfeForm_Duration3M"><value>3 months</value></data>
+  <data name="TfeForm_Duration6M"><value>6 months</value></data>
+  <data name="TfeForm_Duration9M"><value>9 months</value></data>
+  <data name="TfeForm_Duration12M"><value>12 months</value></data>
+  <data name="TfeForm_DurationError"><value>You must select an estimated duration.</value></data>
+  <data name="TfeForm_TopicsLabel"><value>Main Topic</value></data>
+  <data name="TfeForm_TopicsCaption"><value>Select the areas of knowledge that best describe your project.</value></data>
+  <data name="TfeForm_SkillsLabel"><value>Technical Requirements (Skills)</value></data>
+  <data name="TfeForm_SkillsCaption"><value>Specify the technologies or knowledge the student should have.</value></data>
+  <data name="TfeForm_PublishBtn"><value>Publish Proposal</value></data>
+  <data name="TfeForm_UpdateBtn"><value>Update Proposal</value></data>
+  <data name="TfeForm_PublishedSuccess"><value>Proposal published successfully.</value></data>
+  <data name="TfeForm_UpdatedSuccess"><value>Proposal updated successfully.</value></data>
+  <data name="TfeForm_ConnectionError"><value>Error connecting to server. Please try again.</value></data>
+  <data name="TfeForm_LoadError"><value>Error loading proposal data.</value></data>
+  <data name="TfeForm_ExpiredStatus"><value>Expired</value></data>
+  <data name="TfeForm_OpenStatus"><value>Open</value></data>
+
+  <!-- Candidates -->
+  <data name="Candidates_BackBtn"><value>Back to My Publications</value></data>
+  <data name="Candidates_Title"><value>Applied Candidates</value></data>
+  <data name="Candidates_NoneTitle"><value>No candidates yet</value></data>
+  <data name="Candidates_NoneBody"><value>Interested students will appear here.</value></data>
+  <data name="Candidates_NotFound"><value>The proposal could not be found or you don't have permission to view it.</value></data>
+  <data name="Candidates_UnavailableDecision"><value>This proposal is no longer available for decision.</value></data>
+  <data name="Candidates_AlreadyResolved"><value>This proposal has already been resolved.</value></data>
+  <data name="Candidates_NoPermission"><value>You do not have permission to decide on this candidate.</value></data>
+  <data name="Candidates_DecisionError"><value>There was a problem recording the decision.</value></data>
+  <data name="Candidates_ConnectionError"><value>Connection error to the server.</value></data>
+  <data name="Candidates_AcceptedMsg"><value>You have accepted {0}.</value></data>
+  <data name="Candidates_RejectedMsg"><value>You have discarded {0}.</value></data>
+  <data name="Candidates_LoadError"><value>An error occurred: {0}</value></data>
+  <data name="CandidateListItem_ViewProfile"><value>View Profile</value></data>
+  <data name="CandidateListItem_Reject"><value>Not interested</value></data>
+  <data name="CandidateListItem_Accept"><value>Interested</value></data>
+  <data name="CandidateStatus_Pending"><value>Pending</value></data>
+  <data name="CandidateStatus_Accepted"><value>Accepted</value></data>
+  <data name="CandidateStatus_Rejected"><value>Rejected</value></data>
+  <data name="CandidateStatus_Expired"><value>Expired</value></data>
+  <data name="CandidateDetail_Back"><value>Back</value></data>
+  <data name="CandidateDetail_ProfileNotFound"><value>Could not load the user's profile.</value></data>
+  <data name="CandidateDetail_NoContextError"><value>Cannot decide on this candidate without TFE context.</value></data>
+  <data name="CandidateDetail_AcceptedMsg"><value>You have accepted {0} for your proposal.</value></data>
+  <data name="CandidateDetail_RejectedMsg"><value>You have discarded {0}.</value></data>
+  <data name="CandidateDetail_AlreadyResolved"><value>This proposal has already been resolved.</value></data>
+  <data name="CandidateDetail_NoPermission"><value>You do not have permission to decide on this candidate.</value></data>
+  <data name="CandidateDetail_DecisionError"><value>There was a problem recording the decision.</value></data>
+  <data name="CandidateDetail_ConnectionError"><value>Connection error to the server.</value></data>
+  <data name="CandidateDetail_Discard"><value>DISCARD</value></data>
+  <data name="CandidateDetail_Interested"><value>I'M INTERESTED</value></data>
+
+  <!-- ProfileCard -->
+  <data name="ProfileCard_TechnicalSkills"><value>Technical Skills</value></data>
+  <data name="ProfileCard_NoSkills"><value>No skills established.</value></data>
+  <data name="ProfileCard_InterestAreas"><value>Interest Areas</value></data>
+  <data name="ProfileCard_NoInterests"><value>No interest areas established.</value></data>
+  <data name="ProfileCard_BioTitle"><value>Biography and Motivation</value></data>
+  <data name="ProfileCard_NoBio"><value>No biography established.</value></data>
+  <data name="ProfileCard_NoOffice"><value>Office not set</value></data>
+  <data name="ProfileCard_NoYear"><value>Year not set</value></data>
+  <data name="ProfileCard_StudentLabel"><value>Student</value></data>
+  <data name="ProfileCard_AdminLabel"><value>System Administrator</value></data>
+  <data name="ProfileCard_NoDept"><value>Department not set</value></data>
+
+  <!-- NotFound -->
+  <data name="NotFound_Title"><value>Page Not Found</value></data>
+  <data name="NotFound_Body"><value>Sorry, the content you are looking for does not exist.</value></data>
+
+  <!-- Home errors -->
+  <data name="Home_RoleError"><value>Could not identify the user role.</value></data>
+
+  <!-- Admin Dashboard -->
+  <data name="Admin_UserManagementTitle"><value>User Management</value></data>
+  <data name="Admin_UserManagementSubtitle"><value>Manage system users, roles, and perform bulk actions.</value></data>
+  <data name="Admin_UpdateRoleTitle"><value>Update User Role</value></data>
+  <data name="Admin_UpdateRoleSubtitle"><value>Quickly change the role of a specific user by email.</value></data>
+  <data name="Admin_UserEmailLabel"><value>User email</value></data>
+  <data name="Admin_NewRoleLabel"><value>New Role</value></data>
+  <data name="Admin_UpdateBtn"><value>UPDATE</value></data>
+  <data name="Admin_BulkImportTitle"><value>Bulk Profile Import</value></data>
+  <data name="Admin_BulkImportSubtitle"><value>Upload a structured file (.csv or .txt, UTF-8) to automatically generate new user profiles.</value></data>
+  <data name="Admin_FormatReference"><value>File format reference</value></data>
+  <data name="Admin_BrowseFile"><value>BROWSE FILE (.CSV, .TXT)</value></data>
+  <data name="Admin_ImportBtn"><value>IMPORT</value></data>
+  <data name="Admin_ChangePasswordTitle"><value>Change User Password</value></data>
+  <data name="Admin_ChangePasswordSubtitle"><value>Directly replace a user's password. Active sessions will be automatically invalidated.</value></data>
+  <data name="Admin_ChangePasswordInfo"><value>Remember to inform the user that their password has been changed.</value></data>
+  <data name="Admin_NewPasswordLabel"><value>New Password</value></data>
+  <data name="Admin_ConfirmPasswordLabel"><value>Confirm Password</value></data>
+  <data name="Admin_PasswordMismatch"><value>Passwords do not match</value></data>
+  <data name="Admin_ChangePasswordBtn"><value>CHANGE PASSWORD</value></data>
+  <data name="Admin_PasswordMinChars"><value>The new password must be at least 6 characters.</value></data>
+  <data name="Admin_SearchPlaceholder"><value>Search by name or email...</value></data>
+  <data name="Admin_FilterByRole"><value>Filter by role...</value></data>
+  <data name="Admin_ColUser"><value>USER</value></data>
+  <data name="Admin_ColEmail"><value>EMAIL</value></data>
+  <data name="Admin_ColRole"><value>ROLE</value></data>
+  <data name="Admin_ColStatus"><value>STATUS</value></data>
+  <data name="Admin_StatusActive"><value>Active</value></data>
+  <data name="Admin_StatusSuspended"><value>Suspended</value></data>
+  <data name="Admin_UsersSelected"><value>{0} users selected</value></data>
+  <data name="Admin_SuspendBtn"><value>SUSPEND</value></data>
+  <data name="Admin_ReactivateBtn"><value>REACTIVATE</value></data>
+  <data name="Admin_DeleteBtn"><value>DELETE</value></data>
+  <data name="Admin_TagManagementTitle"><value>Tag Management</value></data>
+  <data name="Admin_TagManagementSubtitle"><value>Create, edit, and delete system tags. Click on a row to edit.</value></data>
+  <data name="Admin_CreateTagTitle"><value>Create Tag</value></data>
+  <data name="Admin_TagNameLabel"><value>Name:</value></data>
+  <data name="Admin_TagNamePlaceholder"><value>Enter the name of the new tag...</value></data>
+  <data name="Admin_AddTagBtn"><value>ADD TAG</value></data>
+  <data name="Admin_CurrentTagsTitle"><value>Current Tags</value></data>
+  <data name="Admin_SearchTagsPlaceholder"><value>Search tags...</value></data>
+  <data name="Admin_ColTagName"><value>TAG NAME</value></data>
+  <data name="Admin_ColTagActions"><value>ACTIONS</value></data>
+  <data name="Admin_LoadUsersError"><value>Error loading users.</value></data>
+  <data name="Admin_LoadTagsError"><value>Error loading tags.</value></data>
+  <data name="Admin_ImportSuccess"><value>{0} user(s) created, {1} already existed.</value></data>
+
+  <!-- TagSelector / SkillSelector -->
+  <data name="TagSelector_LoadError"><value>Error loading tags: {0}</value></data>
+  <data name="SkillSelector_LoadError"><value>Error loading skills: {0}</value></data>
+
+  <!-- DiscoverLayout / TFEFeed -->
+  <data name="DiscoverLayout_Title"><value>TFE Proposals</value></data>
+  <data name="Feed_MobileTitle"><value>Discover TFE Proposals</value></data>
+
+  <!-- TfeListItem -->
+  <data name="TfeListItem_ViewBtn"><value>View</value></data>
+
+  <!-- NewTfe / EditTfe server errors -->
+  <data name="TfeForm_CreateError"><value>Could not create ({0}): {1}</value></data>
+  <data name="TfeForm_UpdateError"><value>Could not update ({0}): {1}</value></data>
+
+  <!-- Admin error fallbacks -->
+  <data name="Admin_UpdateRoleError"><value>Failed to update role.</value></data>
+  <data name="Admin_ImportError"><value>Failed to import users.</value></data>
+  <data name="Admin_BulkActionError"><value>Bulk action failed.</value></data>
+  <data name="Admin_PasswordUpdateError"><value>Failed to update password.</value></data>
+  <data name="Admin_ConnectionError"><value>Connection error.</value></data>
+  <data name="Admin_TagConnectionError"><value>Connection error managing the tag.</value></data>
+
+  <!-- Match aria labels -->
+  <data name="Match_HideEmail"><value>Hide email of {0}</value></data>
+  <data name="Match_ShowEmail"><value>Show email of {0}</value></data>
+
+  <!-- TfeForm placeholders -->
+  <data name="TfeForm_TopicsPlaceholder"><value>E.g.: Artificial Intelligence, Web...</value></data>
+  <data name="TfeForm_SkillsPlaceholder"><value>E.g.: C#, Python, React...</value></data>
+
+  <!-- Profile placeholders -->
+  <data name="Profile_AcademicYearPlaceholder"><value>E.g.: 4th Year, Masters...</value></data>
+
+  <!-- MudBlazor internal -->
+  <data name="MudTablePager.RowsPerPage"><value>Rows per page:</value></data>
+  <data name="MudTablePager.AllRows"><value>All</value></data>
+  <data name="MudTablePager.InfoFormat"><value>{first_item}-{last_item} of {all_items}</value></data>
+  <data name="MudDataGrid.Cancel"><value>Cancel</value></data>
+  <data name="MudDataGrid.Clear"><value>Clear</value></data>
+  <data name="MudDataGrid.Filter"><value>Filter</value></data>
+  <data name="MudDataGrid.Contains"><value>Contains</value></data>
+  <data name="MudDataGrid.Equals"><value>Equals</value></data>
+  <data name="MudDataGrid.IsEmpty"><value>Is empty</value></data>
+  <data name="MudDataGrid.IsNotEmpty"><value>Is not empty</value></data>
+</root>
