@@ -20,7 +20,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTP_PORTS=8080
-      - GATEWAY_BASE_URL=http://${BASE_HOST}/
+      - GATEWAY_BASE_URL=https://${BASE_HOST}/
     volumes:
       - matchtfe_dataprotection:/root/.aspnet/DataProtection-Keys
 
@@ -34,7 +34,10 @@ services:
       - ./cert.pem:/etc/ssl/certs/cert.pem:ro
       - ./matchtfe.pem:/etc/ssl/private/matchtfe.pem:ro
     depends_on:
+      - matchtfe
       - authservice
+      - userservice
+      - matchservice
 
   authservice:
     image: ${DOCKER_REGISTRY-}authservice
@@ -44,7 +47,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - FRONTEND_ORIGIN=http://${BASE_HOST}:5080
+      - FRONTEND_ORIGIN=https://${BASE_HOST}
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - USER_SERVICE_BASE_URL=http://userservice:8080/
       - JwtSettings__Secret=${JWT_SECRET}
@@ -63,7 +66,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - FRONTEND_ORIGIN=http://${BASE_HOST}:5080
+      - FRONTEND_ORIGIN=https://${BASE_HOST}
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService
@@ -80,7 +83,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - FRONTEND_ORIGIN=http://${BASE_HOST}:5080
+      - FRONTEND_ORIGIN=https://${BASE_HOST}
       - ConnectionStrings__DbConnection=Host=postgresdb;Port=5432;Database=MatchTFEDb;Username=postgres;Password=${DB_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET}
       - JwtSettings__Issuer=MatchTFE_AuthService

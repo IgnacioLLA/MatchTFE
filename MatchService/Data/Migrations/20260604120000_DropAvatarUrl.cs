@@ -10,9 +10,8 @@ namespace MatchService.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "AvatarUrl",
-                table: "UserProfile");
+            migrationBuilder.Sql(
+                "ALTER TABLE \"UserProfile\" DROP COLUMN IF EXISTS \"AvatarUrl\";");
         }
 
         /// <inheritdoc />

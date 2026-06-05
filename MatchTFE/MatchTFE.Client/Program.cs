@@ -10,12 +10,7 @@ builder.Services.AddTransient<CookieHandler>();
 builder.Services.AddTransient<AuthInterceptor>();
 builder.Services.AddTransient<ForbiddenInterceptor>();
 
-var gatewayBaseUrl = Environment.GetEnvironmentVariable("GATEWAY_BASE_URL");
-if (string.IsNullOrWhiteSpace(gatewayBaseUrl))
-{
-    var hostBaseUri = new Uri(builder.HostEnvironment.BaseAddress);
-    gatewayBaseUrl = $"{hostBaseUri.Scheme}://{hostBaseUri.Host}:5080/";
-}
+var gatewayBaseUrl = builder.HostEnvironment.BaseAddress;
 
 builder.Services.AddHttpClient("CleanAPI", client =>
 {
