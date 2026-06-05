@@ -20,7 +20,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - ASPNETCORE_HTTP_PORTS=8080
-      - GATEWAY_BASE_URL=http://${BASE_HOST}:5080/
+      - GATEWAY_BASE_URL=http://${BASE_HOST}/
+    volumes:
+      - matchtfe_dataprotection:/root/.aspnet/DataProtection-Keys
 
   apigateway:
     image: nginx:alpine
@@ -88,4 +90,5 @@ services:
 
 volumes:
   postgres_data:
+  matchtfe_dataprotection:
 
