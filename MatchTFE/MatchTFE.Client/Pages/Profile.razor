@@ -86,8 +86,18 @@ else
         @if (!IsAdmin)
         {
             @* INTERESTS *@
-            <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
+            <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2"
+                     Style="@(_profileDto.Interests.Count == 0 ? "border-color: var(--mud-palette-warning) !important; border-left: 4px solid var(--mud-palette-warning) !important; background: rgba(var(--mud-palette-warning-rgb), 0.05);" : "")">
                 <MudCardContent>
+                    @if (_profileDto.Interests.Count == 0)
+                    {
+                        <div class="d-flex align-center gap-2 mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.TipsAndUpdates" Color="Color.Warning" Size="Size.Small" />
+                            <MudText Typo="Typo.body2" Style="color: var(--mud-palette-warning-darken);">
+                                @L["Profile_NoInterestsWarning"]
+                            </MudText>
+                        </div>
+                    }
                     <TagSelector @bind-SelectedTags="_profileDto.Interests"
                                  Title="@L["Profile_Interests"]"
                                  Icon="@Icons.Material.Filled.LocalOffer"

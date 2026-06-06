@@ -1,4 +1,5 @@
 @inject IStringLocalizer<SharedResources> L
+@using TFELibrary.Shared
 
 <div class="home-panel">
     <HomeHero Tag="@L["TeacherHome_Tag"].Value"
@@ -39,13 +40,35 @@
         </MudItem>
     </HomeFeatureGrid>
 
+    @if (GlobalProfile?.Interests.Count == 0)
+    {
+        <MudPaper Elevation="0" Class="home-interests-alert border-all rounded-xl">
+            <div class="home-interests-alert__inner">
+                <MudIcon Icon="@Icons.Material.Filled.TipsAndUpdates" Color="Color.Warning" Size="Size.Large" Class="home-interests-alert__icon" />
+                <div>
+                    <MudText Typo="Typo.h6" Class="app-title-tight mb-1">@L["TeacherHome_InterestsAlert"]</MudText>
+                    <MudText Typo="Typo.body2" Class="home-interests-alert__desc mb-3">
+                        @L["TeacherHome_InterestsAlertDesc"]
+                    </MudText>
+                    <MudButton Href="/profile" Variant="Variant.Filled" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Add" Class="rounded-lg font-weight-bold">
+                        @L["TeacherHome_InterestsAlertBtn"]
+                    </MudButton>
+                </div>
+            </div>
+        </MudPaper>
+    }
+
     <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
         <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["TeacherHome_Cta"]</MudText>
         <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
             @L["TeacherHome_CtaDesc"]
         </MudText>
-        <MudButton Href="/tfe/author" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Checklist" Class="rounded-lg font-weight-bold">
+        <MudButton Href="/tfe/create" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline" Class="rounded-lg font-weight-bold">
             @L["TeacherHome_CtaBtn"]
         </MudButton>
     </MudPaper>
 </div>
+
+@code {
+    [CascadingParameter] public ProfileDto? GlobalProfile { get; set; }
+}

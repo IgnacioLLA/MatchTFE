@@ -25,51 +25,59 @@
             </MudAlert>
         }
 
-        <EditForm Model="@_loginModel" OnValidSubmit="HandleLoginAsync">
-            <DataAnnotationsValidator />
+        <MudTextField @bind-Value="_loginModel.Email"
+                      Label="@L["Login_EmailLabel"]"
+                      Placeholder="@L["Login_EmailPlaceholder"]"
+                      Variant="Variant.Outlined"
+                      InputType="InputType.Email"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Outlined.Email"
+                      AutoComplete="email"
+                      Class="auth-input"
+                      Error="@(_emailError != null)"
+                      ErrorText="@_emailError" />
 
-            <MudTextField @bind-Value="_loginModel.Email"
-                          Label="@L["Login_EmailLabel"]"
-                          Placeholder="@L["Login_EmailPlaceholder"]"
-                          Variant="Variant.Outlined"
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Outlined.Email"
-                          Class="auth-input"
-                          For="@(() => _loginModel.Email)" />
+        <div class="password-header">
+            <MudText Typo="Typo.body2" Class="password-label">@L["Login_PasswordLabel"]</MudText>
+            <MudLink Typo="Typo.caption" Underline="Underline.Hover" Class="forgot-link" @onclick="ToggleForgotPasswordInfo">@L["Login_ForgotPassword"]</MudLink>
+        </div>
 
-            <div class="password-header">
-                <MudText Typo="Typo.body2" Class="password-label">@L["Login_PasswordLabel"]</MudText>
-                <MudLink Href="/forgot-password" Typo="Typo.caption" Underline="Underline.Hover" Class="forgot-link">@L["Login_ForgotPassword"]</MudLink>
-            </div>
+        @if (_showForgotPasswordInfo)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                @L["Login_ForgotPasswordInfo"]
+            </MudAlert>
+        }
 
-            <MudTextField @bind-Value="_loginModel.Password"
-                          Placeholder="••••••••"
-                          Variant="Variant.Outlined"
-                          InputType="@_passwordInput"
-                          Adornment="Adornment.End"
-                          AdornmentIcon="@_passwordIcon"
-                          OnAdornmentClick="TogglePasswordVisibility"
-                          Class="auth-input login-password-input"
-                          For="@(() => _loginModel.Password)" />
+        <MudTextField @bind-Value="_loginModel.Password"
+                      Placeholder="••••••••"
+                      Variant="Variant.Outlined"
+                      InputType="@_passwordInput"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@_passwordIcon"
+                      OnAdornmentClick="TogglePasswordVisibility"
+                      AutoComplete="current-password"
+                      Class="auth-input login-password-input"
+                      Error="@(_passwordError != null)"
+                      ErrorText="@_passwordError" />
 
-
-            <MudButton ButtonType="ButtonType.Submit"
-                       Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       FullWidth="true"
-                       Disabled="@_isLoading"
-                       Class="auth-button">
-                @if (_isLoading)
-                {
-                    <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
-                    <span class="loading-text">@L["Login_Loading"]</span>
-                }
-                else
-                {
-                    <span class="button-content">@L["Login_Submit"] <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
-                }
-            </MudButton>
-        </EditForm>
+        <MudButton ButtonType="ButtonType.Button"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   FullWidth="true"
+                   Disabled="@_isLoading"
+                   OnClick="HandleLoginAsync"
+                   Class="auth-button">
+            @if (_isLoading)
+            {
+                <MudProgressCircular Indeterminate="true" Class="loading-spinner" />
+                <span class="loading-text">@L["Login_Loading"]</span>
+            }
+            else
+            {
+                <span class="button-content">@L["Login_Submit"] <MudIcon Icon="@Icons.Material.Filled.ArrowForward" Class="btn-icon" /></span>
+            }
+        </MudButton>
 
         <div class="auth-bottom-section">
             <MudText Typo="Typo.body2" Class="auth-bottom-text">@L["Login_NoAccount"]</MudText>
@@ -83,9 +91,15 @@
     private bool _isLoading = false;
     private bool _isSuspended = false;
     private string _loginError = string.Empty;
+    private bool _showForgotPasswordInfo = false;
+
+    private string? _emailError;
+    private string? _passwordError;
 
     private InputType _passwordInput = InputType.Password;
     private string _passwordIcon = Icons.Material.Outlined.VisibilityOff;
+
+    private void ToggleForgotPasswordInfo() => _showForgotPasswordInfo = !_showForgotPasswordInfo;
 
     private void TogglePasswordVisibility()
     {
@@ -101,8 +115,35 @@
         }
     }
 
+    private bool CheckForm()
+    {
+        _emailError = null;
+        _passwordError = null;
+
+        if (string.IsNullOrWhiteSpace(_loginModel.Email))
+            _emailError = L["Login_EmailRequired"].Value;
+        else if (!IsValidEmail(_loginModel.Email))
+            _emailError = L["Login_EmailInvalid"].Value;
+
+        if (string.IsNullOrWhiteSpace(_loginModel.Password))
+            _passwordError = L["Login_PasswordRequired"].Value;
+
+        return _emailError == null && _passwordError == null;
+    }
+
+    private static bool IsValidEmail(string email)
+    {
+        var at = email.IndexOf('@');
+        if (at < 1 || email.IndexOf('@', at + 1) >= 0) return false;
+        var domain = email[(at + 1)..];
+        var dot = domain.LastIndexOf('.');
+        return dot > 0 && dot < domain.Length - 1;
+    }
+
     private async Task HandleLoginAsync()
     {
+        if (!CheckForm()) return;
+
         _isLoading = true;
         _isSuspended = false;
         _loginError = string.Empty;
@@ -114,6 +155,10 @@
             if (response.IsSuccessStatusCode)
             {
                 Navigation.NavigateTo("/", replace: true);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _emailError = L["Login_EmailInvalid"].Value;
             }
             else
             {

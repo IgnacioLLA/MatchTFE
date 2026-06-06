@@ -3,6 +3,25 @@
 
 @inject IStringLocalizer<SharedResources> L
 
+@* --- Tarjeta: Habilidades Técnicas --- *@
+<MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Secondary" />
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Profile_TechnicalSkills"]</MudText>
+            <MudText Typo="Typo.body2" Class="app-text-muted">
+                @L["Profile_TechnicalSkillsSubtitle"]
+            </MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <SkillSelector @bind-SelectedSkills="Model.Skills"
+                       Placeholder="@L["Profile_TechnicalSkills"]" />
+    </MudCardContent>
+</MudCard>
+
 @* --- Tarjeta: Información Académica --- *@
 <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
     <MudCardHeader>
@@ -25,32 +44,6 @@
                               HelperText="@L["Profile_AcademicYearHelper"]" />
             </MudItem>
         </MudGrid>
-    </MudCardContent>
-</MudCard>
-
-@* --- Tarjeta: Habilidades Técnicas --- *@
-<MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2 animate-fade-in">
-    <MudCardHeader>
-        <CardHeaderAvatar>
-            <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Secondary" />
-        </CardHeaderAvatar>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Profile_TechnicalSkills"]</MudText>
-            <MudText Typo="Typo.body2" Class="app-text-muted">
-                @L["Profile_TechnicalSkillsSubtitle"]
-            </MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        @if (!Model.Skills.Any())
-        {
-            <MudAlert Severity="Severity.Warning" Variant="Variant.Text" Class="mb-4 rounded-lg">
-                @L["Profile_NoSkillsWarning"]
-            </MudAlert>
-        }
-
-        <SkillSelector @bind-SelectedSkills="Model.Skills"
-                       Placeholder="@L["Profile_TechnicalSkills"]" />
     </MudCardContent>
 </MudCard>
 

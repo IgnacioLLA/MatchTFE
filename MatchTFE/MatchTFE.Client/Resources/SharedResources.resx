@@ -26,7 +26,6 @@
   <data name="Nav_Home"><value>Inicio</value></data>
   <data name="Nav_Discover"><value>Descubrir</value></data>
   <data name="Nav_MyMatches"><value>Mis Matches</value></data>
-  <data name="Nav_CreateProposal"><value>Crear Propuesta</value></data>
   <data name="Nav_MyProposals"><value>Ver mis propuestas</value></data>
   <data name="Nav_Admin"><value>Administración</value></data>
   <data name="Nav_Profile"><value>Mi Perfil</value></data>
@@ -61,6 +60,9 @@
   <data name="Login_SuspendedMessage"><value>Tu cuenta ha sido suspendida. Contacta con el administrador.</value></data>
   <data name="Login_ErrorDefault"><value>Email o contraseña incorrectos.</value></data>
   <data name="Login_ConnectionError"><value>No se pudo conectar con el servidor. Revisa tu conexión.</value></data>
+  <data name="Login_EmailRequired"><value>El email es obligatorio.</value></data>
+  <data name="Login_EmailInvalid"><value>El formato del email no es válido.</value></data>
+  <data name="Login_PasswordRequired"><value>La contraseña es obligatoria.</value></data>
 
   <!-- Register -->
   <data name="Register_Title"><value>Crea tu cuenta</value></data>
@@ -85,6 +87,17 @@
   <data name="Register_ProcessError"><value>Error al procesar el registro.</value></data>
   <data name="Register_ConfirmEmailRequired"><value>Por favor, confirma tu email.</value></data>
   <data name="Register_EmailMismatch"><value>Los correos electrónicos no coinciden.</value></data>
+  <data name="Register_ConfirmPassword"><value>Confirmar contraseña</value></data>
+  <data name="Register_ConfirmPasswordPlaceholder"><value>Repite tu contraseña</value></data>
+  <data name="Register_FirstNameRequired"><value>El nombre es obligatorio.</value></data>
+  <data name="Register_LastNameRequired"><value>Los apellidos son obligatorios.</value></data>
+  <data name="Register_EmailRequired"><value>El email es obligatorio.</value></data>
+  <data name="Register_EmailInvalid"><value>El formato del email no es válido.</value></data>
+  <data name="Register_PasswordRequired"><value>La contraseña es obligatoria.</value></data>
+  <data name="Register_PasswordTooShort"><value>La contraseña debe tener al menos 6 caracteres.</value></data>
+  <data name="Register_ConfirmPasswordRequired"><value>Por favor, confirma tu contraseña.</value></data>
+  <data name="Register_PasswordMismatch"><value>Las contraseñas no coinciden.</value></data>
+  <data name="Login_ForgotPasswordInfo"><value>Si tienes problemas al iniciar sesión, ponte en contacto con la administración de tu universidad para solicitar un cambio.</value></data>
 
   <!-- Profile -->
   <data name="Profile_Title"><value>Mi Perfil</value></data>
@@ -115,7 +128,6 @@
   <data name="Profile_AcademicYearHelper"><value>Indica el curso en el que te encuentras actualmente.</value></data>
   <data name="Profile_TechnicalSkills"><value>Habilidades Técnicas</value></data>
   <data name="Profile_TechnicalSkillsSubtitle"><value>Los tutores las usarán para valorar tu perfil al buscar candidatos.</value></data>
-  <data name="Profile_NoSkillsWarning"><value>Aún no has añadido ninguna habilidad técnica. ¡Los tutores las valoran mucho!</value></data>
   <data name="Profile_TeacherAcademicData"><value>Datos Académicos</value></data>
   <data name="Profile_Department"><value>DEPARTAMENTO</value></data>
   <data name="Profile_DepartmentHelper"><value>Ej: Departamento de Ciencias de la Computación</value></data>
@@ -138,9 +150,13 @@
   <data name="StudentHome_Card2Desc"><value>Muestra tu candidatura de forma guiada y sigue el estado de cada propuesta sin fricción.</value></data>
   <data name="StudentHome_Card3"><value>Potenciar tu perfil</value></data>
   <data name="StudentHome_Card3Desc"><value>Mejora tu visibilidad para que tus capacidades destaquen frente al profesorado.</value></data>
-  <data name="StudentHome_Cta"><value>Siguiente mejor paso</value></data>
-  <data name="StudentHome_CtaDesc"><value>Completa tu perfil y revisa propuestas recientes para aumentar tus posibilidades de lograr un match de calidad.</value></data>
-  <data name="StudentHome_CtaBtn"><value>Actualizar mi perfil</value></data>
+  <data name="StudentHome_Cta"><value>¿Tienes una idea para tu TFE?</value></data>
+  <data name="StudentHome_CtaDesc"><value>Crea tu propia propuesta, defínela con detalle y ponla en marcha para encontrar al tutor ideal.</value></data>
+  <data name="StudentHome_CtaBtn"><value>Crear propuesta</value></data>
+  <data name="StudentHome_InterestsAlert"><value>Añade intereses para recibir recomendaciones</value></data>
+  <data name="StudentHome_InterestsAlertDesc"><value>Tu perfil aún no tiene intereses configurados. Nuestro sistema los utiliza para sugerirte los proyectos más relevantes y mejorar la calidad de tus matches. Cuantos más añadas, más personalizadas serán tus recomendaciones.</value></data>
+  <data name="StudentHome_InterestsAlertBtn"><value>Añadir intereses ahora</value></data>
+  <data name="Profile_NoInterestsWarning"><value>Aún no has añadido ningún interés. El sistema de recomendaciones los usa para sugerirte los proyectos y tutores más relevantes para ti.</value></data>
 
   <data name="TeacherHome_Tag"><value>PROFESOR</value></data>
   <data name="TeacherHome_Title"><value>Encuentra al candidato ideal para tu TFE</value></data>
@@ -155,9 +171,12 @@
   <data name="TeacherHome_Card2Desc"><value>Analiza competencias y experiencia para seleccionar perfiles realmente alineados con tu propuesta.</value></data>
   <data name="TeacherHome_Card3"><value>Decidir con agilidad</value></data>
   <data name="TeacherHome_Card3Desc"><value>Gestiona el estado de cada candidatura y reduce fricción en la coordinación docente.</value></data>
-  <data name="TeacherHome_Cta"><value>Acción recomendada</value></data>
-  <data name="TeacherHome_CtaDesc"><value>Revisa el listado de candidatos pendientes en tus propuestas para avanzar decisiones esta semana.</value></data>
-  <data name="TeacherHome_CtaBtn"><value>Revisar mis TFE</value></data>
+  <data name="TeacherHome_Cta"><value>¿Lista tu próxima propuesta?</value></data>
+  <data name="TeacherHome_CtaDesc"><value>Crea una nueva propuesta de TFE, defínela con detalle y empieza a recibir candidaturas de los mejores estudiantes.</value></data>
+  <data name="TeacherHome_CtaBtn"><value>Crear propuesta</value></data>
+  <data name="TeacherHome_InterestsAlert"><value>Añade intereses para recibir recomendaciones</value></data>
+  <data name="TeacherHome_InterestsAlertDesc"><value>Tu perfil aún no tiene intereses configurados. El sistema los usa para sugerirte candidatos y proyectos afines a tus líneas de investigación. Cuantos más añadas, más relevantes serán las recomendaciones.</value></data>
+  <data name="TeacherHome_InterestsAlertBtn"><value>Añadir intereses ahora</value></data>
 
   <data name="AdminHome_Tag"><value>ADMINISTRACIÓN</value></data>
   <data name="AdminHome_Title"><value>Controla la plataforma desde una vista central</value></data>

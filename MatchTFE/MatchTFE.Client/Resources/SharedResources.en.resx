@@ -26,7 +26,6 @@
   <data name="Nav_Home"><value>Home</value></data>
   <data name="Nav_Discover"><value>Discover</value></data>
   <data name="Nav_MyMatches"><value>My Matches</value></data>
-  <data name="Nav_CreateProposal"><value>Create Proposal</value></data>
   <data name="Nav_MyProposals"><value>My Proposals</value></data>
   <data name="Nav_Admin"><value>Administration</value></data>
   <data name="Nav_Profile"><value>My Profile</value></data>
@@ -61,6 +60,9 @@
   <data name="Login_SuspendedMessage"><value>Your account has been suspended. Contact the administrator.</value></data>
   <data name="Login_ErrorDefault"><value>Incorrect email or password.</value></data>
   <data name="Login_ConnectionError"><value>Could not connect to the server. Check your connection.</value></data>
+  <data name="Login_EmailRequired"><value>Email is required.</value></data>
+  <data name="Login_EmailInvalid"><value>Invalid email format.</value></data>
+  <data name="Login_PasswordRequired"><value>Password is required.</value></data>
 
   <!-- Register -->
   <data name="Register_Title"><value>Create your account</value></data>
@@ -85,6 +87,17 @@
   <data name="Register_ProcessError"><value>Error processing the registration.</value></data>
   <data name="Register_ConfirmEmailRequired"><value>Please confirm your email.</value></data>
   <data name="Register_EmailMismatch"><value>Email addresses do not match.</value></data>
+  <data name="Register_ConfirmPassword"><value>Confirm Password</value></data>
+  <data name="Register_ConfirmPasswordPlaceholder"><value>Repeat your password</value></data>
+  <data name="Register_FirstNameRequired"><value>First name is required.</value></data>
+  <data name="Register_LastNameRequired"><value>Last name is required.</value></data>
+  <data name="Register_EmailRequired"><value>Email is required.</value></data>
+  <data name="Register_EmailInvalid"><value>Invalid email format.</value></data>
+  <data name="Register_PasswordRequired"><value>Password is required.</value></data>
+  <data name="Register_PasswordTooShort"><value>Password must be at least 6 characters.</value></data>
+  <data name="Register_ConfirmPasswordRequired"><value>Please confirm your password.</value></data>
+  <data name="Register_PasswordMismatch"><value>Passwords do not match.</value></data>
+  <data name="Login_ForgotPasswordInfo"><value>If you have trouble logging in, please contact your university administration to request a change.</value></data>
 
   <!-- Profile -->
   <data name="Profile_Title"><value>My Profile</value></data>
@@ -115,7 +128,6 @@
   <data name="Profile_AcademicYearHelper"><value>Enter your current academic year.</value></data>
   <data name="Profile_TechnicalSkills"><value>Technical Skills</value></data>
   <data name="Profile_TechnicalSkillsSubtitle"><value>Supervisors will use these to evaluate your profile when looking for candidates.</value></data>
-  <data name="Profile_NoSkillsWarning"><value>No technical skills added yet. Supervisors value them highly!</value></data>
   <data name="Profile_TeacherAcademicData"><value>Academic Data</value></data>
   <data name="Profile_Department"><value>DEPARTMENT</value></data>
   <data name="Profile_DepartmentHelper"><value>E.g.: Department of Computer Science</value></data>
@@ -138,9 +150,13 @@
   <data name="StudentHome_Card2Desc"><value>Submit your candidacy in a guided way and track each proposal's status without friction.</value></data>
   <data name="StudentHome_Card3"><value>Boost your profile</value></data>
   <data name="StudentHome_Card3Desc"><value>Improve your visibility so your skills stand out to faculty.</value></data>
-  <data name="StudentHome_Cta"><value>Next best step</value></data>
-  <data name="StudentHome_CtaDesc"><value>Complete your profile and review recent proposals to increase your chances of a quality match.</value></data>
-  <data name="StudentHome_CtaBtn"><value>Update my profile</value></data>
+  <data name="StudentHome_Cta"><value>Have an idea for your TFE?</value></data>
+  <data name="StudentHome_CtaDesc"><value>Create your own proposal, define it in detail and get it started to find the ideal supervisor.</value></data>
+  <data name="StudentHome_CtaBtn"><value>Create proposal</value></data>
+  <data name="StudentHome_InterestsAlert"><value>Add interests to get recommendations</value></data>
+  <data name="StudentHome_InterestsAlertDesc"><value>Your profile has no interests set yet. Our system uses them to suggest the most relevant projects and improve the quality of your matches. The more you add, the more personalised your recommendations will be.</value></data>
+  <data name="StudentHome_InterestsAlertBtn"><value>Add interests now</value></data>
+  <data name="Profile_NoInterestsWarning"><value>You haven't added any interests yet. The recommendation system uses them to suggest the most relevant projects and supervisors for you.</value></data>
 
   <data name="TeacherHome_Tag"><value>TEACHER</value></data>
   <data name="TeacherHome_Title"><value>Find the ideal candidate for your TFE</value></data>
@@ -155,9 +171,12 @@
   <data name="TeacherHome_Card2Desc"><value>Analyse skills and experience to select profiles truly aligned with your proposal.</value></data>
   <data name="TeacherHome_Card3"><value>Decide with agility</value></data>
   <data name="TeacherHome_Card3Desc"><value>Manage each application's status and reduce friction in academic coordination.</value></data>
-  <data name="TeacherHome_Cta"><value>Recommended action</value></data>
-  <data name="TeacherHome_CtaDesc"><value>Review the list of pending candidates in your proposals to advance decisions this week.</value></data>
-  <data name="TeacherHome_CtaBtn"><value>Review my TFEs</value></data>
+  <data name="TeacherHome_Cta"><value>Ready for your next proposal?</value></data>
+  <data name="TeacherHome_CtaDesc"><value>Create a new TFE proposal, define it in detail and start receiving applications from the best students.</value></data>
+  <data name="TeacherHome_CtaBtn"><value>Create proposal</value></data>
+  <data name="TeacherHome_InterestsAlert"><value>Add interests to get recommendations</value></data>
+  <data name="TeacherHome_InterestsAlertDesc"><value>Your profile has no interests set yet. The system uses them to suggest candidates and projects aligned with your research lines. The more you add, the more relevant the recommendations.</value></data>
+  <data name="TeacherHome_InterestsAlertBtn"><value>Add interests now</value></data>
 
   <data name="AdminHome_Tag"><value>ADMINISTRATION</value></data>
   <data name="AdminHome_Title"><value>Control the platform from a central view</value></data>

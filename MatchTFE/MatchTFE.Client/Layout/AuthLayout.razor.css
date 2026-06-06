@@ -16,26 +16,11 @@
     margin-bottom: 2rem;
 }
 
-.logo-box {
-    background-color: var(--app-primary-dark, #1d4ed8);
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 0.75rem auto;
-    box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
-}
-
-.logo-icon {
-    width: 28px;
-    height: 28px;
-}
-
 ::deep .brand-title {
+    font-size: 2rem !important;
     font-weight: 800;
-    color: var(--app-text-main, #0f172a);
+    letter-spacing: 0.08em;
+    color: var(--app-primary-dark, #1d4ed8);
 }
 
 .auth-main-content {
@@ -134,10 +119,6 @@
     margin-bottom: 0.5rem !important;
 }
 
-::deep .remember-checkbox {
-    margin-bottom: 2rem !important;
-    margin-left: -8px !important;
-}
 
 /* ==========================================
    5. ESPECÍFICOS DE REGISTRO
@@ -188,23 +169,3 @@
     font-weight: 700;
 }
 
-.page-footer {
-    margin-top: 3rem;
-    text-align: center;
-}
-
-.footer-links {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-::deep .footer-links a {
-    color: var(--app-text-muted, #64748b);
-    font-weight: 500;
-}
-
-::deep .copyright-text {
-    color: var(--app-text-muted, #64748b);
-}
