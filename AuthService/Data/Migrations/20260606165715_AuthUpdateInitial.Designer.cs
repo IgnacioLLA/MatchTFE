@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthService.Data.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20260401161506_AuthUpdate01")]
-    partial class AuthUpdate01
+    [Migration("20260606165715_AuthUpdateInitial")]
+    partial class AuthUpdateInitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,6 +88,7 @@ namespace AuthService.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
+                        .IsUnique()
                         .HasDatabaseName("EmailIndex");
 
                     b.HasIndex("NormalizedUserName")

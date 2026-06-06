@@ -12,8 +12,8 @@ using UserService.Data;
 namespace UserService.Data.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20260401172341_UserUpdate01")]
-    partial class UserUpdate01
+    [Migration("20260606165741_UserUpdateInitial")]
+    partial class UserUpdateInitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,9 +36,38 @@ namespace UserService.Data.Migrations
                     b.Property<int>("Level")
                         .HasColumnType("integer");
 
+                    b.Property<string>("UserProfileUserId")
+                        .HasColumnType("text");
+
                     b.HasKey("StudentProfileId", "TagId");
 
+                    b.HasIndex("TagId");
+
+                    b.HasIndex("UserProfileUserId");
+
                     b.ToTable("StudentSkill", (string)null);
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TFEProposal", b =>
+                {
+                    b.Property<string>("OriginUserId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("TfeId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("CreationDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("OriginUserId", "TfeId");
+
+                    b.ToTable("TfeProposal", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("TFELibrary.Data.Tag", b =>
@@ -54,12 +83,7 @@ namespace UserService.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("UserProfileUserId")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserProfileUserId");
 
                     b.ToTable("Tag", null, t =>
                         {
@@ -69,15 +93,15 @@ namespace UserService.Data.Migrations
 
             modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
                 {
-                    b.Property<int>("InterestsId")
+                    b.Property<int>("TagId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("UserProfileUserId")
+                    b.Property<string>("UserProfileId")
                         .HasColumnType("text");
 
-                    b.HasKey("InterestsId", "UserProfileUserId");
+                    b.HasKey("TagId", "UserProfileId");
 
-                    b.HasIndex("UserProfileUserId");
+                    b.HasIndex("UserProfileId");
 
                     b.ToTable("UserInterest", (string)null);
                 });
@@ -89,11 +113,6 @@ namespace UserService.Data.Migrations
 
                     b.Property<string>("AcademicYear")
                         .HasColumnType("text");
-
-                    b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
@@ -115,6 +134,9 @@ namespace UserService.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -129,10 +151,29 @@ namespace UserService.Data.Migrations
 
                     b.HasKey("UserId");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfile", (string)null);
+                    b.ToTable("UserProfile", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("UserService.Data.UserDbContext+AspNetUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AspNetUsers", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("TFELibrary.Data.StudentSkill", b =>
@@ -143,30 +184,67 @@ namespace UserService.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TFELibrary.Data.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.UserProfile", null)
+                        .WithMany("StudentSkills")
+                        .HasForeignKey("UserProfileUserId");
+
                     b.Navigation("StudentProfile");
+
+                    b.Navigation("Tag");
                 });
 
-            modelBuilder.Entity("TFELibrary.Data.Tag", b =>
+            modelBuilder.Entity("TFELibrary.Data.TFEProposal", b =>
                 {
-                    b.HasOne("TFELibrary.Data.UserProfile", null)
-                        .WithMany("Interests")
-                        .HasForeignKey("UserProfileUserId");
+                    b.HasOne("TFELibrary.Data.UserProfile", "OriginUser")
+                        .WithMany("TfeProposals")
+                        .HasForeignKey("OriginUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OriginUser");
                 });
 
             modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
                 {
-                    b.HasOne("TFELibrary.Data.UserProfile", "UserProfile")
+                    b.HasOne("TFELibrary.Data.Tag", "Tag")
                         .WithMany()
-                        .HasForeignKey("UserProfileUserId")
+                        .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.UserProfile", "UserProfile")
+                        .WithMany("UserInterests")
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
 
                     b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
                 {
-                    b.Navigation("Interests");
+                    b.HasOne("UserService.Data.UserDbContext+AspNetUser", null)
+                        .WithOne()
+                        .HasForeignKey("TFELibrary.Data.UserProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
+                {
+                    b.Navigation("StudentSkills");
+
+                    b.Navigation("TfeProposals");
+
+                    b.Navigation("UserInterests");
                 });
 #pragma warning restore 612, 618
         }

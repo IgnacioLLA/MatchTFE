@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MatchService.Data.Migrations
 {
     [DbContext(typeof(MatchDbContext))]
-    [Migration("20260401164932_MatchUpdate01")]
-    partial class MatchUpdate01
+    [Migration("20260606165830_MatchUpdateInitial")]
+    partial class MatchUpdateInitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,25 +24,6 @@ namespace MatchService.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("TFELibrary.Data.InterestProposal", b =>
-                {
-                    b.Property<string>("OriginUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DestinationUserId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("OriginUserId", "DestinationUserId");
-
-                    b.HasIndex("DestinationUserId");
-
-                    b.ToTable("InterestProposal");
-                });
 
             modelBuilder.Entity("TFELibrary.Data.TFE", b =>
                 {
@@ -56,6 +37,9 @@ namespace MatchService.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateOnly>("CreationDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(4000)
@@ -64,9 +48,11 @@ namespace MatchService.Data.Migrations
                     b.Property<DateOnly>("EstimatedDelivery")
                         .HasColumnType("date");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateOnly>("ExpirationDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -85,19 +71,18 @@ namespace MatchService.Data.Migrations
                     b.Property<string>("OriginUserId")
                         .HasColumnType("text");
 
-                    b.Property<int>("TFEId")
+                    b.Property<int>("TfeId")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly>("ExpirationDate")
+                    b.Property<DateOnly>("CreationDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
-                    b.HasKey("OriginUserId", "TFEId");
+                    b.HasKey("OriginUserId", "TfeId");
 
-                    b.HasIndex("TFEId");
+                    b.HasIndex("TfeId");
 
                     b.ToTable("TfeProposal");
                 });
@@ -117,22 +102,61 @@ namespace MatchService.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Tag", (string)null);
                 });
 
-            modelBuilder.Entity("TFELibrary.Data.TfeTopic", b =>
+            modelBuilder.Entity("TFELibrary.Data.TfeRequiredSkill", b =>
                 {
-                    b.Property<int>("TFEId")
+                    b.Property<int>("TfeId")
                         .HasColumnType("integer");
 
                     b.Property<int>("TagId")
                         .HasColumnType("integer");
 
-                    b.HasKey("TFEId", "TagId");
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TfeId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("TfeRequiredSkill", (string)null);
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TfeTopic", b =>
+                {
+                    b.Property<int>("TfeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("TfeId", "TagId");
 
                     b.HasIndex("TagId");
 
                     b.ToTable("TfeTopic", (string)null);
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
+                {
+                    b.Property<int>("TagId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserProfileId")
+                        .HasColumnType("text");
+
+                    b.HasKey("TagId", "UserProfileId");
+
+                    b.HasIndex("UserProfileId");
+
+                    b.ToTable("UserInterest", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
@@ -142,11 +166,6 @@ namespace MatchService.Data.Migrations
 
                     b.Property<string>("AcademicYear")
                         .HasColumnType("text");
-
-                    b.Property<string>("AvatarUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Bio")
                         .HasMaxLength(2000)
@@ -168,6 +187,9 @@ namespace MatchService.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -176,34 +198,13 @@ namespace MatchService.Data.Migrations
                     b.Property<string>("OfficeLocation")
                         .HasColumnType("text");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("UserId");
 
-                    b.ToTable("UserProfile", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-                });
-
-            modelBuilder.Entity("TFELibrary.Data.InterestProposal", b =>
-                {
-                    b.HasOne("TFELibrary.Data.UserProfile", "DestinationUser")
-                        .WithMany()
-                        .HasForeignKey("DestinationUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TFELibrary.Data.UserProfile", "OriginUser")
-                        .WithMany()
-                        .HasForeignKey("OriginUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DestinationUser");
-
-                    b.Navigation("OriginUser");
+                    b.ToTable("UserProfile", (string)null);
                 });
 
             modelBuilder.Entity("TFELibrary.Data.TFE", b =>
@@ -220,14 +221,14 @@ namespace MatchService.Data.Migrations
             modelBuilder.Entity("TFELibrary.Data.TFEProposal", b =>
                 {
                     b.HasOne("TFELibrary.Data.UserProfile", "OriginUser")
-                        .WithMany()
+                        .WithMany("TfeProposals")
                         .HasForeignKey("OriginUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TFELibrary.Data.TFE", "Tfe")
-                        .WithMany()
-                        .HasForeignKey("TFEId")
+                        .WithMany("Proposals")
+                        .HasForeignKey("TfeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -236,23 +237,73 @@ namespace MatchService.Data.Migrations
                     b.Navigation("Tfe");
                 });
 
-            modelBuilder.Entity("TFELibrary.Data.TfeTopic", b =>
+            modelBuilder.Entity("TFELibrary.Data.TfeRequiredSkill", b =>
                 {
-                    b.HasOne("TFELibrary.Data.TFE", "TFE")
-                        .WithMany()
-                        .HasForeignKey("TFEId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TFELibrary.Data.Tag", "Tag")
                         .WithMany()
                         .HasForeignKey("TagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("TFE");
+                    b.HasOne("TFELibrary.Data.TFE", "Tfe")
+                        .WithMany("RequiredSkills")
+                        .HasForeignKey("TfeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Tag");
+
+                    b.Navigation("Tfe");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TfeTopic", b =>
+                {
+                    b.HasOne("TFELibrary.Data.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.TFE", "Tfe")
+                        .WithMany()
+                        .HasForeignKey("TfeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+
+                    b.Navigation("Tfe");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserInterest", b =>
+                {
+                    b.HasOne("TFELibrary.Data.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TFELibrary.Data.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+
+                    b.Navigation("UserProfile");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.TFE", b =>
+                {
+                    b.Navigation("Proposals");
+
+                    b.Navigation("RequiredSkills");
+                });
+
+            modelBuilder.Entity("TFELibrary.Data.UserProfile", b =>
+                {
+                    b.Navigation("TfeProposals");
                 });
 #pragma warning restore 612, 618
         }

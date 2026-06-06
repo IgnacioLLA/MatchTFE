@@ -7,57 +7,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MatchService.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class MatchUpdate01 : Migration
+    public partial class MatchUpdateInitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "UserProfile",
-                columns: table => new
-                {
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    Role = table.Column<string>(type: "text", nullable: false),
-                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
-                    Bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
-                    AvatarUrl = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    AcademicYear = table.Column<string>(type: "text", nullable: true),
-                    Department = table.Column<string>(type: "text", nullable: true),
-                    OfficeLocation = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserProfile", x => x.UserId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "InterestProposal",
-                columns: table => new
-                {
-                    OriginUserId = table.Column<string>(type: "text", nullable: false),
-                    DestinationUserId = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_InterestProposal", x => new { x.OriginUserId, x.DestinationUserId });
-                    table.ForeignKey(
-                        name: "FK_InterestProposal_UserProfile_DestinationUserId",
-                        column: x => x.DestinationUserId,
-                        principalTable: "UserProfile",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_InterestProposal_UserProfile_OriginUserId",
-                        column: x => x.OriginUserId,
-                        principalTable: "UserProfile",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Tag",
                 columns: table => new
@@ -72,6 +26,27 @@ namespace MatchService.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserProfile",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Bio = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: false),
+                    IsSuspended = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AcademicYear = table.Column<string>(type: "text", nullable: true),
+                    Department = table.Column<string>(type: "text", nullable: true),
+                    OfficeLocation = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfile", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tfe",
                 columns: table => new
                 {
@@ -81,7 +56,9 @@ namespace MatchService.Data.Migrations
                     Description = table.Column<string>(type: "character varying(4000)", maxLength: 4000, nullable: false),
                     Title = table.Column<string>(type: "character varying(400)", maxLength: 400, nullable: false),
                     EstimatedDelivery = table.Column<DateOnly>(type: "date", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false)
+                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    CreationDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -99,16 +76,16 @@ namespace MatchService.Data.Migrations
                 columns: table => new
                 {
                     OriginUserId = table.Column<string>(type: "text", nullable: false),
-                    TFEId = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    ExpirationDate = table.Column<DateOnly>(type: "date", nullable: false)
+                    TfeId = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    CreationDate = table.Column<DateOnly>(type: "date", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TfeProposal", x => new { x.OriginUserId, x.TFEId });
+                    table.PrimaryKey("PK_TfeProposal", x => new { x.OriginUserId, x.TfeId });
                     table.ForeignKey(
-                        name: "FK_TfeProposal_Tfe_TFEId",
-                        column: x => x.TFEId,
+                        name: "FK_TfeProposal_Tfe_TfeId",
+                        column: x => x.TfeId,
                         principalTable: "Tfe",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -117,19 +94,44 @@ namespace MatchService.Data.Migrations
                         column: x => x.OriginUserId,
                         principalTable: "UserProfile",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TfeRequiredSkill",
+                columns: table => new
+                {
+                    TfeId = table.Column<int>(type: "integer", nullable: false),
+                    TagId = table.Column<int>(type: "integer", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TfeRequiredSkill", x => new { x.TfeId, x.TagId });
+                    table.ForeignKey(
+                        name: "FK_TfeRequiredSkill_Tag_TagId",
+                        column: x => x.TagId,
+                        principalTable: "Tag",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TfeRequiredSkill_Tfe_TfeId",
+                        column: x => x.TfeId,
+                        principalTable: "Tfe",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "TfeTopic",
                 columns: table => new
                 {
-                    TFEId = table.Column<int>(type: "integer", nullable: false),
+                    TfeId = table.Column<int>(type: "integer", nullable: false),
                     TagId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TfeTopic", x => new { x.TFEId, x.TagId });
+                    table.PrimaryKey("PK_TfeTopic", x => new { x.TfeId, x.TagId });
                     table.ForeignKey(
                         name: "FK_TfeTopic_Tag_TagId",
                         column: x => x.TagId,
@@ -137,17 +139,18 @@ namespace MatchService.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TfeTopic_Tfe_TFEId",
-                        column: x => x.TFEId,
+                        name: "FK_TfeTopic_Tfe_TfeId",
+                        column: x => x.TfeId,
                         principalTable: "Tfe",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_InterestProposal_DestinationUserId",
-                table: "InterestProposal",
-                column: "DestinationUserId");
+                name: "IX_Tag_Name",
+                table: "Tag",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tfe_AuthorId",
@@ -155,9 +158,14 @@ namespace MatchService.Data.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TfeProposal_TFEId",
+                name: "IX_TfeProposal_TfeId",
                 table: "TfeProposal",
-                column: "TFEId");
+                column: "TfeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TfeRequiredSkill_TagId",
+                table: "TfeRequiredSkill",
+                column: "TagId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TfeTopic_TagId",
@@ -169,10 +177,10 @@ namespace MatchService.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "InterestProposal");
+                name: "TfeProposal");
 
             migrationBuilder.DropTable(
-                name: "TfeProposal");
+                name: "TfeRequiredSkill");
 
             migrationBuilder.DropTable(
                 name: "TfeTopic");
