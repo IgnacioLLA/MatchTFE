@@ -44,5 +44,8 @@ namespace MatchService.Controllers
 
         [HttpPut("proposal/tfe/decision")]
         Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request);
+
+        [HttpPatch("tfe/{id}/status")]
+        Task<IActionResult> ChangeTfeStatus(int id, [FromBody] TfeStatusUpdateRequest request);
     }
 }

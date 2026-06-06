@@ -3,6 +3,13 @@
 
 @inject IStringLocalizer<SharedResources> L
 
+@if (IsReadOnly)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mb-6 rounded-lg" Icon="@Icons.Material.Filled.Lock">
+        @L["TfeForm_ReadOnlyNotice"]
+    </MudAlert>
+}
+
 <MudGrid Spacing="4" Class="animate-fade-in">
     @* --- LEFT COLUMN --- *@
     <MudItem xs="12" md="7" lg="7">
@@ -23,6 +30,7 @@
                           HelperText="@L["TfeForm_TitleHelper"]"
                           Error="@(!string.IsNullOrWhiteSpace(_titleError))"
                           ErrorText="@_titleError"
+                          ReadOnly="@IsReadOnly"
                           Class="mb-8 rounded-lg"
                           aria-required="true" />
 
@@ -42,6 +50,7 @@
                           HelperText="@L["TfeForm_DescriptionHelper"]"
                           Error="@(!string.IsNullOrWhiteSpace(_descriptionError))"
                           ErrorText="@_descriptionError"
+                          ReadOnly="@IsReadOnly"
                           Class="rounded-lg"
                           aria-required="true" />
         </MudPaper>
@@ -72,6 +81,7 @@
                               UserAttributes="_expirationDateInputAttributes"
                               Error="@(!string.IsNullOrWhiteSpace(_expirationDateError))"
                               ErrorText="@_expirationDateError"
+                              ReadOnly="@IsReadOnly"
                               Class="rounded-lg" />
             </div>
 
@@ -86,7 +96,7 @@
                         @GetEditExpirationStatusText()
                     </MudChip>
 
-                        @if (IsCurrentDateExpired())
+                        @if (!IsReadOnly && IsCurrentDateExpired())
                         {
                             <MudButton Variant="Variant.Outlined"
                                        Color="Color.Secondary"
@@ -121,6 +131,7 @@
                        AnchorOrigin="Origin.BottomCenter"
                        Placeholder="@L["TfeForm_DurationPlaceholder"]"
                        Margin="Margin.Dense"
+                       Disabled="@IsReadOnly"
                        Error="@(!string.IsNullOrWhiteSpace(_estimatedDurationError))"
                        ErrorText="@_estimatedDurationError"
                        Class="rounded-lg">
@@ -132,34 +143,41 @@
         </MudPaper>
 
         <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
-            <TagSelector @bind-SelectedTags="_selectedTopics"
-                         Title="@L["TfeForm_TopicsLabel"]"
-                         Icon="@Icons.Material.Filled.Category"
-                         Placeholder="@L["TfeForm_TopicsPlaceholder"].Value" />
+            <div style="@(IsReadOnly ? "pointer-events: none; opacity: 0.7;" : string.Empty)">
+                <TagSelector @bind-SelectedTags="_selectedTopics"
+                             Title="@L["TfeForm_TopicsLabel"]"
+                             Icon="@Icons.Material.Filled.Category"
+                             Placeholder="@L["TfeForm_TopicsPlaceholder"].Value" />
+            </div>
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
                 @L["TfeForm_TopicsCaption"]
             </MudText>
         </MudPaper>
 
         <MudPaper Elevation="0" Class="pa-6 rounded-xl mb-6 border-all">
-            <SkillSelector @bind-SelectedSkills="_requiredSkills"
-                           Title="@L["TfeForm_SkillsLabel"]"
-                           Icon="@Icons.Material.Filled.Build"
-                           Placeholder="@L["TfeForm_SkillsPlaceholder"].Value" />
+            <div style="@(IsReadOnly ? "pointer-events: none; opacity: 0.7;" : string.Empty)">
+                <SkillSelector @bind-SelectedSkills="_requiredSkills"
+                               Title="@L["TfeForm_SkillsLabel"]"
+                               Icon="@Icons.Material.Filled.Build"
+                               Placeholder="@L["TfeForm_SkillsPlaceholder"].Value" />
+            </div>
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
                 @L["TfeForm_SkillsCaption"]
             </MudText>
         </MudPaper>
 
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Size="Size.Large"
-                   FullWidth="true"
-                   EndIcon="@Icons.Material.Filled.Send"
-                   Class="rounded-xl py-3 mt-2 btn-primary-shadow"
-                   OnClick="HandleSubmitAsync">
-            @(IsEditMode ? L["TfeForm_UpdateBtn"].Value : L["TfeForm_PublishBtn"].Value)
-        </MudButton>
+        @if (!IsReadOnly)
+        {
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       FullWidth="true"
+                       EndIcon="@Icons.Material.Filled.Send"
+                       Class="rounded-xl py-3 mt-2 btn-primary-shadow"
+                       OnClick="HandleSubmitAsync">
+                @(IsEditMode ? L["TfeForm_UpdateBtn"].Value : L["TfeForm_PublishBtn"].Value)
+            </MudButton>
+        }
 
         @if (!string.IsNullOrWhiteSpace(ServerError))
         {
@@ -186,6 +204,9 @@
 
     [Parameter]
     public EventCallback<string?> ServerErrorChanged { get; set; }
+
+    [Parameter]
+    public bool IsReadOnly { get; set; } = false;
 
     private bool IsEditMode => Tfe != null;
 

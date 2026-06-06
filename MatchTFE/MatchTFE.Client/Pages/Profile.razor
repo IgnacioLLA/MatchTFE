@@ -173,17 +173,10 @@ else
                 var json = JsonSerializer.Serialize(GlobalProfile);
                 _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
             }
-            else
-            {
-                Snackbar.Add(L["Profile_NotFound"].Value, Severity.Warning);
-            }
 
             await LoadTagsAsync();
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["Profile_LoadError", ex.Message].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;
@@ -203,10 +196,7 @@ else
                 _availableBackendSkills = tags.Select(t => t.Name).ToList();
             }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["Profile_TagsLoadError", ex.Message].Value, Severity.Warning);
-        }
+        catch { }
     }
 
     private async Task<IEnumerable<string>> SearchInterestsAsync(string value, CancellationToken token)
@@ -236,8 +226,7 @@ else
         {
             var json = JsonSerializer.Serialize(GlobalProfile);
             _profileDto = JsonSerializer.Deserialize<ProfileDto>(json);
-            Snackbar.Add(L["Profile_DiscardedMessage"].Value, Severity.Info);
-        }
+            }
     }
 
     private async Task SaveChanges()
@@ -265,12 +254,12 @@ else
             }
             else
             {
-                Snackbar.Add(L["Profile_ServerError", response.StatusCode].Value, Severity.Error);
+                Snackbar.Add(L["Profile_SaveError"].Value, Severity.Error);
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Snackbar.Add(L["Profile_ConnectionError", ex.Message].Value, Severity.Error);
+            Snackbar.Add(L["Profile_SaveError"].Value, Severity.Error);
         }
         finally
         {
@@ -289,15 +278,8 @@ else
             {
                 Navigation.NavigateTo("/login");
             }
-            else
-            {
-                Snackbar.Add(L["Profile_ServerError", response.StatusCode].Value, Severity.Error);
-            }
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["Profile_ConnectionError", ex.Message].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;

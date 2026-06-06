@@ -576,4 +576,103 @@ public class TfeServiceTests
             It.Is<List<int>>(ids => ids.Contains(3) && ids.Contains(7) && ids.Count == 2),
             5), Times.Once);
     }
+
+    // =========================================================================
+    // ChangeTfeStatusAsync
+    // =========================================================================
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenStatusIsOpen_ReturnsInvalidStatus()
+    {
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Open, "author-1");
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("InvalidStatus", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenTfeNotFound_ReturnsTfeNotFound()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((TFE?)null);
+
+        var result = await _service.ChangeTfeStatusAsync(99, TfeStatus.Completed, "author-1");
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("TfeNotFound", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenAuthorDoesNotMatch_ReturnsUnauthorized()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateTfeEntity(1, "real-author"));
+
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Completed, "different-author");
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("Unauthorized", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenTfeIsAlreadyCompleted_ReturnsInvalidCurrentStatus()
+    {
+        var tfe = CreateTfeEntity(1, "author-1");
+        tfe.Status = TfeStatus.Completed;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
+
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Cancelled, "author-1");
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("InvalidCurrentStatus", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenTfeIsAlreadyCancelled_ReturnsInvalidCurrentStatus()
+    {
+        var tfe = CreateTfeEntity(1, "author-1");
+        tfe.Status = TfeStatus.Cancelled;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
+
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Completed, "author-1");
+
+        Assert.IsFalse(result.IsSuccess);
+        Assert.AreEqual("InvalidCurrentStatus", result.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenCompletingOpenTfe_UpdatesStatusAndDoesNotExpireProposals()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateTfeEntity(1, "author-1"));
+        _tfeRepoMock.Setup(r => r.UpdateStatusAsync(1, TfeStatus.Completed)).Returns(Task.CompletedTask);
+
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Completed, "author-1");
+
+        Assert.IsTrue(result.IsSuccess);
+        _tfeRepoMock.Verify(r => r.UpdateStatusAsync(1, TfeStatus.Completed), Times.Once);
+        _proposalRepoMock.Verify(r => r.ExpireProposalsByTfeIdAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenCancellingOpenTfe_ExpiresProposalsAndUpdatesStatus()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateTfeEntity(1, "author-1"));
+        _tfeRepoMock.Setup(r => r.UpdateStatusAsync(1, TfeStatus.Cancelled)).Returns(Task.CompletedTask);
+        _proposalRepoMock.Setup(r => r.ExpireProposalsByTfeIdAsync(1)).Returns(Task.CompletedTask);
+
+        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Cancelled, "author-1");
+
+        Assert.IsTrue(result.IsSuccess);
+        _proposalRepoMock.Verify(r => r.ExpireProposalsByTfeIdAsync(1), Times.Once);
+        _tfeRepoMock.Verify(r => r.UpdateStatusAsync(1, TfeStatus.Cancelled), Times.Once);
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatusAsync_WhenRepositoryThrowsOnStatusUpdate_ThrowsInvalidOperationException()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateTfeEntity(1, "author-1"));
+        _tfeRepoMock.Setup(r => r.UpdateStatusAsync(It.IsAny<int>(), It.IsAny<TfeStatus>()))
+            .ThrowsAsync(new Exception("DB error"));
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(
+            () => _service.ChangeTfeStatusAsync(1, TfeStatus.Completed, "author-1"));
+    }
 }

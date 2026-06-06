@@ -284,6 +284,40 @@ public class MatchController : ControllerBase, IMatchController
         }
     }
 
+    [HttpPatch("tfe/{id}/status")]
+    [Authorize(Roles = "User")]
+    public async Task<IActionResult> ChangeTfeStatus(int id, [FromBody] TfeStatusUpdateRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
+
+        try
+        {
+            var result = await _tfeService.ChangeTfeStatusAsync(id, request.Status, authorId);
+
+            if (!result.IsSuccess)
+            {
+                return result.ErrorCode switch
+                {
+                    "Unauthorized" => Forbid(),
+                    "TfeNotFound" => NotFound(result.Message),
+                    "InvalidStatus" or "InvalidCurrentStatus" => Conflict(result.Message),
+                    _ => BadRequest(result.Message)
+                };
+            }
+
+            var updatedTfe = await _tfeService.GetTfeByIdAsync(id);
+            return Ok(new TfeStatusUpdateResponse { Error = result, Tfe = updatedTfe ?? new TfeDto() });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, "Unexpected error while changing status of TFE {TfeId} for user {UserId}.", id, authorId);
+            return StatusCode(500, "Ocurrió un error al cambiar el estado del TFE.");
+        }
+    }
+
     [HttpPut("proposal/tfe/decision")]
     [Authorize(Roles = "User")]
     public async Task<IActionResult> DecideTfeCandidate([FromBody] TfeCandidateDecisionRequest request)

@@ -51,13 +51,21 @@ public class ProposalRepository : IProposalRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task ExpireProposalsByTfeIdAsync(int tfeId)
+    {
+        await _context.TfeProposal
+            .Where(p => p.TfeId == tfeId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.Status, ProposalStatus.Expired));
+    }
+
     public async Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId)
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
         var matches = await _context.TfeProposal
             .Where(tp => (tp.Tfe.AuthorId == userId || tp.OriginUserId == userId)
                       && tp.Status == ProposalStatus.Accepted
-                      && tp.Tfe.ExpirationDate >= today)
+                      && tp.Tfe.ExpirationDate >= today
+                      && tp.Tfe.Status != TfeStatus.Completed)
             .Include(tp => tp.OriginUser)
             .Include(tp => tp.Tfe)
             .ThenInclude(t => t.Author)

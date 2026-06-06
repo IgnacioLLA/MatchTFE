@@ -131,3 +131,15 @@ public class GetAcceptedMatchesResponse
     public int TotalMatches { get; set; }
     public List<AcceptedMatchDto> Matches { get; set; } = new();
 }
+
+public class TfeStatusUpdateRequest
+{
+    [Required]
+    public TfeStatus Status { get; set; }
+}
+
+public class TfeStatusUpdateResponse
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+    public TfeDto Tfe { get; set; } = new TfeDto();
+}

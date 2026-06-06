@@ -2,8 +2,6 @@
 @using System.Net.Http.Json
 
 @inject IHttpClientFactory ClientFactory
-@inject ISnackbar Snackbar
-@inject IStringLocalizer<SharedResources> L
 
 @if (!string.IsNullOrWhiteSpace(Title))
 {
@@ -66,10 +64,7 @@
             var tags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag");
             if (tags != null) _availableBackendTags = tags.Select(t => t.Name).ToList();
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(L["SkillSelector_LoadError", ex.Message].Value, Severity.Warning);
-        }
+        catch { }
         finally
         {
             _isLoading = false;

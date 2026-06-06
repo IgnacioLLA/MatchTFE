@@ -528,4 +528,60 @@ public class ProposalServiceTests
         Assert.AreEqual(ProposalStatus.Rejected, result.Status);
         Assert.IsTrue(result.Error.Message.Contains("rejected", StringComparison.OrdinalIgnoreCase));
     }
+
+    // =========================================================================
+    // TFE status checks (TfeNotOpen)
+    // =========================================================================
+
+    [TestMethod]
+    public async Task CreateTfeProposalAsync_WhenTfeIsCompleted_ReturnsTfeNotOpenError()
+    {
+        var completedTfe = CreateValidTfe();
+        completedTfe.Status = TfeStatus.Completed;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(completedTfe);
+
+        var result = await _service.CreateTfeProposalAsync("user-1", new TfeProposalCreationRequest { TfeId = 1, IsInterested = true });
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("TfeNotOpen", result.Error.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task CreateTfeProposalAsync_WhenTfeIsCancelled_ReturnsTfeNotOpenError()
+    {
+        var cancelledTfe = CreateValidTfe();
+        cancelledTfe.Status = TfeStatus.Cancelled;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(cancelledTfe);
+
+        var result = await _service.CreateTfeProposalAsync("user-1", new TfeProposalCreationRequest { TfeId = 1, IsInterested = true });
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("TfeNotOpen", result.Error.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task UpdateTfeProposalAsync_WhenTfeIsCompleted_ReturnsTfeNotOpenError()
+    {
+        var completedTfe = CreateValidTfe();
+        completedTfe.Status = TfeStatus.Completed;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(completedTfe);
+
+        var result = await _service.UpdateTfeProposalAsync(new TfeProposalUpdateRequest { UserId = "user-1", TfeId = 1, IsInterested = true });
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("TfeNotOpen", result.Error.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task DecideTfeCandidateAsync_WhenTfeIsCompleted_ReturnsTfeNotOpenError()
+    {
+        var completedTfe = CreateValidTfe(authorId: "author-1");
+        completedTfe.Status = TfeStatus.Completed;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(completedTfe);
+
+        var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = ProposalStatus.Accepted });
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("TfeNotOpen", result.Error.ErrorCode);
+    }
 }

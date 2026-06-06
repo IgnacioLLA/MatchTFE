@@ -491,11 +491,8 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
         }
         catch (HttpRequestException e)
         {
-            Snackbar.Add(L["Admin_LoadUsersError"].Value, Severity.Error);
-            if(e.StatusCode == System.Net.HttpStatusCode.Forbidden)
-            {
+            if (e.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 Navigation.NavigateTo("");
-            }
         }
         finally
         {
@@ -516,10 +513,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                 _tags = response.OrderBy(t => t.Name).ToList();
             }
         }
-        catch (Exception)
-        {
-            Snackbar.Add(L["Admin_LoadTagsError"].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isTagsLoading = false;

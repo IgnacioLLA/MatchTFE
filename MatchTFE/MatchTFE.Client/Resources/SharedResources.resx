@@ -44,7 +44,6 @@
   <data name="Role_StudentDesc"><value>Estudiante Universitario</value></data>
   <data name="Role_TeacherDesc"><value>Profesor Universitario</value></data>
   <data name="Role_AdminDesc"><value>Administrador del sistema</value></data>
-  <data name="Layout_ProfileLoadError"><value>Error al conectar con el servidor de perfil.</value></data>
 
   <!-- Login -->
   <data name="Login_Title"><value>Bienvenido de nuevo</value></data>
@@ -115,14 +114,8 @@
   <data name="Profile_Discard"><value>Descartar</value></data>
   <data name="Profile_SaveChanges"><value>Guardar Cambios</value></data>
   <data name="Profile_Logout"><value>Cerrar sesión</value></data>
-  <data name="Profile_DiscardedMessage"><value>Cambios descartados.</value></data>
   <data name="Profile_SavedSuccess"><value>Perfil actualizado correctamente.</value></data>
-  <data name="Profile_NotFound"><value>No se encontraron los datos del perfil.</value></data>
-  <data name="Profile_LoadError"><value>Error al cargar el perfil: {0}</value></data>
-  <data name="Profile_SaveError"><value>Error al procesar la respuesta.</value></data>
-  <data name="Profile_TagsLoadError"><value>Error al cargar las etiquetas: {0}</value></data>
-  <data name="Profile_ServerError"><value>Error del servidor: {0}</value></data>
-  <data name="Profile_ConnectionError"><value>Error de conexión: {0}</value></data>
+  <data name="Profile_SaveError"><value>No se pudieron guardar los cambios.</value></data>
   <data name="Profile_AcademicData"><value>Información Académica</value></data>
   <data name="Profile_AcademicYear"><value>CURSO ACADÉMICO</value></data>
   <data name="Profile_AcademicYearHelper"><value>Indica el curso en el que te encuentras actualmente.</value></data>
@@ -200,10 +193,7 @@
   <data name="Feed_AllSeenTitle"><value>¡Has visto todo por hoy!</value></data>
   <data name="Feed_AllSeenBody"><value>Parece que has revisado todas las propuestas por ahora. Vuelve más tarde para ver nuevos proyectos.</value></data>
   <data name="Feed_Reload"><value>Recargar Propuestas</value></data>
-  <data name="Feed_LoadError"><value>Error al conectar con el backend al obtener los proyectos.</value></data>
-  <data name="Feed_LoadMoreError"><value>Error al cargar más proyectos.</value></data>
   <data name="Feed_DecisionError"><value>Hubo un problema al registrar tu decisión.</value></data>
-  <data name="Feed_ConnectionError"><value>Error de conexión al servidor.</value></data>
 
   <!-- Match -->
   <data name="Match_Title"><value>Mis Matches</value></data>
@@ -236,10 +226,8 @@
   <data name="MyTfes_ColCreation"><value>CREACIÓN</value></data>
   <data name="MyTfes_ColActions"><value>ACCIONES</value></data>
   <data name="MyTfes_ShowingOf"><value>Mostrando {0} de {1} publicaciones</value></data>
-  <data name="MyTfes_LoadError"><value>Error al conectar con el backend al obtener los datos.</value></data>
   <data name="MyTfes_DeleteSuccess"><value>Propuesta eliminada correctamente.</value></data>
-  <data name="MyTfes_DeleteError"><value>No se pudo eliminar la propuesta: {0}</value></data>
-  <data name="MyTfes_DeleteConnectionError"><value>Error de conexión al intentar eliminar.</value></data>
+  <data name="MyTfes_DeleteError"><value>No se pudo eliminar la propuesta.</value></data>
   <data name="MyTfes_NoDate"><value>Sin fecha</value></data>
   <data name="TfeStatus_Completed"><value>• Completado</value></data>
   <data name="TfeStatus_Open"><value>• Abierto</value></data>
@@ -298,10 +286,27 @@
   <data name="TfeForm_SkillsCaption"><value>Especifica las tecnologías o conocimientos que debería tener el estudiante.</value></data>
   <data name="TfeForm_PublishBtn"><value>Publicar Propuesta</value></data>
   <data name="TfeForm_UpdateBtn"><value>Actualizar Propuesta</value></data>
+  <data name="TfeForm_ReadOnlyNotice"><value>Este TFE ha sido completado. Los datos son de solo lectura.</value></data>
+  <data name="EditTfe_FinalizeBtn"><value>Finalizar TFE</value></data>
+  <data name="EditTfe_CancelTfeBtn"><value>Cancelar TFE</value></data>
+  <data name="EditTfe_FinalizeModal_Title"><value>¿Marcar como completado?</value></data>
+  <data name="EditTfe_FinalizeModal_Body"><value>Una vez finalizado, no se podrán crear nuevas propuestas ni tomar decisiones sobre candidatos pendientes. Esta acción no se puede deshacer.</value></data>
+  <data name="EditTfe_FinalizeModal_Confirm"><value>Sí, finalizar</value></data>
+  <data name="EditTfe_CancelModal_Title"><value>¿Cancelar esta propuesta?</value></data>
+  <data name="EditTfe_CancelModal_Body"><value>Al cancelar, todas las propuestas de candidatos asociadas quedarán invalidadas permanentemente. Esta acción no se puede deshacer.</value></data>
+  <data name="EditTfe_CancelModal_Confirm"><value>Sí, cancelar</value></data>
+  <data name="EditTfe_ModalCancel"><value>Volver</value></data>
+  <data name="EditTfe_FinalizeSuccess"><value>TFE marcado como completado.</value></data>
+  <data name="EditTfe_CancelSuccess"><value>TFE cancelado correctamente.</value></data>
+  <data name="EditTfe_StatusChangeError"><value>No se pudo cambiar el estado del TFE.</value></data>
+  <data name="MyTfes_FilterByStatus"><value>Estado:</value></data>
+  <data name="MyTfes_FilterStatus_All"><value>Todos</value></data>
+  <data name="MyTfes_FilterStatus_Open"><value>Solo activos</value></data>
+  <data name="MyTfes_FilterStatus_Completed"><value>Solo completados</value></data>
+  <data name="Candidates_CompletedNotice"><value>Este TFE ha sido completado. Los candidatos no pueden aceptarse ni rechazarse.</value></data>
   <data name="TfeForm_PublishedSuccess"><value>Propuesta publicada correctamente.</value></data>
   <data name="TfeForm_UpdatedSuccess"><value>Propuesta actualizada correctamente.</value></data>
   <data name="TfeForm_ConnectionError"><value>Error al conectar con el servidor. Inténtalo de nuevo.</value></data>
-  <data name="TfeForm_LoadError"><value>Error al cargar los datos de la propuesta.</value></data>
   <data name="TfeForm_ExpiredStatus"><value>Caducado</value></data>
   <data name="TfeForm_OpenStatus"><value>Abierto</value></data>
 
@@ -311,14 +316,11 @@
   <data name="Candidates_NoneTitle"><value>Aún no hay candidatos</value></data>
   <data name="Candidates_NoneBody"><value>Los estudiantes interesados aparecerán aquí.</value></data>
   <data name="Candidates_NotFound"><value>No se ha podido encontrar la propuesta o no tienes permisos para verla.</value></data>
-  <data name="Candidates_UnavailableDecision"><value>Esta propuesta ya no está disponible para decisión.</value></data>
   <data name="Candidates_AlreadyResolved"><value>Esta propuesta ya fue resuelta.</value></data>
   <data name="Candidates_NoPermission"><value>No tienes permisos para decidir sobre este candidato.</value></data>
   <data name="Candidates_DecisionError"><value>Hubo un problema al registrar la decisión.</value></data>
-  <data name="Candidates_ConnectionError"><value>Error de conexión al servidor.</value></data>
   <data name="Candidates_AcceptedMsg"><value>Has aceptado a {0}.</value></data>
   <data name="Candidates_RejectedMsg"><value>Has descartado a {0}.</value></data>
-  <data name="Candidates_LoadError"><value>Hubo un error: {0}</value></data>
   <data name="CandidateListItem_ViewProfile"><value>Ver Perfil</value></data>
   <data name="CandidateListItem_Reject"><value>No me interesa</value></data>
   <data name="CandidateListItem_Accept"><value>Me interesa</value></data>
@@ -328,13 +330,11 @@
   <data name="CandidateStatus_Expired"><value>Expirado</value></data>
   <data name="CandidateDetail_Back"><value>Volver</value></data>
   <data name="CandidateDetail_ProfileNotFound"><value>No se ha podido cargar el perfil del usuario.</value></data>
-  <data name="CandidateDetail_NoContextError"><value>No se puede decidir sobre este candidato sin contexto de TFE.</value></data>
   <data name="CandidateDetail_AcceptedMsg"><value>Has aceptado a {0} para tu propuesta.</value></data>
   <data name="CandidateDetail_RejectedMsg"><value>Has descartado a {0}.</value></data>
   <data name="CandidateDetail_AlreadyResolved"><value>Esta propuesta ya fue resuelta.</value></data>
   <data name="CandidateDetail_NoPermission"><value>No tienes permisos para decidir sobre este candidato.</value></data>
   <data name="CandidateDetail_DecisionError"><value>Hubo un problema al registrar la decisión.</value></data>
-  <data name="CandidateDetail_ConnectionError"><value>Error de conexión al servidor.</value></data>
   <data name="CandidateDetail_Discard"><value>DESCARTAR</value></data>
   <data name="CandidateDetail_Interested"><value>ME INTERESA</value></data>
 
@@ -401,13 +401,9 @@
   <data name="Admin_SearchTagsPlaceholder"><value>Buscar temáticas...</value></data>
   <data name="Admin_ColTagName"><value>NOMBRE</value></data>
   <data name="Admin_ColTagActions"><value>ACCIONES</value></data>
-  <data name="Admin_LoadUsersError"><value>Error al cargar usuarios.</value></data>
-  <data name="Admin_LoadTagsError"><value>Error al cargar temáticas.</value></data>
   <data name="Admin_ImportSuccess"><value>{0} usuario(s) creados, {1} ya existían.</value></data>
 
   <!-- TagSelector / SkillSelector -->
-  <data name="TagSelector_LoadError"><value>Error cargando etiquetas: {0}</value></data>
-  <data name="SkillSelector_LoadError"><value>Error cargando habilidades: {0}</value></data>
 
   <!-- DiscoverLayout / TFEFeed -->
   <data name="DiscoverLayout_Title"><value>Propuestas de TFE</value></data>
@@ -417,8 +413,8 @@
   <data name="TfeListItem_ViewBtn"><value>Ver</value></data>
 
   <!-- NewTfe / EditTfe server errors -->
-  <data name="TfeForm_CreateError"><value>No se pudo crear ({0}): {1}</value></data>
-  <data name="TfeForm_UpdateError"><value>No se pudo actualizar ({0}): {1}</value></data>
+  <data name="TfeForm_CreateError"><value>No se pudo publicar la propuesta.</value></data>
+  <data name="TfeForm_UpdateError"><value>No se pudo actualizar el TFE.</value></data>
 
   <!-- Admin error fallbacks -->
   <data name="Admin_UpdateRoleError"><value>No se pudo actualizar el rol.</value></data>

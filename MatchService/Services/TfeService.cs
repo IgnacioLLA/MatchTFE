@@ -134,6 +134,36 @@ public class TfeService : ITfeService
         };
     }
 
+    public async Task<OperationResult> ChangeTfeStatusAsync(int id, TfeStatus newStatus, string authorId)
+    {
+        if (newStatus is not (TfeStatus.Completed or TfeStatus.Cancelled))
+            return new OperationResult(false, "Only Completed or Cancelled statuses are allowed.", "InvalidStatus");
+
+        var tfe = await _tfeRepository.GetByIdAsync(id);
+        if (tfe is null)
+            return new OperationResult(false, "TFE not found.", "TfeNotFound");
+
+        if (!string.Equals(tfe.AuthorId, authorId, StringComparison.Ordinal))
+            return new OperationResult(false, "You do not have permission to change this TFE's status.", "Unauthorized");
+
+        if (tfe.Status != TfeStatus.Open)
+            return new OperationResult(false, "Only Open TFEs can be completed or cancelled.", "InvalidCurrentStatus");
+
+        try
+        {
+            if (newStatus == TfeStatus.Cancelled)
+                await _proposalRepository.ExpireProposalsByTfeIdAsync(id);
+
+            await _tfeRepository.UpdateStatusAsync(id, newStatus);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Ocurrió un error al cambiar el estado del TFE.", ex);
+        }
+
+        return new OperationResult(true, "TFE status updated successfully.");
+    }
+
     // -------------------------------------------------------
 
     private void CheckTfe(TfeDto tfe)

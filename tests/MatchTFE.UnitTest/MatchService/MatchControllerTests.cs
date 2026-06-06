@@ -673,4 +673,68 @@ public class MatchControllerTests
 
         Assert.IsInstanceOfType(result, typeof(OkObjectResult));
     }
+
+    // -------------------------------------------------------------------------
+    // ChangeTfeStatus
+    // -------------------------------------------------------------------------
+
+    [TestMethod]
+    public async Task ChangeTfeStatus_WhenUserClaimsMissing_ReturnsUnauthorized()
+    {
+        SetNoUserClaims();
+
+        var result = await _controller.ChangeTfeStatus(1, new TfeStatusUpdateRequest { Status = TfeStatus.Completed });
+
+        Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatus_WhenTfeNotFound_ReturnsNotFound()
+    {
+        SetUserClaims("user-1");
+        _tfeServiceMock.Setup(s => s.ChangeTfeStatusAsync(99, TfeStatus.Completed, "user-1"))
+            .ReturnsAsync(new OperationResult(false, "TFE not found.", "TfeNotFound"));
+
+        var result = await _controller.ChangeTfeStatus(99, new TfeStatusUpdateRequest { Status = TfeStatus.Completed });
+
+        Assert.IsInstanceOfType(result, typeof(NotFoundObjectResult));
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatus_WhenUnauthorized_ReturnsForbid()
+    {
+        SetUserClaims("user-1");
+        _tfeServiceMock.Setup(s => s.ChangeTfeStatusAsync(1, TfeStatus.Completed, "user-1"))
+            .ReturnsAsync(new OperationResult(false, "No permission.", "Unauthorized"));
+
+        var result = await _controller.ChangeTfeStatus(1, new TfeStatusUpdateRequest { Status = TfeStatus.Completed });
+
+        Assert.IsInstanceOfType(result, typeof(ForbidResult));
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatus_WhenInvalidCurrentStatus_ReturnsConflict()
+    {
+        SetUserClaims("user-1");
+        _tfeServiceMock.Setup(s => s.ChangeTfeStatusAsync(1, TfeStatus.Completed, "user-1"))
+            .ReturnsAsync(new OperationResult(false, "Only Open TFEs can be completed or cancelled.", "InvalidCurrentStatus"));
+
+        var result = await _controller.ChangeTfeStatus(1, new TfeStatusUpdateRequest { Status = TfeStatus.Completed });
+
+        Assert.IsInstanceOfType(result, typeof(ConflictObjectResult));
+    }
+
+    [TestMethod]
+    public async Task ChangeTfeStatus_WhenSuccess_ReturnsOkWithUpdatedTfe()
+    {
+        SetUserClaims("user-1");
+        _tfeServiceMock.Setup(s => s.ChangeTfeStatusAsync(1, TfeStatus.Completed, "user-1"))
+            .ReturnsAsync(new OperationResult(true, "TFE status updated successfully."));
+        _tfeServiceMock.Setup(s => s.GetTfeByIdAsync(1))
+            .ReturnsAsync(new TfeDto { Id = 1, Status = TfeStatus.Completed });
+
+        var result = await _controller.ChangeTfeStatus(1, new TfeStatusUpdateRequest { Status = TfeStatus.Completed });
+
+        Assert.IsInstanceOfType(result, typeof(OkObjectResult));
+    }
 }

@@ -33,6 +33,9 @@ public class ProposalService : IProposalService
         if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
             return new TfeProposalCreationResponse { Error = new OperationResult(false, "This TFE has expired and cannot receive new proposals.", "TfeExpired") };
 
+        if (tfe.Status != TfeStatus.Open)
+            return new TfeProposalCreationResponse { Error = new OperationResult(false, "This TFE is no longer accepting proposals.", "TfeNotOpen") };
+
         if (await _proposalRepository.TfeProposalExistsAsync(userId, request.TfeId))
             return new TfeProposalCreationResponse { Error = new OperationResult(false, "TFE already exists.", "DuplicateProposal") };
 
@@ -73,6 +76,9 @@ public class ProposalService : IProposalService
 
         if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
             return new TfeProposalUpdateResponse { Error = new OperationResult(false, "This TFE has expired and can no longer be updated.", "TfeExpired") };
+
+        if (tfe.Status != TfeStatus.Open)
+            return new TfeProposalUpdateResponse { Error = new OperationResult(false, "This TFE is no longer accepting updates.", "TfeNotOpen") };
 
         var existingTfe = await _proposalRepository.GetTfeProposalByUserIdAsync(request.UserId, request.TfeId);
         if (existingTfe == null)
@@ -136,6 +142,9 @@ public class ProposalService : IProposalService
 
         if (!TfeDateRules.IsValidExpirationDate(tfe.ExpirationDate))
             return new TfeCandidateDecisionResponse { Error = new OperationResult(false, "This TFE has expired and can no longer be decided.", "TfeExpired") };
+
+        if (tfe.Status != TfeStatus.Open)
+            return new TfeCandidateDecisionResponse { Error = new OperationResult(false, "This TFE is no longer open for decisions.", "TfeNotOpen") };
 
         if (!string.Equals(tfe.AuthorId, authorId, StringComparison.Ordinal))
             return new TfeCandidateDecisionResponse { Error = new OperationResult(false, "You do not have permission to decide this proposal.", "Unauthorized") };

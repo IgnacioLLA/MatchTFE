@@ -75,7 +75,7 @@
 
         @* ACTIONS *@
         <MudItem xs="6" md="1" Class="d-flex justify-end align-center gap-1">
-            @if (Model.Status != TfeStatus.Cancelled)
+            @if (Model.Status == TfeStatus.Open)
             {
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Size="Size.Small"
@@ -86,6 +86,14 @@
                                Size="Size.Small"
                                Color="Color.Error"
                                OnClick="OnDeleteClicked" />
+            }
+            else if (Model.Status == TfeStatus.Completed)
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                               Size="Size.Small"
+                               Color="Color.Default"
+                               Href="@($"/tfe/edit/{Model.Id}")"
+                               Title="@L["TfeListItem_ViewBtn"]" />
             }
         </MudItem>
     </MudGrid>

@@ -3,7 +3,6 @@
 @using MatchTFE.Client.Themes
 
 @inject IHttpClientFactory ClientFactory
-@inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 @inject IStringLocalizer<SharedResources> L
 @inject IJSRuntime JS
@@ -177,10 +176,7 @@
             var result = await http.GetFromJsonAsync<ProfileResponse>("api/user/profile");
             _globalProfile = result?.Profile;
         }
-        catch (Exception)
-        {
-            Snackbar.Add(L["Layout_ProfileLoadError"], Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;

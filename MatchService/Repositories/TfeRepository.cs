@@ -58,7 +58,7 @@ public class TfeRepository : ITfeRepository
     public async Task<List<TFE>> GetByAuthorIdAsync(string authorId)
     {
         return await _context.Tfe
-            .Where(t => t.AuthorId == authorId)
+            .Where(t => t.AuthorId == authorId && t.Status != TfeStatus.Cancelled)
             .Include(t => t.Author)
             .Include(t => t.Topics)
             .Include(t => t.RequiredSkills)
@@ -160,5 +160,13 @@ public class TfeRepository : ITfeRepository
         }
 
         return result;
+    }
+
+    public async Task UpdateStatusAsync(int id, TfeStatus status)
+    {
+        var tfe = await _context.Tfe.FindAsync(id);
+        if (tfe is null) return;
+        tfe.Status = status;
+        await _context.SaveChangesAsync();
     }
 }

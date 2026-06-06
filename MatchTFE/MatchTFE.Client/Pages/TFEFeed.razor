@@ -74,13 +74,7 @@
                 foreach (var tfe in response.Tfes)
                     _proposalsQueue.Enqueue(tfe);
         }
-        catch
-        {
-            var errorMsg = clearQueue
-                ? L["Feed_LoadError"].Value
-                : L["Feed_LoadMoreError"].Value;
-            Snackbar.Add(errorMsg, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;
@@ -107,20 +101,12 @@
             {
 
             }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-            {
-                var errorMsg = await response.Content.ReadAsStringAsync();
-                Snackbar.Add(errorMsg, Severity.Warning);
-            }
             else
             {
                 Snackbar.Add(L["Feed_DecisionError"].Value, Severity.Error);
             }
         }
-        catch
-        {
-            Snackbar.Add(L["Feed_ConnectionError"].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _proposalsQueue.Dequeue();

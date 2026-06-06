@@ -34,7 +34,7 @@
             @L["CandidateListItem_ViewProfile"]
         </MudButton>
 
-        @if (Candidate.CanDecide)
+        @if (Candidate.CanDecide && !IsActionsDisabled)
         {
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Error"
@@ -60,6 +60,7 @@
     [Parameter] public EventCallback<TfeCandidateDto> OnViewProfile { get; set; }
     [Parameter] public EventCallback<TfeCandidateDto> OnReject { get; set; }
     [Parameter] public EventCallback<TfeCandidateDto> OnAccept { get; set; }
+    [Parameter] public bool IsActionsDisabled { get; set; } = false;
 
     private string GetStatusLabel(ProposalStatus status) => status switch
     {

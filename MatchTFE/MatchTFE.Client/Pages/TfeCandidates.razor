@@ -36,6 +36,13 @@
                 @L["Candidates_Title"]
             </MudText>
 
+            @if (_tfe.Status == TfeStatus.Completed)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mb-4 rounded-lg">
+                    @L["Candidates_CompletedNotice"]
+                </MudAlert>
+            }
+
             @if (!_candidates.Any())
             {
                 <MudPaper Elevation="0" Class="pa-8 text-center rounded-xl border-all mud-text-secondary">
@@ -49,6 +56,7 @@
                 @foreach (var candidate in _candidates)
                 {
                     <CandidateListItem Candidate="candidate"
+                                       IsActionsDisabled="@(_tfe.Status == TfeStatus.Completed)"
                                        OnViewProfile="HandleViewProfile"
                                        OnReject="HandleRejectAsync"
                                        OnAccept="HandleAcceptAsync" />
@@ -88,10 +96,7 @@
                     .ToList();
             }
         }
-        catch (Exception e)
-        {
-            Snackbar.Add(L["Candidates_LoadError", e.Message].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;
@@ -124,10 +129,7 @@
     private async Task DecideAsync(TfeCandidateDto candidate, ProposalStatus status)
     {
         if (!candidate.CanDecide)
-        {
-            Snackbar.Add(L["Candidates_UnavailableDecision"].Value, Severity.Warning);
             return;
-        }
 
         try
         {
@@ -162,9 +164,6 @@
                 Snackbar.Add(L["Candidates_DecisionError"].Value, Severity.Error);
             }
         }
-        catch
-        {
-            Snackbar.Add(L["Candidates_ConnectionError"].Value, Severity.Error);
-        }
+        catch { }
     }
 }

@@ -51,6 +51,15 @@
             }
         </MudSelect>
 
+        <div class="d-flex align-center">
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mr-2">@L["MyTfes_FilterByStatus"]</MudText>
+            <MudSelect T="string" @bind-Value="StatusFilter" Variant="Variant.Text" Margin="Margin.Dense" Class="font-weight-bold" Style="min-width: 140px;">
+                <MudSelectItem Value="@("all")">@L["MyTfes_FilterStatus_All"]</MudSelectItem>
+                <MudSelectItem Value="@("open")">@L["MyTfes_FilterStatus_Open"]</MudSelectItem>
+                <MudSelectItem Value="@("completed")">@L["MyTfes_FilterStatus_Completed"]</MudSelectItem>
+            </MudSelect>
+        </div>
+
         <MudSpacer />
 
         <div class="d-flex align-center">
@@ -130,6 +139,17 @@
         }
     }
 
+    private string _statusFilter = "all";
+    public string StatusFilter
+    {
+        get => _statusFilter;
+        set
+        {
+            _statusFilter = value;
+            _currentPage = 1;
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -138,15 +158,19 @@
             _proposals = await client.GetFromJsonAsync<List<TfeDto>>("api/match/tfe/author") ?? new();
             _availableTags = await client.GetFromJsonAsync<List<TagDto>>("api/match/tag") ?? new();
         }
-        catch
-        {
-            Snackbar.Add(L["MyTfes_LoadError"].Value, Severity.Error);
-        }
+        catch { }
     }
 
     private IEnumerable<TfeDto> GetFilteredProposals()
     {
         var result = _proposals.AsEnumerable();
+
+        result = StatusFilter switch
+        {
+            "completed" => result.Where(p => p.Status == TfeStatus.Completed),
+            "open"      => result.Where(p => p.Status == TfeStatus.Open),
+            _           => result
+        };
 
         if (!string.IsNullOrWhiteSpace(SearchQuery))
         {
@@ -218,13 +242,9 @@
             }
             else
             {
-                var error = await response.Content.ReadAsStringAsync();
-                Snackbar.Add(L["MyTfes_DeleteError", error].Value, Severity.Error);
+                Snackbar.Add(L["MyTfes_DeleteError"].Value, Severity.Error);
             }
         }
-        catch
-        {
-            Snackbar.Add(L["MyTfes_DeleteConnectionError"].Value, Severity.Error);
-        }
+        catch { }
     }
 }

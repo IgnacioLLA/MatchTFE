@@ -77,26 +77,11 @@
         try
         {
             var client = HttpClientFactory.CreateClient("GatewayAPI");
-
             var response = await client.GetFromJsonAsync<ProfileResponse>($"api/user/profile/{UserId}");
-
             if (response != null && response.Profile != null)
-            {
                 _profile = response.Profile;
-            }
-            else
-            {
-                Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Warning);
-            }
         }
-        catch (HttpRequestException)
-        {
-            Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Error);
-        }
-        catch (Exception)
-        {
-            Snackbar.Add(L["CandidateDetail_ProfileNotFound"].Value, Severity.Error);
-        }
+        catch { }
         finally
         {
             _isLoading = false;
@@ -111,10 +96,7 @@
     private async Task HandleDecision(bool isInterested)
     {
         if (_profile == null || !TfeId.HasValue)
-        {
-            Snackbar.Add(L["CandidateDetail_NoContextError"].Value, Severity.Warning);
             return;
-        }
 
         try
         {
@@ -148,9 +130,6 @@
                 Snackbar.Add(L["CandidateDetail_DecisionError"].Value, Severity.Error);
             }
         }
-        catch
-        {
-            Snackbar.Add(L["CandidateDetail_ConnectionError"].Value, Severity.Error);
-        }
+        catch { }
     }
 }

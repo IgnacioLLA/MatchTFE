@@ -40,8 +40,7 @@
                 return;
             }
 
-            var error = await response.Content.ReadAsStringAsync();
-            _serverError = L["TfeForm_CreateError", (int)response.StatusCode, error].Value;
+            _serverError = L["TfeForm_CreateError"].Value;
         }
         catch
         {

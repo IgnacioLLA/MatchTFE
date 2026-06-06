@@ -44,7 +44,6 @@
   <data name="Role_StudentDesc"><value>University Student</value></data>
   <data name="Role_TeacherDesc"><value>University Professor</value></data>
   <data name="Role_AdminDesc"><value>System Administrator</value></data>
-  <data name="Layout_ProfileLoadError"><value>Error connecting to the profile server.</value></data>
 
   <!-- Login -->
   <data name="Login_Title"><value>Welcome back</value></data>
@@ -115,14 +114,8 @@
   <data name="Profile_Discard"><value>Discard</value></data>
   <data name="Profile_SaveChanges"><value>Save Changes</value></data>
   <data name="Profile_Logout"><value>Log out</value></data>
-  <data name="Profile_DiscardedMessage"><value>Changes discarded.</value></data>
   <data name="Profile_SavedSuccess"><value>Profile updated successfully.</value></data>
-  <data name="Profile_NotFound"><value>Profile data not found.</value></data>
-  <data name="Profile_LoadError"><value>Error loading profile: {0}</value></data>
-  <data name="Profile_SaveError"><value>Error processing the response.</value></data>
-  <data name="Profile_TagsLoadError"><value>Error loading tags: {0}</value></data>
-  <data name="Profile_ServerError"><value>Server error: {0}</value></data>
-  <data name="Profile_ConnectionError"><value>Connection error: {0}</value></data>
+  <data name="Profile_SaveError"><value>Your changes could not be saved.</value></data>
   <data name="Profile_AcademicData"><value>Academic Information</value></data>
   <data name="Profile_AcademicYear"><value>ACADEMIC YEAR</value></data>
   <data name="Profile_AcademicYearHelper"><value>Enter your current academic year.</value></data>
@@ -200,10 +193,7 @@
   <data name="Feed_AllSeenTitle"><value>You've seen everything for today!</value></data>
   <data name="Feed_AllSeenBody"><value>It looks like you've reviewed all proposals for now. Come back later to see new projects.</value></data>
   <data name="Feed_Reload"><value>Reload Proposals</value></data>
-  <data name="Feed_LoadError"><value>Error connecting to backend when fetching projects.</value></data>
-  <data name="Feed_LoadMoreError"><value>Error loading more projects.</value></data>
   <data name="Feed_DecisionError"><value>There was a problem recording your decision.</value></data>
-  <data name="Feed_ConnectionError"><value>Connection error to the server.</value></data>
 
   <!-- Match -->
   <data name="Match_Title"><value>My Matches</value></data>
@@ -236,10 +226,8 @@
   <data name="MyTfes_ColCreation"><value>CREATION</value></data>
   <data name="MyTfes_ColActions"><value>ACTIONS</value></data>
   <data name="MyTfes_ShowingOf"><value>Showing {0} of {1} publications</value></data>
-  <data name="MyTfes_LoadError"><value>Error connecting to backend when fetching data.</value></data>
   <data name="MyTfes_DeleteSuccess"><value>Proposal deleted successfully.</value></data>
-  <data name="MyTfes_DeleteError"><value>Could not delete the proposal: {0}</value></data>
-  <data name="MyTfes_DeleteConnectionError"><value>Connection error when trying to delete.</value></data>
+  <data name="MyTfes_DeleteError"><value>Could not delete the proposal.</value></data>
   <data name="MyTfes_NoDate"><value>No date</value></data>
   <data name="TfeStatus_Completed"><value>• Completed</value></data>
   <data name="TfeStatus_Open"><value>• Open</value></data>
@@ -298,10 +286,27 @@
   <data name="TfeForm_SkillsCaption"><value>Specify the technologies or knowledge the student should have.</value></data>
   <data name="TfeForm_PublishBtn"><value>Publish Proposal</value></data>
   <data name="TfeForm_UpdateBtn"><value>Update Proposal</value></data>
+  <data name="TfeForm_ReadOnlyNotice"><value>This TFE has been completed. All fields are read-only.</value></data>
+  <data name="EditTfe_FinalizeBtn"><value>Complete TFE</value></data>
+  <data name="EditTfe_CancelTfeBtn"><value>Cancel TFE</value></data>
+  <data name="EditTfe_FinalizeModal_Title"><value>Mark as completed?</value></data>
+  <data name="EditTfe_FinalizeModal_Body"><value>Once completed, no new proposals can be created and pending candidates cannot be accepted or rejected. This action cannot be undone.</value></data>
+  <data name="EditTfe_FinalizeModal_Confirm"><value>Yes, complete</value></data>
+  <data name="EditTfe_CancelModal_Title"><value>Cancel this proposal?</value></data>
+  <data name="EditTfe_CancelModal_Body"><value>Cancelling will permanently invalidate all associated candidate proposals. This action cannot be undone.</value></data>
+  <data name="EditTfe_CancelModal_Confirm"><value>Yes, cancel</value></data>
+  <data name="EditTfe_ModalCancel"><value>Go back</value></data>
+  <data name="EditTfe_FinalizeSuccess"><value>TFE marked as completed.</value></data>
+  <data name="EditTfe_CancelSuccess"><value>TFE cancelled successfully.</value></data>
+  <data name="EditTfe_StatusChangeError"><value>Could not change the TFE status.</value></data>
+  <data name="MyTfes_FilterByStatus"><value>Status:</value></data>
+  <data name="MyTfes_FilterStatus_All"><value>All</value></data>
+  <data name="MyTfes_FilterStatus_Open"><value>Active only</value></data>
+  <data name="MyTfes_FilterStatus_Completed"><value>Completed only</value></data>
+  <data name="Candidates_CompletedNotice"><value>This TFE has been completed. Candidates can no longer be accepted or rejected.</value></data>
   <data name="TfeForm_PublishedSuccess"><value>Proposal published successfully.</value></data>
   <data name="TfeForm_UpdatedSuccess"><value>Proposal updated successfully.</value></data>
   <data name="TfeForm_ConnectionError"><value>Error connecting to server. Please try again.</value></data>
-  <data name="TfeForm_LoadError"><value>Error loading proposal data.</value></data>
   <data name="TfeForm_ExpiredStatus"><value>Expired</value></data>
   <data name="TfeForm_OpenStatus"><value>Open</value></data>
 
@@ -311,14 +316,11 @@
   <data name="Candidates_NoneTitle"><value>No candidates yet</value></data>
   <data name="Candidates_NoneBody"><value>Interested students will appear here.</value></data>
   <data name="Candidates_NotFound"><value>The proposal could not be found or you don't have permission to view it.</value></data>
-  <data name="Candidates_UnavailableDecision"><value>This proposal is no longer available for decision.</value></data>
   <data name="Candidates_AlreadyResolved"><value>This proposal has already been resolved.</value></data>
   <data name="Candidates_NoPermission"><value>You do not have permission to decide on this candidate.</value></data>
   <data name="Candidates_DecisionError"><value>There was a problem recording the decision.</value></data>
-  <data name="Candidates_ConnectionError"><value>Connection error to the server.</value></data>
   <data name="Candidates_AcceptedMsg"><value>You have accepted {0}.</value></data>
   <data name="Candidates_RejectedMsg"><value>You have discarded {0}.</value></data>
-  <data name="Candidates_LoadError"><value>An error occurred: {0}</value></data>
   <data name="CandidateListItem_ViewProfile"><value>View Profile</value></data>
   <data name="CandidateListItem_Reject"><value>Not interested</value></data>
   <data name="CandidateListItem_Accept"><value>Interested</value></data>
@@ -328,13 +330,11 @@
   <data name="CandidateStatus_Expired"><value>Expired</value></data>
   <data name="CandidateDetail_Back"><value>Back</value></data>
   <data name="CandidateDetail_ProfileNotFound"><value>Could not load the user's profile.</value></data>
-  <data name="CandidateDetail_NoContextError"><value>Cannot decide on this candidate without TFE context.</value></data>
   <data name="CandidateDetail_AcceptedMsg"><value>You have accepted {0} for your proposal.</value></data>
   <data name="CandidateDetail_RejectedMsg"><value>You have discarded {0}.</value></data>
   <data name="CandidateDetail_AlreadyResolved"><value>This proposal has already been resolved.</value></data>
   <data name="CandidateDetail_NoPermission"><value>You do not have permission to decide on this candidate.</value></data>
   <data name="CandidateDetail_DecisionError"><value>There was a problem recording the decision.</value></data>
-  <data name="CandidateDetail_ConnectionError"><value>Connection error to the server.</value></data>
   <data name="CandidateDetail_Discard"><value>DISCARD</value></data>
   <data name="CandidateDetail_Interested"><value>I'M INTERESTED</value></data>
 
@@ -401,13 +401,9 @@
   <data name="Admin_SearchTagsPlaceholder"><value>Search tags...</value></data>
   <data name="Admin_ColTagName"><value>TAG NAME</value></data>
   <data name="Admin_ColTagActions"><value>ACTIONS</value></data>
-  <data name="Admin_LoadUsersError"><value>Error loading users.</value></data>
-  <data name="Admin_LoadTagsError"><value>Error loading tags.</value></data>
   <data name="Admin_ImportSuccess"><value>{0} user(s) created, {1} already existed.</value></data>
 
   <!-- TagSelector / SkillSelector -->
-  <data name="TagSelector_LoadError"><value>Error loading tags: {0}</value></data>
-  <data name="SkillSelector_LoadError"><value>Error loading skills: {0}</value></data>
 
   <!-- DiscoverLayout / TFEFeed -->
   <data name="DiscoverLayout_Title"><value>TFE Proposals</value></data>
@@ -417,8 +413,8 @@
   <data name="TfeListItem_ViewBtn"><value>View</value></data>
 
   <!-- NewTfe / EditTfe server errors -->
-  <data name="TfeForm_CreateError"><value>Could not create ({0}): {1}</value></data>
-  <data name="TfeForm_UpdateError"><value>Could not update ({0}): {1}</value></data>
+  <data name="TfeForm_CreateError"><value>Could not publish the proposal.</value></data>
+  <data name="TfeForm_UpdateError"><value>Could not update the TFE.</value></data>
 
   <!-- Admin error fallbacks -->
   <data name="Admin_UpdateRoleError"><value>Failed to update role.</value></data>

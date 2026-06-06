@@ -11,4 +11,5 @@ public interface IProposalRepository
     Task<TFEProposal?> GetTfeProposalByUserIdAsync(string userId, int tfeId);
     Task UpdateTfeProposalAsync(TFEProposal proposal);
     Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId);
+    Task ExpireProposalsByTfeIdAsync(int tfeId);
 }
