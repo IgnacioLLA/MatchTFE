@@ -34,7 +34,8 @@
 
         <MudSpacer />
 
-        <MudToggleIconButton @bind-Toggled="_isDarkMode"
+        <MudToggleIconButton Toggled="_isDarkMode"
+                             ToggledChanged="OnDarkModeToggledAsync"
                              Icon="@Icons.Material.Filled.WbSunny"
                              Color="Color.Inherit"
                              ToggledIcon="@Icons.Material.Filled.DarkMode"
@@ -113,6 +114,25 @@
     private bool _isDarkMode = false;
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var stored = await JS.InvokeAsync<string?>("blazorTheme.get");
+            if (stored is "true" or "false")
+            {
+                _isDarkMode = stored == "true";
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnDarkModeToggledAsync(bool value)
+    {
+        _isDarkMode = value;
+        await JS.InvokeVoidAsync("blazorTheme.set", value.ToString().ToLower());
+    }
 
     private ProfileDto? _globalProfile;
     private bool _isLoading = true;

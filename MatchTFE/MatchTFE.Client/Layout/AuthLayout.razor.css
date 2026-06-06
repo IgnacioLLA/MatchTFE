@@ -20,7 +20,7 @@
     font-size: 2rem !important;
     font-weight: 800;
     letter-spacing: 0.08em;
-    color: var(--app-primary-dark, #1d4ed8);
+    color: var(--mud-palette-primary-darken, #1d4ed8);
 }
 
 .auth-main-content {
@@ -36,7 +36,7 @@
     width: 100%;
     max-width: 440px;
     border-radius: 16px;
-    border: 1px solid var(--app-border, #e2e8f0);
+    border: 1px solid var(--mud-palette-lines-default, #e2e8f0);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
@@ -52,11 +52,11 @@
 ::deep .auth-title {
     font-weight: 700;
     margin-bottom: 0.5rem !important;
-    color: var(--app-text-main, #0f172a);
+    color: var(--mud-palette-text-primary, #0f172a);
 }
 
 ::deep .auth-subtitle {
-    color: var(--app-text-muted, #64748b);
+    color: var(--mud-palette-text-secondary, #64748b);
     margin-bottom: 2rem !important;
 }
 
@@ -107,11 +107,11 @@
 
 ::deep .password-label {
     font-weight: 700;
-    color: var(--app-text-main, #0f172a);
+    color: var(--mud-palette-text-primary, #0f172a);
 }
 
 ::deep .forgot-link {
-    color: var(--app-primary-dark, #1d4ed8);
+    color: var(--mud-palette-primary-darken, #1d4ed8);
     font-weight: 500;
 }
 
@@ -140,7 +140,7 @@
 
 ::deep .password-hint {
     display: block;
-    color: var(--app-text-muted, #64748b);
+    color: var(--mud-palette-text-secondary, #64748b);
     font-size: 0.75rem;
     font-style: italic;
     line-height: 1.4;
@@ -160,12 +160,12 @@
 }
 
 ::deep .auth-bottom-text {
-    color: var(--app-text-muted, #64748b);
+    color: var(--mud-palette-text-secondary, #64748b);
     margin-right: 0.5rem;
 }
 
 ::deep .auth-bottom-link {
-    color: var(--app-primary-dark, #1d4ed8);
+    color: var(--mud-palette-primary-darken, #1d4ed8);
     font-weight: 700;
 }
 

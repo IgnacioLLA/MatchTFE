@@ -23,7 +23,8 @@ public static class MatchTheme
         Background = "#f8fafc",
         Surface = "#ffffff",
         DrawerBackground = "#ffffff",
-        AppbarBackground = "#ffffff",
+        AppbarBackground = "#2563eb",  // contraste 5.1:1 con texto blanco → WCAG AA
+        AppbarText = "#ffffff",
         TextPrimary = "#0f172a",
         TextSecondary = "#475569",
         LinesDefault = "#e2e8f0",
