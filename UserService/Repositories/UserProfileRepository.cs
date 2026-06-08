@@ -138,6 +138,35 @@ public class UserProfileRepository : IUserProfileRepository
             .ToListAsync();
     }
 
+    public async Task<List<UserProfile>> GetUsersForNotificationAsync()
+    {
+        var now = DateTime.UtcNow;
+        return await _context.UserProfile
+            .Include(u => u.UserInterests).ThenInclude(ui => ui.Tag)
+            .Where(u =>
+                u.NotificationFrequency != NotificationFrequency.Disabled &&
+                !u.IsSuspended &&
+                u.Role != RoleType.Admin &&
+                (u.LastNotificationSentAt == null ||
+                 (u.NotificationFrequency == NotificationFrequency.Weekly   && u.LastNotificationSentAt <= now.AddDays(-7))  ||
+                 (u.NotificationFrequency == NotificationFrequency.Biweekly && u.LastNotificationSentAt <= now.AddDays(-14)) ||
+                 (u.NotificationFrequency == NotificationFrequency.Monthly  && u.LastNotificationSentAt <= now.AddDays(-30))))
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task MarkNotificationSentAsync(List<string> userIds)
+    {
+        var profiles = await _context.UserProfile
+            .Where(u => userIds.Contains(u.UserId))
+            .ToListAsync();
+
+        foreach (var profile in profiles)
+            profile.LastNotificationSentAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<bool> UpdateUserRoleAsync(string userId, RoleType newRole)
     {
         var profile = await _context.UserProfile.FirstOrDefaultAsync(u => u.UserId == userId);

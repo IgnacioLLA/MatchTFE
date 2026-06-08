@@ -164,6 +164,55 @@ public class TfeService : ITfeService
         return new OperationResult(true, "TFE status updated successfully.");
     }
 
+    public async Task<NotificationDataResponse> GetNotificationDataForUsersAsync(NotificationDataRequest request)
+    {
+        var data = new List<UserNotificationData>();
+        var oneWeekAgo = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7));
+
+        foreach (var user in request.Users)
+        {
+            var since = user.LastNotificationSentAt.HasValue
+                ? DateOnly.FromDateTime(user.LastNotificationSentAt.Value)
+                : (DateOnly?)null;
+
+            var pendingEntities = await _proposalRepository.GetPendingProposalsByAuthorAsync(user.UserId);
+            var pendingProposals = pendingEntities
+                .GroupBy(p => new { p.TfeId, p.Tfe.Title })
+                .Select(g => new PendingProposalSummary
+                {
+                    TfeId = g.Key.TfeId,
+                    TfeTitle = g.Key.Title,
+                    PendingCount = g.Count()
+                })
+                .ToList();
+
+            var newMatches = await _proposalRepository.GetNewMatchesSinceAsync(user.UserId, since);
+
+            var expiredEntities = await _tfeRepository.GetExpiredTfesByAuthorAsync(user.UserId);
+            var expiredTfes = expiredEntities
+                .Select(t => new ExpiredTfeSummary
+                {
+                    TfeId = t.Id,
+                    TfeTitle = t.Title,
+                    ExpirationDate = t.ExpirationDate
+                })
+                .ToList();
+            var expiredThisWeek = expiredTfes.Count(t => t.ExpirationDate >= oneWeekAgo);
+
+            data.Add(new UserNotificationData
+            {
+                UserId = user.UserId,
+                PendingProposals = pendingProposals,
+                TotalPendingProposals = pendingProposals.Sum(p => p.PendingCount),
+                NewMatchesCount = newMatches,
+                ExpiredTfes = expiredTfes,
+                ExpiredThisWeekCount = expiredThisWeek
+            });
+        }
+
+        return new NotificationDataResponse { Data = data };
+    }
+
     // -------------------------------------------------------
 
     private void CheckTfe(TfeDto tfe)

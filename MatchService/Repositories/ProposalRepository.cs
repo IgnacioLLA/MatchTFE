@@ -98,4 +98,24 @@ public class ProposalRepository : IProposalRepository
 
         return result.DistinctBy(m => new { m.MatchedUserId, m.TfeId }).ToList();
     }
+
+    public async Task<List<TFEProposal>> GetPendingProposalsByAuthorAsync(string authorId)
+    {
+        return await _context.TfeProposal
+            .Where(tp => tp.Tfe.AuthorId == authorId && tp.Status == ProposalStatus.Pending)
+            .Include(tp => tp.Tfe)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<int> GetNewMatchesSinceAsync(string userId, DateOnly? since)
+    {
+        var query = _context.TfeProposal
+            .Where(tp => tp.OriginUserId == userId && tp.Status == ProposalStatus.Accepted);
+
+        if (since.HasValue)
+            query = query.Where(tp => tp.CreationDate >= since.Value);
+
+        return await query.CountAsync();
+    }
 }

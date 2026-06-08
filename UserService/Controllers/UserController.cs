@@ -155,4 +155,23 @@ public class UserController : ControllerBase, IUserController
 
         return Ok(response);
     }
+
+    [Authorize(Roles = "Service")]
+    [HttpGet("notifications/pending")]
+    public async Task<ActionResult<PendingNotificationsResponse>> GetPendingNotifications()
+    {
+        var response = await _profileService.GetUsersForNotificationAsync();
+        return Ok(response);
+    }
+
+    [Authorize(Roles = "Service")]
+    [HttpPut("notifications/mark-sent")]
+    public async Task<IActionResult> MarkNotificationsSent([FromBody] MarkNotificationsSentRequest request)
+    {
+        if (request?.UserIds == null || request.UserIds.Count == 0)
+            return BadRequest("UserIds cannot be empty.");
+
+        await _profileService.MarkNotificationSentAsync(request.UserIds);
+        return NoContent();
+    }
 }

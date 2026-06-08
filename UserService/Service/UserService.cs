@@ -215,6 +215,49 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<PendingNotificationsResponse> GetUsersForNotificationAsync()
+    {
+        try
+        {
+            var entities = await _userRepository.GetUsersForNotificationAsync();
+            var dtos = entities.Select(u => new UserNotificationDto
+            {
+                UserId = u.UserId,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                NotificationFrequency = u.NotificationFrequency,
+                LastNotificationSentAt = u.LastNotificationSentAt
+            }).ToList();
+
+            return new PendingNotificationsResponse
+            {
+                Error = new OperationResult(true, string.Empty),
+                Users = dtos
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while retrieving users for notification.");
+            return new PendingNotificationsResponse
+            {
+                Error = new OperationResult(false, "Could not retrieve users for notification.", "DatabaseError")
+            };
+        }
+    }
+
+    public async Task MarkNotificationSentAsync(List<string> userIds)
+    {
+        try
+        {
+            await _userRepository.MarkNotificationSentAsync(userIds);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while marking notifications as sent.");
+        }
+    }
+
     // --------------------------------------------------
 
     private ProfileDto GetProfileDto(UserProfile profile)

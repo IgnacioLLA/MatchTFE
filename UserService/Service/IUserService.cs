@@ -11,5 +11,7 @@ namespace UserService.Service
         Task<RoleUpdateResponse> UpdateUserRoleAsync(string userId, RoleType newRole);
         Task<SuspensionUpdateResponse> UpdateUserSuspensionAsync(string userId, bool isSuspended);
         Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request);
+        Task<PendingNotificationsResponse> GetUsersForNotificationAsync();
+        Task MarkNotificationSentAsync(List<string> userIds);
     }
 }

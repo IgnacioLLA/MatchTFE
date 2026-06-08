@@ -1,5 +1,4 @@
 using TFELibrary.Data;
-using TFELibrary.Shared;
 
 namespace MatchService.Repositories;
 
@@ -13,4 +12,5 @@ public interface ITfeRepository
     Task<bool> DeleteAsync(int id, string authorId);
     Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count);
     Task UpdateStatusAsync(int id, TfeStatus status);
+    Task<List<TFE>> GetExpiredTfesByAuthorAsync(string authorId);
 }

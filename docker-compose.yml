@@ -98,6 +98,22 @@ services:
     build:
       context: .
       dockerfile: NotificationService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__Issuer=MatchTFE_AuthService
+      - JwtSettings__Audience=MatchTFE_Clients
+      - USER_SERVICE_BASE_URL=http://userservice:8080/
+      - MATCH_SERVICE_BASE_URL=http://matchservice:8080/
+      - EmailSettings__Host=smtp.gmail.com
+      - EmailSettings__Port=587
+      - EmailSettings__User=${SMTP_USER}
+      - EmailSettings__Password=${SMTP_PASSWORD}
+      - EmailSettings__FromName=MatchTFE
+    depends_on:
+      - userservice
+      - matchservice
 
 volumes:
   postgres_data:

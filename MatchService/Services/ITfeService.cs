@@ -11,4 +11,5 @@ public interface ITfeService
     Task<bool> DeleteTfeAsync(int id, string authorId);
     Task<TfeRecommendedResponse> GetRecommendedTfesAsync(string userId, TfeRecommendedRequest request);
     Task<OperationResult> ChangeTfeStatusAsync(int id, TfeStatus newStatus, string authorId);
+    Task<NotificationDataResponse> GetNotificationDataForUsersAsync(NotificationDataRequest request);
 }

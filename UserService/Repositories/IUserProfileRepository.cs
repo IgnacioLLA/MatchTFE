@@ -12,5 +12,7 @@ namespace UserService.Repositories
         Task<bool> UpdateUserRoleAsync(string userId, RoleType newRole);
         Task<bool> UpdateUserSuspensionAsync(string userId, bool isSuspended);
         Task<List<UserProfile>> GetAllProfilesAsync();
+        Task<List<UserProfile>> GetUsersForNotificationAsync();
+        Task MarkNotificationSentAsync(List<string> userIds);
     }
 }

@@ -342,4 +342,23 @@ public class MatchController : ControllerBase, IMatchController
         }
         return Ok(response);
     }
+
+    [Authorize(Roles = "Service")]
+    [HttpPost("notifications/data")]
+    public async Task<ActionResult<NotificationDataResponse>> GetNotificationData([FromBody] NotificationDataRequest request)
+    {
+        if (request?.Users == null || request.Users.Count == 0)
+            return BadRequest("Users list cannot be empty.");
+
+        try
+        {
+            var response = await _tfeService.GetNotificationDataForUsersAsync(request);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting notification data.");
+            return StatusCode(500);
+        }
+    }
 }
