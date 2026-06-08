@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Security.Claims;
-using TFELibrary.Data;
 using TFELibrary.Shared;
 using UserService.Controllers;
 using UserService.Service;

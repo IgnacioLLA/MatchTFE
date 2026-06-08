@@ -1,11 +1,8 @@
 ﻿using AuthService.Controllers;
-using AuthService.Data;
 using AuthService.Repositories;
 using AuthService.Service;
 using Autofac;
 using MatchTFE.AuthService.Repositories;
-using Microsoft.EntityFrameworkCore;
-using TFELibrary.Data;
 
 namespace AuthService.Infrastructure
 {

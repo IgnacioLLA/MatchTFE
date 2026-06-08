@@ -10,18 +10,18 @@ namespace MatchTFE.UnitTest.MatchService;
 [TestClass]
 public class TfeServiceTests
 {
-    private Mock<ITfeRepository>      _tfeRepoMock      = null!;
-    private Mock<ITagRepository>      _tagRepoMock      = null!;
+    private Mock<ITfeRepository> _tfeRepoMock = null!;
+    private Mock<ITagRepository> _tagRepoMock = null!;
     private Mock<IProposalRepository> _proposalRepoMock = null!;
     private TfeService _service = null!;
 
     [TestInitialize]
     public void Setup()
     {
-        _tfeRepoMock      = new Mock<ITfeRepository>();
-        _tagRepoMock      = new Mock<ITagRepository>();
+        _tfeRepoMock = new Mock<ITfeRepository>();
+        _tagRepoMock = new Mock<ITagRepository>();
         _proposalRepoMock = new Mock<IProposalRepository>();
-        _service          = new TfeService(_tfeRepoMock.Object, _tagRepoMock.Object, _proposalRepoMock.Object);
+        _service = new TfeService(_tfeRepoMock.Object, _tagRepoMock.Object, _proposalRepoMock.Object);
 
         // MapTagsAndSkillsAsync usa GetByNamesAsync (bulk). Default: diccionario vacío.
         _tagRepoMock.Setup(r => r.GetByNamesAsync(It.IsAny<IEnumerable<string>>()))
@@ -31,33 +31,33 @@ public class TfeServiceTests
     // -- helpers --
 
     private static TfeCreationRequest CreateValidRequest(
-        string title       = "Valid Title",
+        string title = "Valid Title",
         string description = "Valid Description",
-        DateTime? expDate  = null) => new TfeCreationRequest
-    {
-        Tfe = new TfeDto
+        DateTime? expDate = null) => new TfeCreationRequest
         {
-            Title             = title,
-            Description       = description,
-            ExpirationDate    = expDate ?? DateTime.Today.AddDays(2),
-            EstimatedDelivery = DateTime.Today.AddDays(30),
-            Topics            = new List<TagDto>(),
-            RequiredSkills    = new List<SkillDto>()
-        }
-    };
+            Tfe = new TfeDto
+            {
+                Title = title,
+                Description = description,
+                ExpirationDate = expDate ?? DateTime.Today.AddDays(2),
+                EstimatedDelivery = DateTime.Today.AddDays(30),
+                Topics = new List<TagDto>(),
+                RequiredSkills = new List<SkillDto>()
+            }
+        };
 
     private static TFE CreateTfeEntity(int id, string authorId, DateOnly? expirationDate = null) => new TFE
     {
-        Id             = id,
-        AuthorId       = authorId,
-        Title          = "TFE Title",
-        Description    = "TFE Description",
+        Id = id,
+        AuthorId = authorId,
+        Title = "TFE Title",
+        Description = "TFE Description",
         ExpirationDate = expirationDate ?? DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
         EstimatedDelivery = DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
-        CreationDate   = DateOnly.FromDateTime(DateTime.Today),
-        Status         = TfeStatus.Open,
-        Author         = new UserProfile { FirstName = "Author", LastName = "Name" },
-        Topics         = new List<Tag>(),
+        CreationDate = DateOnly.FromDateTime(DateTime.Today),
+        Status = TfeStatus.Open,
+        Author = new UserProfile { FirstName = "Author", LastName = "Name" },
+        Topics = new List<Tag>(),
         RequiredSkills = new List<TfeRequiredSkill>()
     };
 
@@ -65,7 +65,7 @@ public class TfeServiceTests
         _tfeRepoMock.Setup(r => r.CreateAsync(It.IsAny<TFE>()))
             .ReturnsAsync((TFE t) =>
             {
-                t.Id     = id;
+                t.Id = id;
                 t.Author = new UserProfile { FirstName = "Author", LastName = "Name" };
                 return t;
             });
@@ -233,9 +233,9 @@ public class TfeServiceTests
     public async Task GetTfeByIdAsync_WhenTfeFound_ReturnsMappedDto()
     {
         var tfe = CreateTfeEntity(1, "author-1");
-        tfe.Title       = "My TFE";
+        tfe.Title = "My TFE";
         tfe.Description = "My Description";
-        tfe.Topics      = new List<Tag> { new Tag { Id = 1, Name = "AI" } };
+        tfe.Topics = new List<Tag> { new Tag { Id = 1, Name = "AI" } };
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
 
         var result = await _service.GetTfeByIdAsync(1);
@@ -360,11 +360,11 @@ public class TfeServiceTests
             {
                 Tfe = new TfeDto
                 {
-                    Title          = "T",
-                    Description    = "D",
+                    Title = "T",
+                    Description = "D",
                     ExpirationDate = DateTime.Today,
                     EstimatedDelivery = DateTime.Today.AddDays(30),
-                    Topics         = new List<TagDto>(),
+                    Topics = new List<TagDto>(),
                     RequiredSkills = new List<SkillDto>()
                 }
             }, "author-1"));
@@ -374,7 +374,7 @@ public class TfeServiceTests
     public async Task UpdateTfeAsync_WhenExpirationDateUnchanged_DoesNotValidateDateAndReturnsTrue()
     {
         // Aunque la fecha esté expirada, si no cambia no se valida
-        var pastDate    = DateTime.Today.AddDays(-10);
+        var pastDate = DateTime.Today.AddDays(-10);
         var existingTfe = CreateTfeEntity(1, "author-1", DateOnly.FromDateTime(pastDate));
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existingTfe);
         _tfeRepoMock.Setup(r => r.UpdateAsync(It.IsAny<TFE>())).Returns(Task.CompletedTask);
@@ -383,12 +383,12 @@ public class TfeServiceTests
         {
             Tfe = new TfeDto
             {
-                Title             = "Updated",
-                Description       = "Updated desc",
-                ExpirationDate    = pastDate, // igual a la existente
+                Title = "Updated",
+                Description = "Updated desc",
+                ExpirationDate = pastDate, // igual a la existente
                 EstimatedDelivery = DateTime.Today.AddDays(30),
-                Topics            = new List<TagDto>(),
-                RequiredSkills    = new List<SkillDto>()
+                Topics = new List<TagDto>(),
+                RequiredSkills = new List<SkillDto>()
             }
         }, "author-1");
 
@@ -406,12 +406,12 @@ public class TfeServiceTests
             {
                 Tfe = new TfeDto
                 {
-                    Title             = "T",
-                    Description       = "D",
-                    ExpirationDate    = DateTime.Today.AddDays(2),
+                    Title = "T",
+                    Description = "D",
+                    ExpirationDate = DateTime.Today.AddDays(2),
                     EstimatedDelivery = DateTime.Today.AddDays(30),
-                    Topics            = new List<TagDto> { new TagDto { Name = "UnknownTag" } },
-                    RequiredSkills    = new List<SkillDto>()
+                    Topics = new List<TagDto> { new TagDto { Name = "UnknownTag" } },
+                    RequiredSkills = new List<SkillDto>()
                 }
             }, "author-1"));
     }
@@ -428,12 +428,12 @@ public class TfeServiceTests
             {
                 Tfe = new TfeDto
                 {
-                    Title             = "T",
-                    Description       = "D",
-                    ExpirationDate    = DateTime.Today.AddDays(2),
+                    Title = "T",
+                    Description = "D",
+                    ExpirationDate = DateTime.Today.AddDays(2),
                     EstimatedDelivery = DateTime.Today.AddDays(30),
-                    Topics            = new List<TagDto>(),
-                    RequiredSkills    = new List<SkillDto>()
+                    Topics = new List<TagDto>(),
+                    RequiredSkills = new List<SkillDto>()
                 }
             }, "author-1"));
     }
@@ -448,12 +448,12 @@ public class TfeServiceTests
         {
             Tfe = new TfeDto
             {
-                Title             = "Updated Title",
-                Description       = "Updated Desc",
-                ExpirationDate    = DateTime.Today.AddDays(2),
+                Title = "Updated Title",
+                Description = "Updated Desc",
+                ExpirationDate = DateTime.Today.AddDays(2),
                 EstimatedDelivery = DateTime.Today.AddDays(30),
-                Topics            = new List<TagDto>(),
-                RequiredSkills    = new List<SkillDto>()
+                Topics = new List<TagDto>(),
+                RequiredSkills = new List<SkillDto>()
             }
         }, "author-1");
 

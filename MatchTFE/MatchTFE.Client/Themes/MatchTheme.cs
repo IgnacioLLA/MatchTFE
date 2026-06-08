@@ -1,6 +1,7 @@
 ﻿using MudBlazor;
 
 namespace MatchTFE.Client.Themes;
+
 public static class MatchTheme
 {
     private static readonly string[] _fontFamily = ["Inter", "Helvetica", "Arial", "sans-serif"];

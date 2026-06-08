@@ -93,7 +93,14 @@ services:
     depends_on:
       - postgresdb
 
+  notificationservice:
+    image: ${DOCKER_REGISTRY-}notificationservice
+    build:
+      context: .
+      dockerfile: NotificationService/Dockerfile
+
 volumes:
   postgres_data:
   matchtfe_dataprotection:
+
 

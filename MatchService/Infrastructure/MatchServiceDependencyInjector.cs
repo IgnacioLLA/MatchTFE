@@ -1,8 +1,7 @@
 ﻿using Autofac;
-using Autofac.Core;
 using MatchService.Controllers;
-using MatchService.Services;
 using MatchService.Repositories;
+using MatchService.Services;
 
 namespace MatchService.Infrastructure
 {

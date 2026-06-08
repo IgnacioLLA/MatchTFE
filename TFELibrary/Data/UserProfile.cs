@@ -39,4 +39,8 @@ public class UserProfile
     // --- TEACHER ---
     public string? Department { get; set; }
     public string? OfficeLocation { get; set; }
+
+    // --- NOTIFICATIONS ---
+    public NotificationFrequency NotificationFrequency { get; set; } = NotificationFrequency.Disabled;
+    public DateTime? LastNotificationSentAt { get; set; }
 }

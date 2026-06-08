@@ -1,5 +1,4 @@
-﻿using TFELibrary.Data;
-using TFELibrary.Shared;
+﻿using TFELibrary.Shared;
 
 namespace MatchService.Services
 {

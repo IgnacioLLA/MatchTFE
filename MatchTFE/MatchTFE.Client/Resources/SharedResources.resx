@@ -152,6 +152,13 @@
   <data name="StudentHome_InterestsAlertDesc"><value>Tu perfil aún no tiene intereses configurados. Nuestro sistema los utiliza para sugerirte los proyectos más relevantes y mejorar la calidad de tus matches. Cuantos más añadas, más personalizadas serán tus recomendaciones.</value></data>
   <data name="StudentHome_InterestsAlertBtn"><value>Añadir intereses ahora</value></data>
   <data name="Profile_NoInterestsWarning"><value>Aún no has añadido ningún interés. El sistema de recomendaciones los usa para sugerirte los proyectos y tutores más relevantes para ti.</value></data>
+  <data name="Profile_Notifications"><value>Notificaciones</value></data>
+  <data name="Profile_NotificationFrequency"><value>FRECUENCIA DE CORREOS</value></data>
+  <data name="Profile_NotificationFrequencyHelper"><value>Recibirás un resumen de los proyectos y novedades que coincidan con tu perfil.</value></data>
+  <data name="Profile_NotifDisabled"><value>Desactivado</value></data>
+  <data name="Profile_NotifWeekly"><value>Una vez a la semana</value></data>
+  <data name="Profile_NotifBiweekly"><value>Cada 2 semanas</value></data>
+  <data name="Profile_NotifMonthly"><value>Una vez al mes</value></data>
 
   <data name="TeacherHome_Tag"><value>PROFESOR</value></data>
   <data name="TeacherHome_Title"><value>Encuentra al candidato ideal para tu TFE</value></data>

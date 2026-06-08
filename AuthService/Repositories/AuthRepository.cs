@@ -1,5 +1,5 @@
-﻿using AuthService.Repositories;
-using AuthService.Data;
+﻿using AuthService.Data;
+using AuthService.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

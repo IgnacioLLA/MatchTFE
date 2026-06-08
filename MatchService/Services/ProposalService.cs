@@ -1,5 +1,4 @@
 using MatchService.Repositories;
-using Microsoft.Extensions.Logging;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 

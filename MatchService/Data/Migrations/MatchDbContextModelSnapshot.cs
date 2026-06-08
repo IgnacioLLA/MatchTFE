@@ -17,7 +17,7 @@ namespace MatchService.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "10.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -191,6 +191,12 @@ namespace MatchService.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("character varying(150)");
+
+                    b.Property<DateTime?>("LastNotificationSentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("NotificationFrequency")
+                        .HasColumnType("integer");
 
                     b.Property<string>("OfficeLocation")
                         .HasColumnType("text");

@@ -17,7 +17,7 @@ public class TagServiceTests
     public void Setup()
     {
         _tagRepoMock = new Mock<ITagRepository>();
-        _service     = new TagService(_tagRepoMock.Object);
+        _service = new TagService(_tagRepoMock.Object);
     }
 
     // =========================================================================

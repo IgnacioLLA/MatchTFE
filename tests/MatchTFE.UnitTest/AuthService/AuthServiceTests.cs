@@ -1,6 +1,5 @@
 using AuthService.Data;
 using AuthService.Repositories;
-using AuthService.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +9,6 @@ using Moq;
 using Moq.Protected;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using TFELibrary.Shared;
 

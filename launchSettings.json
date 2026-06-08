@@ -8,7 +8,8 @@
         "apigateway": "StartDebugging",
         "authservice": "StartDebugging",
         "userservice": "StartDebugging",
-        "matchservice": "StartDebugging"
+        "matchservice": "StartDebugging",
+        "notificationservice": "StartDebugging"
       }
     }
   }

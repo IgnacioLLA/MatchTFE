@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TFELibrary.Data;
-using TFELibrary.Shared;
+﻿using TFELibrary.Shared;
 
 namespace UserService.Service
 {

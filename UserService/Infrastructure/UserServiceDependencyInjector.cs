@@ -1,7 +1,5 @@
 ﻿using Autofac;
-using Microsoft.EntityFrameworkCore;
 using UserService.Controllers;
-using UserService.Data;
 using UserService.Repositories;
 using UserService.Service;
 

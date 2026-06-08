@@ -85,7 +85,7 @@ builder.Services.AddControllers().AddControllersAsServices();
 var dbConnectionString = Environment.GetEnvironmentVariable("DB_CONNECTION")
                          ?? builder.Configuration.GetConnectionString("DbConnection");
 builder.Services.AddDbContext<AuthDbContext>(options =>
-    options.UseNpgsql(dbConnectionString, x => 
+    options.UseNpgsql(dbConnectionString, x =>
         x.MigrationsHistoryTable("__AuthMigrationsHistory")));
 
 var app = builder.Build();

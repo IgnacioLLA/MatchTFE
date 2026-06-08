@@ -1,7 +1,6 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Npgsql;
+using System.ComponentModel.DataAnnotations;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 using UserService.Repositories;
@@ -107,7 +106,8 @@ public class UserService : IUserService
             Role = request.Profile.Role,
             AcademicYear = request.Profile.AcademicYear,
             Department = request.Profile.Department,
-            OfficeLocation = request.Profile.OfficeLocation
+            OfficeLocation = request.Profile.OfficeLocation,
+            NotificationFrequency = request.Profile.NotificationFrequency
         };
 
         try
@@ -236,7 +236,8 @@ public class UserService : IUserService
                 Level = s.Level
             }).ToList() ?? new List<SkillDto>(),
             Department = profile.Department ?? string.Empty,
-            OfficeLocation = profile.OfficeLocation ?? string.Empty
+            OfficeLocation = profile.OfficeLocation ?? string.Empty,
+            NotificationFrequency = profile.NotificationFrequency
         };
     }
 

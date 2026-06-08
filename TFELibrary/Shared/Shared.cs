@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using TFELibrary.Data;
 
 namespace TFELibrary.Shared;
 
@@ -15,6 +14,14 @@ public enum RoleType
     Student,
     Teacher,
     Admin
+}
+
+public enum NotificationFrequency
+{
+    Disabled = 0,
+    Weekly = 1,
+    Biweekly = 2,
+    Monthly = 3
 }
 
 public class TfeDto
@@ -102,6 +109,11 @@ public class ProfileDto
     // ----------------------------------
     public string Department { get; set; } = string.Empty;
     public string OfficeLocation { get; set; } = string.Empty;
+
+    // ----------------------------------
+    // NOTIFICATIONS
+    // ----------------------------------
+    public NotificationFrequency NotificationFrequency { get; set; } = NotificationFrequency.Disabled;
 }
 
 public class SkillDto

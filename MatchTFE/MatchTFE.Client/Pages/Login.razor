@@ -9,6 +9,7 @@
 
 <MudCard Class="auth-card">
     <MudCardContent Class="auth-card-content">
+        <form @onsubmit="HandleLoginAsync" @onsubmit:preventDefault>
         <MudText Typo="Typo.h5" Class="auth-title">@L["Login_Title"]</MudText>
         <MudText Typo="Typo.body2" Class="auth-subtitle">@L["Login_Subtitle"]</MudText>
 
@@ -61,12 +62,11 @@
                       Error="@(_passwordError != null)"
                       ErrorText="@_passwordError" />
 
-        <MudButton ButtonType="ButtonType.Button"
+        <MudButton ButtonType="ButtonType.Submit"
                    Variant="Variant.Filled"
                    Color="Color.Primary"
                    FullWidth="true"
                    Disabled="@_isLoading"
-                   OnClick="HandleLoginAsync"
                    Class="auth-button">
             @if (_isLoading)
             {
@@ -83,6 +83,7 @@
             <MudText Typo="Typo.body2" Class="auth-bottom-text">@L["Login_NoAccount"]</MudText>
             <MudLink Href="/register" Typo="Typo.body2" Underline="Underline.Hover" Class="auth-bottom-link">@L["Login_CreateAccount"]</MudLink>
         </div>
+        </form>
     </MudCardContent>
 </MudCard>
 

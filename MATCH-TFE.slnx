@@ -9,6 +9,7 @@
   <Project Path="MatchService/MatchService.csproj" Id="37077eff-b988-4518-89a8-920652653d11" />
   <Project Path="MatchTFE/MatchTFE.Client/MatchTFE.Client.csproj" />
   <Project Path="MatchTFE/MatchTFE/MatchTFE.csproj" />
+  <Project Path="NotificationService/NotificationService.csproj" Id="13aafc15-78a0-40fe-82fd-c10706a57a3b" />
   <Project Path="TFELibrary/TFELibrary.csproj" />
   <Project Path="UserService/UserService.csproj" Id="7bf751aa-e810-46a3-b79c-a7de7357d144" />
 </Solution>

@@ -57,6 +57,7 @@ public class UserProfileRepository : IUserProfileRepository
         existing.Department = entity.Department;
         existing.OfficeLocation = entity.OfficeLocation;
         existing.Role = entity.Role;
+        existing.NotificationFrequency = entity.NotificationFrequency;
 
         await UpdateInterestsAsync(existing.UserId, interests);
         await UpdateSkillsAsync(existing.UserId, skills);

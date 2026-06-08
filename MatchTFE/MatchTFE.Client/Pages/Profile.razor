@@ -85,6 +85,27 @@ else
 
         @if (!IsAdmin)
         {
+            @* NOTIFICATIONS *@
+            <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2">
+                <MudCardHeader>
+                    <CardHeaderAvatar><MudIcon Icon="@Icons.Material.Filled.Notifications" Color="Color.Primary" /></CardHeaderAvatar>
+                    <CardHeaderContent><MudText Typo="Typo.h6" Class="font-weight-bold">@L["Profile_Notifications"]</MudText></CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudSelect @bind-Value="_profileDto.NotificationFrequency"
+                               Label="@L["Profile_NotificationFrequency"]"
+                               Variant="Variant.Outlined"
+                               Margin="Margin.Dense"
+                               Class="rounded-lg"
+                               HelperText="@L["Profile_NotificationFrequencyHelper"]">
+                        <MudSelectItem Value="NotificationFrequency.Disabled">@L["Profile_NotifDisabled"]</MudSelectItem>
+                        <MudSelectItem Value="NotificationFrequency.Weekly">@L["Profile_NotifWeekly"]</MudSelectItem>
+                        <MudSelectItem Value="NotificationFrequency.Biweekly">@L["Profile_NotifBiweekly"]</MudSelectItem>
+                        <MudSelectItem Value="NotificationFrequency.Monthly">@L["Profile_NotifMonthly"]</MudSelectItem>
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+
             @* INTERESTS *@
             <MudCard Elevation="0" Class="border-all rounded-xl mb-6 pa-2"
                      Style="@(_profileDto.Interests.Count == 0 ? "border-color: var(--mud-palette-warning) !important; border-left: 4px solid var(--mud-palette-warning) !important; background: rgba(var(--mud-palette-warning-rgb), 0.05);" : "")">
@@ -304,6 +325,7 @@ else
             Tag = s.Tag,
             Level = s.Level
         }).ToList();
+        GlobalProfile.NotificationFrequency = updatedProfile.NotificationFrequency;
     }
 
     private string GetRoleDescription(RoleType role) => role switch

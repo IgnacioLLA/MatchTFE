@@ -11,42 +11,42 @@ namespace MatchTFE.UnitTest.MatchService;
 public class ProposalServiceTests
 {
     private Mock<IProposalRepository> _proposalRepoMock = null!;
-    private Mock<ITfeRepository>      _tfeRepoMock      = null!;
-    private Mock<ILogger<ProposalService>> _loggerMock   = null!;
+    private Mock<ITfeRepository> _tfeRepoMock = null!;
+    private Mock<ILogger<ProposalService>> _loggerMock = null!;
     private ProposalService _service = null!;
 
     [TestInitialize]
     public void Setup()
     {
         _proposalRepoMock = new Mock<IProposalRepository>();
-        _tfeRepoMock      = new Mock<ITfeRepository>();
-        _loggerMock       = new Mock<ILogger<ProposalService>>();
-        _service          = new ProposalService(_proposalRepoMock.Object, _tfeRepoMock.Object, _loggerMock.Object);
+        _tfeRepoMock = new Mock<ITfeRepository>();
+        _loggerMock = new Mock<ILogger<ProposalService>>();
+        _service = new ProposalService(_proposalRepoMock.Object, _tfeRepoMock.Object, _loggerMock.Object);
     }
 
     // -- helpers --
 
     private static TFE CreateValidTfe(int id = 1, string authorId = "author-1", bool expired = false) => new TFE
     {
-        Id             = id,
-        AuthorId       = authorId,
-        Title          = "Test TFE",
-        Description    = "Test description",
+        Id = id,
+        AuthorId = authorId,
+        Title = "Test TFE",
+        Description = "Test description",
         ExpirationDate = expired
             ? DateOnly.FromDateTime(DateTime.Today)           // hoy = inválido
             : DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
         EstimatedDelivery = DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
-        CreationDate   = DateOnly.FromDateTime(DateTime.Today),
-        Status         = TfeStatus.Open,
-        Topics         = new List<Tag>(),
+        CreationDate = DateOnly.FromDateTime(DateTime.Today),
+        Status = TfeStatus.Open,
+        Topics = new List<Tag>(),
         RequiredSkills = new List<TfeRequiredSkill>()
     };
 
     private static TFEProposal CreateProposal(string userId, int tfeId, ProposalStatus status) => new TFEProposal
     {
         OriginUserId = userId,
-        TfeId        = tfeId,
-        Status       = status,
+        TfeId = tfeId,
+        Status = status,
         CreationDate = DateOnly.FromDateTime(DateTime.Today)
     };
 

@@ -152,6 +152,13 @@
   <data name="StudentHome_InterestsAlertDesc"><value>Your profile has no interests set yet. Our system uses them to suggest the most relevant projects and improve the quality of your matches. The more you add, the more personalised your recommendations will be.</value></data>
   <data name="StudentHome_InterestsAlertBtn"><value>Add interests now</value></data>
   <data name="Profile_NoInterestsWarning"><value>You haven't added any interests yet. The recommendation system uses them to suggest the most relevant projects and supervisors for you.</value></data>
+  <data name="Profile_Notifications"><value>Notifications</value></data>
+  <data name="Profile_NotificationFrequency"><value>EMAIL FREQUENCY</value></data>
+  <data name="Profile_NotificationFrequencyHelper"><value>You will receive a summary of projects and updates matching your profile.</value></data>
+  <data name="Profile_NotifDisabled"><value>Disabled</value></data>
+  <data name="Profile_NotifWeekly"><value>Once a week</value></data>
+  <data name="Profile_NotifBiweekly"><value>Every 2 weeks</value></data>
+  <data name="Profile_NotifMonthly"><value>Once a month</value></data>
 
   <data name="TeacherHome_Tag"><value>TEACHER</value></data>
   <data name="TeacherHome_Title"><value>Find the ideal candidate for your TFE</value></data>
