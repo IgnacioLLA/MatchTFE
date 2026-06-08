@@ -85,7 +85,7 @@ public class AuthControllerTests
     public async Task Login_WhenCredentialsInvalid_ReturnsUnauthorized()
     {
         _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequestDto>()))
-            .ReturnsAsync((new LoginResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Invalid credentials." } }, null));
+            .ReturnsAsync((new LoginResponseDto { Error = new OperationResult(false, "Invalid credentials.") }, null));
 
         var result = await _controller.Login(new LoginRequestDto { Email = "x@x.com", Password = "wrong" });
 
@@ -98,7 +98,7 @@ public class AuthControllerTests
         _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequestDto>()))
             .ReturnsAsync((new LoginResponseDto
             {
-                AuthData = new AuthResultDto { IsSuccess = true },
+                Error = new OperationResult(true, string.Empty),
                 FirstName = "Test",
                 LastName = "User"
             }, null));
@@ -128,8 +128,7 @@ public class AuthControllerTests
         _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
             .ReturnsAsync((new RegisterResponseDto
             {
-                Error = new OperationResult(false, "Email already taken.", "DuplicateEmail"),
-                AuthData = new AuthResultDto { IsSuccess = false }
+                Error = new OperationResult(false, "Email already taken.", "DuplicateEmail")
             }, null));
 
         var result = await _controller.Register(new RegisterRequestDto { Email = "dup@test.com" });
@@ -143,8 +142,7 @@ public class AuthControllerTests
         _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
             .ReturnsAsync((new RegisterResponseDto
             {
-                Error = new OperationResult(false, "Could not create profile."),
-                AuthData = new AuthResultDto { IsSuccess = false }
+                Error = new OperationResult(false, "Could not create profile.")
             }, null));
 
         var result = await _controller.Register(new RegisterRequestDto { Email = "x@x.com" });
@@ -158,8 +156,7 @@ public class AuthControllerTests
         _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
             .ReturnsAsync((new RegisterResponseDto
             {
-                Error = new OperationResult(true, string.Empty),
-                AuthData = new AuthResultDto { IsSuccess = true }
+                Error = new OperationResult(true, string.Empty)
             }, null));
 
         var result = await _controller.Register(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
@@ -194,7 +191,7 @@ public class AuthControllerTests
     {
         SetCookies(CreateTestJwt("user-1"), "refresh-token");
         _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequestDto>()))
-            .ReturnsAsync((new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = false, Message = "Token revocado." } }, null));
+            .ReturnsAsync((new RefreshTokenResponseDto { Error = new OperationResult(false, "Token revocado.") }, null));
 
         var result = await _controller.RefreshToken();
 
@@ -206,7 +203,7 @@ public class AuthControllerTests
     {
         SetCookies(CreateTestJwt("user-1"), "refresh-token");
         _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequestDto>()))
-            .ReturnsAsync((new RefreshTokenResponseDto { AuthData = new AuthResultDto { IsSuccess = true } }, null));
+            .ReturnsAsync((new RefreshTokenResponseDto { Error = new OperationResult(true, string.Empty) }, null));
 
         var result = await _controller.RefreshToken();
 

@@ -33,7 +33,7 @@ public class AuthController : ControllerBase, IAuthController
 
         var (response, tokens) = await _authService.LoginAsync(loginDto);
 
-        if (!response.AuthData.IsSuccess)
+        if (!response.Error.IsSuccess)
         {
             return Unauthorized(response);
         }
@@ -144,7 +144,7 @@ public class AuthController : ControllerBase, IAuthController
 
         var (response, tokens) = await _authService.RefreshTokenAsync(requestDto);
 
-        if (!response.AuthData.IsSuccess)
+        if (!response.Error.IsSuccess)
         {
             return Unauthorized(response);
         }

@@ -76,7 +76,7 @@
   <data name="Register_ConfirmEmailPlaceholder"><value>Repeat your institutional email</value></data>
   <data name="Register_Password"><value>Password</value></data>
   <data name="Register_PasswordPlaceholder"><value>Minimum 6 characters</value></data>
-  <data name="Register_PasswordHint"><value>Must be at least 6 characters with an uppercase letter, a number, and a special character.</value></data>
+  <data name="Register_PasswordHint"><value>Must be at least 6 characters with an uppercase letter, a lowercase letter, a number, and a special character.</value></data>
   <data name="Register_Submit"><value>Create account</value></data>
   <data name="Register_Loading"><value>Creating account...</value></data>
   <data name="Register_AlreadyHaveAccount"><value>Already have an account?</value></data>
@@ -96,6 +96,8 @@
   <data name="Register_PasswordTooShort"><value>Password must be at least 6 characters.</value></data>
   <data name="Register_ConfirmPasswordRequired"><value>Please confirm your password.</value></data>
   <data name="Register_PasswordMismatch"><value>Passwords do not match.</value></data>
+  <data name="Register_EmailAlreadyTaken"><value>This email is already registered. Try signing in.</value></data>
+  <data name="Register_PasswordComplexityError"><value>Password must include at least one uppercase letter, one lowercase letter, one number, and one special character.</value></data>
   <data name="Login_ForgotPasswordInfo"><value>If you have trouble logging in, please contact your university administration to request a change.</value></data>
 
   <!-- Profile -->
@@ -378,7 +380,7 @@
   <data name="Admin_ConfirmPasswordLabel"><value>Confirm Password</value></data>
   <data name="Admin_PasswordMismatch"><value>Passwords do not match</value></data>
   <data name="Admin_ChangePasswordBtn"><value>CHANGE PASSWORD</value></data>
-  <data name="Admin_PasswordMinChars"><value>The new password must be at least 6 characters.</value></data>
+  <data name="Admin_PasswordMinChars"><value>Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one number, and one special character.</value></data>
   <data name="Admin_SearchPlaceholder"><value>Search by name or email...</value></data>
   <data name="Admin_FilterByRole"><value>Filter by role...</value></data>
   <data name="Admin_ColUser"><value>USER</value></data>
@@ -422,7 +424,19 @@
   <data name="Admin_BulkActionError"><value>Bulk action failed.</value></data>
   <data name="Admin_PasswordUpdateError"><value>Failed to update password.</value></data>
   <data name="Admin_ConnectionError"><value>Connection error.</value></data>
+  <data name="Admin_TagSaveError"><value>Could not save the tag.</value></data>
   <data name="Admin_TagConnectionError"><value>Connection error managing the tag.</value></data>
+
+  <!-- Admin success messages -->
+  <data name="Admin_RoleUpdateSuccess"><value>Role updated successfully.</value></data>
+  <data name="Admin_PasswordUpdateSuccess"><value>Password updated successfully.</value></data>
+  <data name="Admin_DeleteSuccess"><value>{0} user(s) deleted successfully.</value></data>
+  <data name="Admin_SuspendSuccess"><value>{0} user(s) suspended successfully.</value></data>
+  <data name="Admin_UnsuspendSuccess"><value>{0} user(s) reactivated successfully.</value></data>
+
+  <!-- Admin bulk import format reference -->
+  <data name="Admin_FormatRefRow1"><value>One row per user. Header row is optional. Fields must be separated by commas. Fields containing a comma must be wrapped in double quotes. Admin role is not allowed in import files.</value></data>
+  <data name="Admin_FormatRefRow2"><value>Users that already exist in the system are skipped (not duplicated). If any row has an invalid format, no users are created and the error is reported.</value></data>
 
   <!-- Match aria labels -->
   <data name="Match_HideEmail"><value>Hide email of {0}</value></data>

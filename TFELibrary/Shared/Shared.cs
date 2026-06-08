@@ -125,11 +125,11 @@ public class TagDto
 
 public class LoginRequestDto
 {
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email format.")]
+    [Required]
+    [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required.")]
+    [Required]
     public string Password { get; set; } = string.Empty;
 }
 
@@ -137,32 +137,31 @@ public record OperationResult(bool IsSuccess, string Message, string? ErrorCode 
 
 public class LoginResponseDto
 {
-    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
 }
 
 public class RegisterRequestDto
 {
-    [Required(ErrorMessage = "Email is required.")]
-    [EmailAddress(ErrorMessage = "Invalid email format.")]
+    [Required]
+    [EmailAddress]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Password is required.")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters long.")]
+    [Required]
+    [StringLength(100, MinimumLength = 6)]
     public string Password { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "First name is required.")]
+    [Required]
     public string FirstName { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Last name is required.")]
+    [Required]
     public string LastName { get; set; } = string.Empty;
 }
 
 public class RegisterResponseDto
 {
     public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
-    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
 }
 
 public class RefreshTokenRequestDto
@@ -176,11 +175,5 @@ public class RefreshTokenRequestDto
 
 public class RefreshTokenResponseDto
 {
-    public AuthResultDto AuthData { get; set; } = new AuthResultDto();
-}
-
-public class AuthResultDto
-{
-    public bool IsSuccess { get; set; }
-    public string Message { get; set; } = string.Empty;
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
 }

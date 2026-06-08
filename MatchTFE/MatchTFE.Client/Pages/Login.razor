@@ -163,12 +163,11 @@
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-                var message = errorResult?.AuthData?.Message ?? L["Login_ErrorDefault"].Value;
 
-                if (message == "Account suspended.")
+                if (errorResult?.Error?.ErrorCode == "AccountSuspended")
                     _isSuspended = true;
                 else
-                    _loginError = message;
+                    _loginError = L["Login_ErrorDefault"].Value;
             }
         }
         catch (Exception)

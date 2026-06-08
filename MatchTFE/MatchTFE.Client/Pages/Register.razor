@@ -188,6 +188,8 @@
             _passwordError = L["Register_PasswordRequired"].Value;
         else if (_model.Password.Length < 6)
             _passwordError = L["Register_PasswordTooShort"].Value;
+        else if (!IsPasswordComplex(_model.Password))
+            _passwordError = L["Register_PasswordComplexityError"].Value;
 
         if (string.IsNullOrWhiteSpace(_confirmPassword))
             _confirmPasswordError = L["Register_ConfirmPasswordRequired"].Value;
@@ -198,6 +200,13 @@
                _emailError == null && _confirmEmailError == null &&
                _passwordError == null && _confirmPasswordError == null;
     }
+
+    private static bool IsPasswordComplex(string password) =>
+        password.Length >= 6 &&
+        password.Any(char.IsUpper) &&
+        password.Any(char.IsLower) &&
+        password.Any(char.IsDigit) &&
+        password.Any(c => !char.IsLetterOrDigit(c));
 
     private static bool IsValidEmail(string email)
     {
@@ -229,13 +238,23 @@
                 }
                 else
                 {
-                    Snackbar.Add(result?.Error.Message ?? L["Register_DefaultError"].Value, Severity.Warning);
+                    var warnMsg = result?.Error?.ErrorCode switch
+                    {
+                        "DuplicateEmail" => L["Register_EmailAlreadyTaken"].Value,
+                        _                => L["Register_DefaultError"].Value
+                    };
+                    Snackbar.Add(warnMsg, Severity.Warning);
                 }
             }
             else
             {
                 var errorResult = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
-                Snackbar.Add(errorResult?.Error.Message ?? L["Register_ProcessError"].Value, Severity.Error);
+                var errMsg = errorResult?.Error?.ErrorCode switch
+                {
+                    "DuplicateEmail" => L["Register_EmailAlreadyTaken"].Value,
+                    _                => L["Register_ProcessError"].Value
+                };
+                Snackbar.Add(errMsg, Severity.Error);
             }
         }
         finally

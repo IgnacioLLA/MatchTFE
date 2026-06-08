@@ -80,15 +80,12 @@
             <MudExpansionPanels Elevation="0" Class="mb-4 border-all rounded-lg">
                 <MudExpansionPanel Text="@L["Admin_FormatReference"]" Dense="true" Class="rounded-lg">
                     <MudText Typo="Typo.caption" Class="app-text-muted mb-1">
-                        One row per user. Header row is optional. Fields must be separated by commas.
-                        Fields containing a comma must be wrapped in double quotes.
-                        <strong>Admin</strong> role is not allowed in import files.
+                        @L["Admin_FormatRefRow1"]
                     </MudText>
                     <pre class="code-block-pre">student&#64;university.es,Juan,García,Password1!,Student
 teacher&#64;university.es,María,López,Password2!,Teacher</pre>
                     <MudText Typo="Typo.caption" Class="app-text-muted">
-                        Users that already exist in the system are skipped (not duplicated).
-                        If any row has an invalid format, no users are created and the error is reported.
+                        @L["Admin_FormatRefRow2"]
                     </MudText>
                 </MudExpansionPanel>
             </MudExpansionPanels>
@@ -463,8 +460,15 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
     private bool CanSubmitPasswordChange =>
         !string.IsNullOrWhiteSpace(_passwordChangeEmail) &&
-        _newPassword.Length >= 6 &&
+        IsPasswordComplex(_newPassword) &&
         _newPassword == _confirmPassword;
+
+    private static bool IsPasswordComplex(string password) =>
+        password.Length >= 6 &&
+        password.Any(char.IsUpper) &&
+        password.Any(char.IsLower) &&
+        password.Any(char.IsDigit) &&
+        password.Any(c => !char.IsLetterOrDigit(c));
 
     protected override async Task OnInitializedAsync()
     {
@@ -573,7 +577,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Error.Message, Severity.Success);
+                Snackbar.Add(L["Admin_RoleUpdateSuccess"].Value, Severity.Success);
                 await LoadUsersAsync();
                 _roleUpdateEmail = string.Empty;
                 _roleUpdateSelection = null;
@@ -657,7 +661,13 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                _bulkActionSuccess = result.Error.Message;
+                _bulkActionSuccess = actionType switch
+                {
+                    BulkUserActionType.Delete    => L["Admin_DeleteSuccess", result.AffectedCount].Value,
+                    BulkUserActionType.Suspend   => L["Admin_SuspendSuccess", result.AffectedCount].Value,
+                    BulkUserActionType.Unsuspend => L["Admin_UnsuspendSuccess", result.AffectedCount].Value,
+                    _                            => L["Admin_BulkActionError"].Value
+                };
                 _selectedUsers.Clear();
                 await LoadUsersAsync();
             }
@@ -699,7 +709,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
             if (result != null && result.Error.IsSuccess)
             {
-                Snackbar.Add(result.Error.Message, Severity.Success);
+                Snackbar.Add(L["Admin_PasswordUpdateSuccess"].Value, Severity.Success);
                 _passwordChangeEmail = string.Empty;
                 _newPassword = string.Empty;
                 _confirmPassword = string.Empty;
@@ -734,7 +744,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
             }
             else
             {
-                _tagError = await response.Content.ReadAsStringAsync();
+                _tagError = L["Admin_TagSaveError"].Value;
             }
         }
         catch (Exception)

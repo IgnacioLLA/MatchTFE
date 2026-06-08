@@ -62,13 +62,11 @@ public class AdminPasswordChangeRequest
     public string Email { get; set; } = string.Empty;
 
     [Required]
-    [MinLength(6)]
-    [MaxLength(100)]
+    [StringLength(100, MinimumLength = 6)]
     public string NewPassword { get; set; } = string.Empty;
 
     [Required]
-    [MinLength(6)]
-    [MaxLength(100)]
+    [StringLength(100, MinimumLength = 6)]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 

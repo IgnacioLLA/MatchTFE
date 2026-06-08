@@ -76,7 +76,7 @@
   <data name="Register_ConfirmEmailPlaceholder"><value>Repite tu email institucional</value></data>
   <data name="Register_Password"><value>Contraseña</value></data>
   <data name="Register_PasswordPlaceholder"><value>Mínimo 6 caracteres</value></data>
-  <data name="Register_PasswordHint"><value>Debe tener al menos 6 caracteres, incluir una mayúscula, un número y un carácter especial.</value></data>
+  <data name="Register_PasswordHint"><value>Debe tener al menos 6 caracteres, incluir una mayúscula, una minúscula, un número y un carácter especial.</value></data>
   <data name="Register_Submit"><value>Crear cuenta</value></data>
   <data name="Register_Loading"><value>Creando cuenta...</value></data>
   <data name="Register_AlreadyHaveAccount"><value>¿Ya tienes cuenta?</value></data>
@@ -96,6 +96,8 @@
   <data name="Register_PasswordTooShort"><value>La contraseña debe tener al menos 6 caracteres.</value></data>
   <data name="Register_ConfirmPasswordRequired"><value>Por favor, confirma tu contraseña.</value></data>
   <data name="Register_PasswordMismatch"><value>Las contraseñas no coinciden.</value></data>
+  <data name="Register_EmailAlreadyTaken"><value>Este email ya está registrado. Intenta iniciar sesión.</value></data>
+  <data name="Register_PasswordComplexityError"><value>La contraseña debe incluir al menos una mayúscula, una minúscula, un número y un carácter especial.</value></data>
   <data name="Login_ForgotPasswordInfo"><value>Si tienes problemas al iniciar sesión, ponte en contacto con la administración de tu universidad para solicitar un cambio.</value></data>
 
   <!-- Profile -->
@@ -378,7 +380,7 @@
   <data name="Admin_ConfirmPasswordLabel"><value>Confirmar Contraseña</value></data>
   <data name="Admin_PasswordMismatch"><value>Las contraseñas no coinciden</value></data>
   <data name="Admin_ChangePasswordBtn"><value>CAMBIAR CONTRASEÑA</value></data>
-  <data name="Admin_PasswordMinChars"><value>La nueva contraseña debe tener al menos 6 caracteres.</value></data>
+  <data name="Admin_PasswordMinChars"><value>La contraseña debe tener al menos 6 caracteres e incluir una mayúscula, una minúscula, un número y un carácter especial.</value></data>
   <data name="Admin_SearchPlaceholder"><value>Buscar por nombre o email...</value></data>
   <data name="Admin_FilterByRole"><value>Filtrar por rol...</value></data>
   <data name="Admin_ColUser"><value>USUARIO</value></data>
@@ -422,7 +424,19 @@
   <data name="Admin_BulkActionError"><value>La acción masiva ha fallado.</value></data>
   <data name="Admin_PasswordUpdateError"><value>No se pudo actualizar la contraseña.</value></data>
   <data name="Admin_ConnectionError"><value>Error de conexión.</value></data>
+  <data name="Admin_TagSaveError"><value>No se pudo guardar la temática.</value></data>
   <data name="Admin_TagConnectionError"><value>Error de conexión al gestionar la temática.</value></data>
+
+  <!-- Admin success messages -->
+  <data name="Admin_RoleUpdateSuccess"><value>Rol actualizado correctamente.</value></data>
+  <data name="Admin_PasswordUpdateSuccess"><value>Contraseña actualizada correctamente.</value></data>
+  <data name="Admin_DeleteSuccess"><value>{0} usuario(s) eliminados correctamente.</value></data>
+  <data name="Admin_SuspendSuccess"><value>{0} usuario(s) suspendidos correctamente.</value></data>
+  <data name="Admin_UnsuspendSuccess"><value>{0} usuario(s) reactivados correctamente.</value></data>
+
+  <!-- Admin bulk import format reference -->
+  <data name="Admin_FormatRefRow1"><value>Una fila por usuario. La cabecera es opcional. Los campos deben separarse con comas. Los campos que contengan comas deben ir entre comillas dobles. El rol Admin no está permitido en los archivos de importación.</value></data>
+  <data name="Admin_FormatRefRow2"><value>Los usuarios que ya existen en el sistema se omiten (no se duplican). Si alguna fila tiene un formato inválido, no se crea ningún usuario y se notifica el error.</value></data>
 
   <!-- Match aria labels -->
   <data name="Match_HideEmail"><value>Ocultar correo de {0}</value></data>

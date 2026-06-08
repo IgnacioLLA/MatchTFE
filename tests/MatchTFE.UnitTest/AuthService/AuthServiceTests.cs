@@ -109,8 +109,8 @@ public class AuthServiceTests
     {
         var (result, _) = await _service.LoginAsync(null!);
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("Email and password are required.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("Email and password are required.", result.Error.Message);
     }
 
     [TestMethod]
@@ -118,7 +118,7 @@ public class AuthServiceTests
     {
         var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "   ", Password = "pass" });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
+        Assert.IsFalse(result.Error.IsSuccess);
     }
 
     [TestMethod]
@@ -128,8 +128,8 @@ public class AuthServiceTests
 
         var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "pass" });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("Invalid credentials.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("Invalid credentials.", result.Error.Message);
     }
 
     [TestMethod]
@@ -141,7 +141,7 @@ public class AuthServiceTests
 
         var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "wrong" });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
+        Assert.IsFalse(result.Error.IsSuccess);
     }
 
     [TestMethod]
@@ -155,7 +155,7 @@ public class AuthServiceTests
 
         var (result, tokens) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
 
-        Assert.IsTrue(result.AuthData.IsSuccess);
+        Assert.IsTrue(result.Error.IsSuccess);
         Assert.IsNotNull(tokens);
         Assert.IsFalse(string.IsNullOrEmpty(tokens.AccessToken));
         Assert.IsFalse(string.IsNullOrEmpty(tokens.RefreshToken));
@@ -172,8 +172,8 @@ public class AuthServiceTests
 
         var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("Account suspended.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("Account suspended.", result.Error.Message);
     }
 
     [TestMethod]
@@ -198,8 +198,8 @@ public class AuthServiceTests
     {
         var (result, _) = await _service.RefreshTokenAsync(null!);
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("Invalid refresh token request.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("Invalid refresh token request.", result.Error.Message);
     }
 
     [TestMethod]
@@ -211,7 +211,7 @@ public class AuthServiceTests
             RefreshToken = "not-a-valid-jwt"
         });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
+        Assert.IsFalse(result.Error.IsSuccess);
     }
 
     [TestMethod]
@@ -225,8 +225,8 @@ public class AuthServiceTests
             RefreshToken = CreateValidRefreshToken()
         });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("User not found.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("User not found.", result.Error.Message);
     }
 
     [TestMethod]
@@ -243,8 +243,8 @@ public class AuthServiceTests
             RefreshToken = validToken
         });
 
-        Assert.IsFalse(result.AuthData.IsSuccess);
-        Assert.AreEqual("Token revocado o reemplazado.", result.AuthData.Message);
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("Token revocado o reemplazado.", result.Error.Message);
     }
 
     [TestMethod]
@@ -262,7 +262,7 @@ public class AuthServiceTests
             RefreshToken = validToken
         });
 
-        Assert.IsTrue(result.AuthData.IsSuccess);
+        Assert.IsTrue(result.Error.IsSuccess);
         Assert.IsNotNull(tokens);
         Assert.IsFalse(string.IsNullOrEmpty(tokens.AccessToken));
     }
@@ -304,7 +304,6 @@ public class AuthServiceTests
         var (result, _) = await _service.RegisterAsync(null!);
 
         Assert.IsFalse(result.Error.IsSuccess);
-        Assert.IsFalse(result.AuthData.IsSuccess);
     }
 
     [TestMethod]
@@ -360,7 +359,6 @@ public class AuthServiceTests
         var (result, tokens) = await _service.RegisterAsync(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
 
         Assert.IsTrue(result.Error.IsSuccess);
-        Assert.IsTrue(result.AuthData.IsSuccess);
         Assert.IsNotNull(tokens);
         Assert.IsFalse(string.IsNullOrEmpty(tokens.AccessToken));
     }
