@@ -14,9 +14,9 @@ namespace NotificationService.Service
 
         public EmailService(IConfiguration configuration)
         {
-            _host     = configuration["EmailSettings:Host"]     ?? "smtp.gmail.com";
-            _port     = int.Parse(configuration["EmailSettings:Port"] ?? "587");
-            _user     = configuration["EmailSettings:User"]     ?? throw new InvalidOperationException("EmailSettings:User is required.");
+            _host = configuration["EmailSettings:Host"] ?? "smtp.gmail.com";
+            _port = int.Parse(configuration["EmailSettings:Port"] ?? "587");
+            _user = configuration["EmailSettings:User"] ?? throw new InvalidOperationException("EmailSettings:User is required.");
             _password = configuration["EmailSettings:Password"] ?? throw new InvalidOperationException("EmailSettings:Password is required.");
             _fromName = configuration["EmailSettings:FromName"] ?? "MatchTFE";
         }

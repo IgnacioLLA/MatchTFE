@@ -173,9 +173,9 @@ public class TfeService : ITfeService
             u => u.UserId,
             u => u.LastNotificationSentAt.HasValue ? DateOnly.FromDateTime(u.LastNotificationSentAt.Value) : (DateOnly?)null);
 
-        var pendingByUser  = await _proposalRepository.GetPendingProposalsByAuthorsAsync(userIds);
-        var matchesByUser  = await _proposalRepository.GetNewMatchesSinceByUsersAsync(userIds, sinceMap);
-        var expiredByUser  = await _tfeRepository.GetExpiredTfesByAuthorsAsync(userIds);
+        var pendingByUser = await _proposalRepository.GetPendingProposalsByAuthorsAsync(userIds);
+        var matchesByUser = await _proposalRepository.GetNewMatchesSinceByUsersAsync(userIds, sinceMap);
+        var expiredByUser = await _tfeRepository.GetExpiredTfesByAuthorsAsync(userIds);
 
         var data = request.Users.Select(user =>
         {

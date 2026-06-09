@@ -23,7 +23,7 @@ public class TfeServiceTests
         _proposalRepoMock = new Mock<IProposalRepository>();
         _service = new TfeService(_tfeRepoMock.Object, _tagRepoMock.Object, _proposalRepoMock.Object);
 
-        // MapTagsAndSkillsAsync usa GetByNamesAsync (bulk). Default: diccionario vacío.
+        // MapTagsAndSkillsAsync calls GetByNamesAsync (bulk). Default: empty dictionary.
         _tagRepoMock.Setup(r => r.GetByNamesAsync(It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(new Dictionary<string, Tag>());
     }
@@ -89,17 +89,12 @@ public class TfeServiceTests
     }
 
     [TestMethod]
-    public async Task CreateTfeAsync_WhenTitleIsEmpty_ThrowsArgumentException()
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task CreateTfeAsync_WhenTitleIsInvalid_ThrowsArgumentException(string title)
     {
         await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.CreateTfeAsync(CreateValidRequest(title: ""), "author-1"));
-    }
-
-    [TestMethod]
-    public async Task CreateTfeAsync_WhenTitleIsWhitespace_ThrowsArgumentException()
-    {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.CreateTfeAsync(CreateValidRequest(title: "   "), "author-1"));
+            () => _service.CreateTfeAsync(CreateValidRequest(title: title), "author-1"));
     }
 
     [TestMethod]
@@ -110,17 +105,12 @@ public class TfeServiceTests
     }
 
     [TestMethod]
-    public async Task CreateTfeAsync_WhenExpirationDateIsToday_ThrowsArgumentException()
+    [DataRow(0)]
+    [DataRow(-5)]
+    public async Task CreateTfeAsync_WhenExpirationDateIsInvalid_ThrowsArgumentException(int offsetDays)
     {
         await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.CreateTfeAsync(CreateValidRequest(expDate: DateTime.Today), "author-1"));
-    }
-
-    [TestMethod]
-    public async Task CreateTfeAsync_WhenExpirationDateIsInPast_ThrowsArgumentException()
-    {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.CreateTfeAsync(CreateValidRequest(expDate: DateTime.Today.AddDays(-5)), "author-1"));
+            () => _service.CreateTfeAsync(CreateValidRequest(expDate: DateTime.Today.AddDays(offsetDays)), "author-1"));
     }
 
     [TestMethod]
@@ -253,17 +243,12 @@ public class TfeServiceTests
     // =========================================================================
 
     [TestMethod]
-    public async Task GetTfesByAuthorIdAsync_WhenAuthorIdIsEmpty_ThrowsArgumentException()
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task GetTfesByAuthorIdAsync_WhenAuthorIdIsInvalid_ThrowsArgumentException(string authorId)
     {
         await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.GetTfesByAuthorIdAsync(string.Empty));
-    }
-
-    [TestMethod]
-    public async Task GetTfesByAuthorIdAsync_WhenAuthorIdIsWhitespace_ThrowsArgumentException()
-    {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.GetTfesByAuthorIdAsync("   "));
+            () => _service.GetTfesByAuthorIdAsync(authorId));
     }
 
     [TestMethod]
@@ -298,7 +283,7 @@ public class TfeServiceTests
         var tfe = CreateTfeEntity(1, "author-1");
         _tfeRepoMock.Setup(r => r.GetByAuthorIdAsync("author-1")).ReturnsAsync(new List<TFE> { tfe });
         _proposalRepoMock.Setup(r => r.GetInterestedCountsByTfeIdsAsync(It.IsAny<List<int>>()))
-            .ReturnsAsync(new Dictionary<int, int>()); // TFE 1 no está en el diccionario
+            .ReturnsAsync(new Dictionary<int, int>());
 
         var result = await _service.GetTfesByAuthorIdAsync("author-1");
 
@@ -373,7 +358,7 @@ public class TfeServiceTests
     [TestMethod]
     public async Task UpdateTfeAsync_WhenExpirationDateUnchanged_DoesNotValidateDateAndReturnsTrue()
     {
-        // Aunque la fecha esté expirada, si no cambia no se valida
+        // Even if the date is in the past, it is not validated when unchanged
         var pastDate = DateTime.Today.AddDays(-10);
         var existingTfe = CreateTfeEntity(1, "author-1", DateOnly.FromDateTime(pastDate));
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(existingTfe);
@@ -385,7 +370,7 @@ public class TfeServiceTests
             {
                 Title = "Updated",
                 Description = "Updated desc",
-                ExpirationDate = pastDate, // igual a la existente
+                ExpirationDate = pastDate,
                 EstimatedDelivery = DateTime.Today.AddDays(30),
                 Topics = new List<TagDto>(),
                 RequiredSkills = new List<SkillDto>()
@@ -468,17 +453,12 @@ public class TfeServiceTests
     // =========================================================================
 
     [TestMethod]
-    public async Task DeleteTfeAsync_WhenAuthorIdIsEmpty_ThrowsArgumentException()
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task DeleteTfeAsync_WhenAuthorIdIsInvalid_ThrowsArgumentException(string authorId)
     {
         await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.DeleteTfeAsync(1, string.Empty));
-    }
-
-    [TestMethod]
-    public async Task DeleteTfeAsync_WhenAuthorIdIsWhitespace_ThrowsArgumentException()
-    {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.DeleteTfeAsync(1, "   "));
+            () => _service.DeleteTfeAsync(1, authorId));
     }
 
     [TestMethod]
@@ -613,23 +593,12 @@ public class TfeServiceTests
     }
 
     [TestMethod]
-    public async Task ChangeTfeStatusAsync_WhenTfeIsAlreadyCompleted_ReturnsInvalidCurrentStatus()
+    [DataRow(TfeStatus.Completed)]
+    [DataRow(TfeStatus.Cancelled)]
+    public async Task ChangeTfeStatusAsync_WhenTfeIsAlreadyClosed_ReturnsInvalidCurrentStatus(TfeStatus currentStatus)
     {
         var tfe = CreateTfeEntity(1, "author-1");
-        tfe.Status = TfeStatus.Completed;
-        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
-
-        var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Cancelled, "author-1");
-
-        Assert.IsFalse(result.IsSuccess);
-        Assert.AreEqual("InvalidCurrentStatus", result.ErrorCode);
-    }
-
-    [TestMethod]
-    public async Task ChangeTfeStatusAsync_WhenTfeIsAlreadyCancelled_ReturnsInvalidCurrentStatus()
-    {
-        var tfe = CreateTfeEntity(1, "author-1");
-        tfe.Status = TfeStatus.Cancelled;
+        tfe.Status = currentStatus;
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
 
         var result = await _service.ChangeTfeStatusAsync(1, TfeStatus.Completed, "author-1");

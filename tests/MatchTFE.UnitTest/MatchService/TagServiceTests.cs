@@ -31,7 +31,7 @@ public class TagServiceTests
 
         var result = await _service.GetAllTagsAsync();
 
-        Assert.IsFalse(result.Any());
+        Assert.AreEqual(0, result.Count());
     }
 
     [TestMethod]
@@ -46,8 +46,14 @@ public class TagServiceTests
         var result = (await _service.GetAllTagsAsync()).ToList();
 
         Assert.AreEqual(2, result.Count);
-        Assert.IsTrue(result.Any(t => t.Id == 1 && t.Name == "AI"));
-        Assert.IsTrue(result.Any(t => t.Id == 2 && t.Name == "Backend"));
+
+        var aiTag = result.FirstOrDefault(t => t.Id == 1);
+        Assert.IsNotNull(aiTag);
+        Assert.AreEqual("AI", aiTag.Name);
+
+        var backendTag = result.FirstOrDefault(t => t.Id == 2);
+        Assert.IsNotNull(backendTag);
+        Assert.AreEqual("Backend", backendTag.Name);
     }
 
     // =========================================================================

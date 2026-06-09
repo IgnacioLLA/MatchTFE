@@ -161,29 +161,17 @@ public class AuthServiceTests
     }
 
     [TestMethod]
-    public async Task LoginAsync_WhenUserIsLockedOut_ReturnsAccountSuspendedError()
+    public async Task LoginAsync_WhenUserIsLockedOut_ReturnsAccountSuspendedErrorAndNoTokens()
     {
         var user = new MatchUser { Id = "user-1", Email = "x@x.com" };
         _repositoryMock.Setup(r => r.GetUserByEmailAsync("x@x.com")).ReturnsAsync(user);
         _repositoryMock.Setup(r => r.CheckPasswordAsync(user, "Abc@1234")).ReturnsAsync(true);
         _repositoryMock.Setup(r => r.IsLockedOutAsync(user)).ReturnsAsync(true);
 
-        var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
+        var (result, tokens) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.AreEqual("Account suspended.", result.Error.Message);
-    }
-
-    [TestMethod]
-    public async Task LoginAsync_WhenUserIsLockedOut_DoesNotGenerateTokens()
-    {
-        var user = new MatchUser { Id = "user-1", Email = "x@x.com" };
-        _repositoryMock.Setup(r => r.GetUserByEmailAsync("x@x.com")).ReturnsAsync(user);
-        _repositoryMock.Setup(r => r.CheckPasswordAsync(user, "Abc@1234")).ReturnsAsync(true);
-        _repositoryMock.Setup(r => r.IsLockedOutAsync(user)).ReturnsAsync(true);
-
-        var (_, tokens) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
-
         Assert.IsNull(tokens);
     }
 
@@ -377,32 +365,13 @@ public class AuthServiceTests
     }
 
     [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenContainsCurrentUser_ReturnsError()
+    [DataRow(BulkUserActionType.Delete)]
+    [DataRow(BulkUserActionType.Suspend)]
+    [DataRow(BulkUserActionType.Unsuspend)]
+    public async Task ExecuteBulkActionAsync_WhenContainsCurrentUser_ReturnsError(BulkUserActionType action)
     {
         var result = await _service.ExecuteBulkActionAsync(
-            new BulkUserActionRequest { UserIds = new List<string> { "admin-1", "user-2" }, Action = BulkUserActionType.Delete },
-            "admin-1");
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.AreEqual("You cannot perform actions on yourself.", result.Error.Message);
-    }
-
-    [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenSuspendContainsCurrentUser_ReturnsError()
-    {
-        var result = await _service.ExecuteBulkActionAsync(
-            new BulkUserActionRequest { UserIds = new List<string> { "admin-1", "user-2" }, Action = BulkUserActionType.Suspend },
-            "admin-1");
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.AreEqual("You cannot perform actions on yourself.", result.Error.Message);
-    }
-
-    [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenUnsuspendContainsCurrentUser_ReturnsError()
-    {
-        var result = await _service.ExecuteBulkActionAsync(
-            new BulkUserActionRequest { UserIds = new List<string> { "admin-1", "user-2" }, Action = BulkUserActionType.Unsuspend },
+            new BulkUserActionRequest { UserIds = new List<string> { "admin-1", "user-2" }, Action = action },
             "admin-1");
 
         Assert.IsFalse(result.Error.IsSuccess);
@@ -438,23 +407,7 @@ public class AuthServiceTests
     }
 
     [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenSuspend_CallsLockUserForEachSelectedUser()
-    {
-        var user2 = new MatchUser { Id = "user-2" };
-        var user3 = new MatchUser { Id = "user-3" };
-        _repositoryMock.Setup(r => r.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
-            .ReturnsAsync(new List<MatchUser> { user2, user3 });
-        _repositoryMock.Setup(r => r.LockUserAsync(It.IsAny<MatchUser>())).Returns(Task.CompletedTask);
-
-        await _service.ExecuteBulkActionAsync(
-            new BulkUserActionRequest { UserIds = new List<string> { "user-2", "user-3" }, Action = BulkUserActionType.Suspend },
-            "admin-1");
-
-        _repositoryMock.Verify(r => r.LockUserAsync(It.IsAny<MatchUser>()), Times.Exactly(2));
-    }
-
-    [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenSuspend_ReturnsCorrectAffectedCount()
+    public async Task ExecuteBulkActionAsync_WhenSuspend_CallsLockForEachUserAndReturnsAffectedCount()
     {
         var user2 = new MatchUser { Id = "user-2" };
         var user3 = new MatchUser { Id = "user-3" };
@@ -468,25 +421,11 @@ public class AuthServiceTests
 
         Assert.IsTrue(result.Error.IsSuccess);
         Assert.AreEqual(2, result.AffectedCount);
+        _repositoryMock.Verify(r => r.LockUserAsync(It.IsAny<MatchUser>()), Times.Exactly(2));
     }
 
     [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenUnsuspend_CallsUnlockUserForEachSelectedUser()
-    {
-        var user2 = new MatchUser { Id = "user-2" };
-        _repositoryMock.Setup(r => r.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
-            .ReturnsAsync(new List<MatchUser> { user2 });
-        _repositoryMock.Setup(r => r.UnlockUserAsync(It.IsAny<MatchUser>())).Returns(Task.CompletedTask);
-
-        await _service.ExecuteBulkActionAsync(
-            new BulkUserActionRequest { UserIds = new List<string> { "user-2" }, Action = BulkUserActionType.Unsuspend },
-            "admin-1");
-
-        _repositoryMock.Verify(r => r.UnlockUserAsync(It.IsAny<MatchUser>()), Times.Once);
-    }
-
-    [TestMethod]
-    public async Task ExecuteBulkActionAsync_WhenUnsuspend_ReturnsCorrectAffectedCount()
+    public async Task ExecuteBulkActionAsync_WhenUnsuspend_CallsUnlockForEachUserAndReturnsAffectedCount()
     {
         var user2 = new MatchUser { Id = "user-2" };
         _repositoryMock.Setup(r => r.GetUsersByIdsAsync(It.IsAny<IEnumerable<string>>()))
@@ -499,6 +438,7 @@ public class AuthServiceTests
 
         Assert.IsTrue(result.Error.IsSuccess);
         Assert.AreEqual(1, result.AffectedCount);
+        _repositoryMock.Verify(r => r.UnlockUserAsync(It.IsAny<MatchUser>()), Times.Once);
     }
 
     // -------------------------------------------------------------------------

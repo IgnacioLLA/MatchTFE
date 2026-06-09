@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AuthService\AuthService.csproj" />
     <ProjectReference Include="..\..\MatchService\MatchService.csproj" />
+    <ProjectReference Include="..\..\NotificationService\NotificationService.csproj" />
     <ProjectReference Include="..\..\TFELibrary\TFELibrary.csproj" />
     <ProjectReference Include="..\..\UserService\UserService.csproj" />
   </ItemGroup>

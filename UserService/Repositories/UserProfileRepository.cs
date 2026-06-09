@@ -148,9 +148,9 @@ public class UserProfileRepository : IUserProfileRepository
                 !u.IsSuspended &&
                 u.Role != RoleType.Admin &&
                 (u.LastNotificationSentAt == null ||
-                 (u.NotificationFrequency == NotificationFrequency.Weekly   && u.LastNotificationSentAt <= now.AddDays(-7))  ||
+                 (u.NotificationFrequency == NotificationFrequency.Weekly && u.LastNotificationSentAt <= now.AddDays(-7)) ||
                  (u.NotificationFrequency == NotificationFrequency.Biweekly && u.LastNotificationSentAt <= now.AddDays(-14)) ||
-                 (u.NotificationFrequency == NotificationFrequency.Monthly  && u.LastNotificationSentAt <= now.AddDays(-30))))
+                 (u.NotificationFrequency == NotificationFrequency.Monthly && u.LastNotificationSentAt <= now.AddDays(-30))))
             .AsNoTracking()
             .ToListAsync();
     }

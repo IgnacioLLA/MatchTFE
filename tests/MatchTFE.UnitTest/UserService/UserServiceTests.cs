@@ -26,18 +26,11 @@ public class UserServiceTests
     // -------------------------------------------------------------------------
 
     [TestMethod]
-    public async Task GetProfileByUserIdAsync_WhenUserIdIsNull_ReturnsError()
+    [DataRow(null)]
+    [DataRow("   ")]
+    public async Task GetProfileByUserIdAsync_WhenUserIdIsInvalid_ReturnsError(string? userId)
     {
-        var result = await _service.GetProfileByUserIdAsync(null!);
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.IsNull(result.Profile);
-    }
-
-    [TestMethod]
-    public async Task GetProfileByUserIdAsync_WhenUserIdIsWhitespace_ReturnsError()
-    {
-        var result = await _service.GetProfileByUserIdAsync("   ");
+        var result = await _service.GetProfileByUserIdAsync(userId!);
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.IsNull(result.Profile);
@@ -105,22 +98,12 @@ public class UserServiceTests
     }
 
     [TestMethod]
-    public async Task CreateProfileAsync_WhenFirstNameIsBlank_ReturnsError()
+    [DataRow("", "Lopez")]
+    [DataRow("Ignacio", "  ")]
+    public async Task CreateProfileAsync_WhenNameIsBlank_ReturnsError(string firstName, string lastName)
     {
         var request = new ProfileCreationRequest("user-1",
-            new ProfileDto { FirstName = "", LastName = "Lopez", Email = "test@example.com" });
-
-        var result = await _service.CreateProfileAsync(request);
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.AreEqual("First name and last name are required.", result.Error.Message);
-    }
-
-    [TestMethod]
-    public async Task CreateProfileAsync_WhenLastNameIsBlank_ReturnsError()
-    {
-        var request = new ProfileCreationRequest("user-1",
-            new ProfileDto { FirstName = "Ignacio", LastName = "  ", Email = "test@example.com" });
+            new ProfileDto { FirstName = firstName, LastName = lastName, Email = "test@example.com" });
 
         var result = await _service.CreateProfileAsync(request);
 
@@ -330,18 +313,11 @@ public class UserServiceTests
     }
 
     [TestMethod]
-    public async Task GetProfileByTfeInterestAsync_WhenTfeIdIsZero_ReturnsEmptyList()
+    [DataRow(0)]
+    [DataRow(-5)]
+    public async Task GetProfileByTfeInterestAsync_WhenTfeIdIsInvalid_ReturnsEmptyList(int tfeId)
     {
-        var result = await _service.GetProfileByTfeInterestAsync(new ProfileByTfeInterestRequest(0));
-
-        Assert.IsNotNull(result);
-        Assert.AreEqual(0, result.Interested.Count);
-    }
-
-    [TestMethod]
-    public async Task GetProfileByTfeInterestAsync_WhenTfeIdIsNegative_ReturnsEmptyList()
-    {
-        var result = await _service.GetProfileByTfeInterestAsync(new ProfileByTfeInterestRequest(-5));
+        var result = await _service.GetProfileByTfeInterestAsync(new ProfileByTfeInterestRequest(tfeId));
 
         Assert.IsNotNull(result);
         Assert.AreEqual(0, result.Interested.Count);
@@ -436,7 +412,13 @@ public class UserServiceTests
 
         Assert.IsNotNull(result);
         Assert.AreEqual(2, result.Profiles.Count);
-        Assert.IsTrue(result.Profiles.Any(p => p.Id == "user-1" && p.FirstName == "Ana"));
-        Assert.IsTrue(result.Profiles.Any(p => p.Id == "user-2" && p.FirstName == "Luis"));
+
+        var anaProfile = result.Profiles.FirstOrDefault(p => p.Id == "user-1");
+        Assert.IsNotNull(anaProfile);
+        Assert.AreEqual("Ana", anaProfile.FirstName);
+
+        var luisProfile = result.Profiles.FirstOrDefault(p => p.Id == "user-2");
+        Assert.IsNotNull(luisProfile);
+        Assert.AreEqual("Luis", luisProfile.FirstName);
     }
 }

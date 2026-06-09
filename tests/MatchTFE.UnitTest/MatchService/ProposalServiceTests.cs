@@ -33,7 +33,7 @@ public class ProposalServiceTests
         Title = "Test TFE",
         Description = "Test description",
         ExpirationDate = expired
-            ? DateOnly.FromDateTime(DateTime.Today)           // hoy = inválido
+            ? DateOnly.FromDateTime(DateTime.Today)
             : DateOnly.FromDateTime(DateTime.Today.AddDays(2)),
         EstimatedDelivery = DateOnly.FromDateTime(DateTime.Today.AddDays(30)),
         CreationDate = DateOnly.FromDateTime(DateTime.Today),
@@ -64,20 +64,14 @@ public class ProposalServiceTests
     // =========================================================================
 
     [TestMethod]
-    public async Task CreateTfeProposalAsync_WhenUserIdIsEmpty_ReturnsError()
+    [DataRow("")]
+    [DataRow("   ")]
+    public async Task CreateTfeProposalAsync_WhenUserIdIsInvalid_ReturnsError(string userId)
     {
-        var result = await _service.CreateTfeProposalAsync(string.Empty, new TfeProposalCreationRequest { TfeId = 1 });
+        var result = await _service.CreateTfeProposalAsync(userId, new TfeProposalCreationRequest { TfeId = 1 });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.IsNull(result.Error.ErrorCode);
-    }
-
-    [TestMethod]
-    public async Task CreateTfeProposalAsync_WhenUserIdIsWhitespace_ReturnsError()
-    {
-        var result = await _service.CreateTfeProposalAsync("   ", new TfeProposalCreationRequest { TfeId = 1 });
-
-        Assert.IsFalse(result.Error.IsSuccess);
     }
 
     [TestMethod]
@@ -396,18 +390,11 @@ public class ProposalServiceTests
     }
 
     [TestMethod]
-    public async Task DecideTfeCandidateAsync_WhenStatusIsPending_ReturnsInvalidStatusError()
+    [DataRow(ProposalStatus.Pending)]
+    [DataRow(ProposalStatus.Expired)]
+    public async Task DecideTfeCandidateAsync_WhenStatusIsInvalid_ReturnsInvalidStatusError(ProposalStatus status)
     {
-        var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = ProposalStatus.Pending });
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.AreEqual("InvalidStatus", result.Error.ErrorCode);
-    }
-
-    [TestMethod]
-    public async Task DecideTfeCandidateAsync_WhenStatusIsExpired_ReturnsInvalidStatusError()
-    {
-        var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = ProposalStatus.Expired });
+        var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = status });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.AreEqual("InvalidStatus", result.Error.ErrorCode);
@@ -449,7 +436,7 @@ public class ProposalServiceTests
     [TestMethod]
     public async Task DecideTfeCandidateAsync_WhenAuthorIdDiffersInCase_ReturnsUnauthorizedError()
     {
-        // La comparación es StringComparison.Ordinal (case-sensitive)
+        // Comparison is case-sensitive (StringComparison.Ordinal)
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateValidTfe(authorId: "Author-1"));
 
         var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = ProposalStatus.Accepted });
@@ -534,24 +521,13 @@ public class ProposalServiceTests
     // =========================================================================
 
     [TestMethod]
-    public async Task CreateTfeProposalAsync_WhenTfeIsCompleted_ReturnsTfeNotOpenError()
+    [DataRow(TfeStatus.Completed)]
+    [DataRow(TfeStatus.Cancelled)]
+    public async Task CreateTfeProposalAsync_WhenTfeIsNotOpen_ReturnsTfeNotOpenError(TfeStatus status)
     {
-        var completedTfe = CreateValidTfe();
-        completedTfe.Status = TfeStatus.Completed;
-        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(completedTfe);
-
-        var result = await _service.CreateTfeProposalAsync("user-1", new TfeProposalCreationRequest { TfeId = 1, IsInterested = true });
-
-        Assert.IsFalse(result.Error.IsSuccess);
-        Assert.AreEqual("TfeNotOpen", result.Error.ErrorCode);
-    }
-
-    [TestMethod]
-    public async Task CreateTfeProposalAsync_WhenTfeIsCancelled_ReturnsTfeNotOpenError()
-    {
-        var cancelledTfe = CreateValidTfe();
-        cancelledTfe.Status = TfeStatus.Cancelled;
-        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(cancelledTfe);
+        var tfe = CreateValidTfe();
+        tfe.Status = status;
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(tfe);
 
         var result = await _service.CreateTfeProposalAsync("user-1", new TfeProposalCreationRequest { TfeId = 1, IsInterested = true });
 

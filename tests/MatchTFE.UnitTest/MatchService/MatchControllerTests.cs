@@ -559,7 +559,7 @@ public class MatchControllerTests
     {
         SetUserClaims("user-1");
         _proposalServiceMock.Setup(s => s.GetAcceptedMatchesForUserAsync("user-1"))
-            .ReturnsAsync(new GetAcceptedMatchesResponse { Error = new OperationResult(false, "Error al obtener los matches.", "DatabaseError") });
+            .ReturnsAsync(new GetAcceptedMatchesResponse { Error = new OperationResult(false, "Failed to retrieve matches.", "DatabaseError") });
 
         var result = await _controller.GetAcceptedMatches();
 
