@@ -99,23 +99,35 @@ public class ProposalRepository : IProposalRepository
         return result.DistinctBy(m => new { m.MatchedUserId, m.TfeId }).ToList();
     }
 
-    public async Task<List<TFEProposal>> GetPendingProposalsByAuthorAsync(string authorId)
+    public async Task<Dictionary<string, List<TFEProposal>>> GetPendingProposalsByAuthorsAsync(List<string> authorIds)
     {
-        return await _context.TfeProposal
-            .Where(tp => tp.Tfe.AuthorId == authorId && tp.Status == ProposalStatus.Pending)
+        var proposals = await _context.TfeProposal
+            .Where(tp => authorIds.Contains(tp.Tfe.AuthorId) && tp.Status == ProposalStatus.Pending)
             .Include(tp => tp.Tfe)
             .AsNoTracking()
             .ToListAsync();
+
+        return proposals
+            .GroupBy(tp => tp.Tfe.AuthorId)
+            .ToDictionary(g => g.Key, g => g.ToList());
     }
 
-    public async Task<int> GetNewMatchesSinceAsync(string userId, DateOnly? since)
+    public async Task<Dictionary<string, int>> GetNewMatchesSinceByUsersAsync(List<string> userIds, Dictionary<string, DateOnly?> sinceMap)
     {
-        var query = _context.TfeProposal
-            .Where(tp => tp.OriginUserId == userId && tp.Status == ProposalStatus.Accepted);
+        var proposals = await _context.TfeProposal
+            .Where(tp => userIds.Contains(tp.OriginUserId) && tp.Status == ProposalStatus.Accepted)
+            .Select(tp => new { tp.OriginUserId, tp.CreationDate })
+            .AsNoTracking()
+            .ToListAsync();
 
-        if (since.HasValue)
-            query = query.Where(tp => tp.CreationDate >= since.Value);
-
-        return await query.CountAsync();
+        return userIds.ToDictionary(
+            userId => userId,
+            userId =>
+            {
+                var since = sinceMap.GetValueOrDefault(userId);
+                return proposals.Count(tp =>
+                    tp.OriginUserId == userId &&
+                    (!since.HasValue || tp.CreationDate >= since.Value));
+            });
     }
 }

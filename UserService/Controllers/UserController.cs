@@ -161,6 +161,8 @@ public class UserController : ControllerBase, IUserController
     public async Task<ActionResult<PendingNotificationsResponse>> GetPendingNotifications()
     {
         var response = await _profileService.GetUsersForNotificationAsync();
+        if (!response.Error.IsSuccess)
+            return StatusCode(500, response.Error.Message);
         return Ok(response);
     }
 

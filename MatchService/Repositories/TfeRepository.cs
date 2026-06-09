@@ -170,12 +170,16 @@ public class TfeRepository : ITfeRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<List<TFE>> GetExpiredTfesByAuthorAsync(string authorId)
+    public async Task<Dictionary<string, List<TFE>>> GetExpiredTfesByAuthorsAsync(List<string> authorIds)
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        return await _context.Tfe
-            .Where(t => t.AuthorId == authorId && t.Status == TfeStatus.Open && t.ExpirationDate < today)
+        var tfes = await _context.Tfe
+            .Where(t => authorIds.Contains(t.AuthorId) && t.Status == TfeStatus.Open && t.ExpirationDate < today)
             .AsNoTracking()
             .ToListAsync();
+
+        return tfes
+            .GroupBy(t => t.AuthorId)
+            .ToDictionary(g => g.Key, g => g.ToList());
     }
 }

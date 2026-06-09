@@ -1,4 +1,5 @@
 using TFELibrary.Data;
+using TFELibrary.Shared;
 
 namespace MatchService.Repositories;
 
@@ -11,6 +12,6 @@ public interface IProposalRepository
     Task UpdateTfeProposalAsync(TFEProposal proposal);
     Task<List<AcceptedMatchDto>> GetAcceptedMatchesForUserAsync(string userId);
     Task ExpireProposalsByTfeIdAsync(int tfeId);
-    Task<List<TFEProposal>> GetPendingProposalsByAuthorAsync(string authorId);
-    Task<int> GetNewMatchesSinceAsync(string userId, DateOnly? since);
+    Task<Dictionary<string, List<TFEProposal>>> GetPendingProposalsByAuthorsAsync(List<string> authorIds);
+    Task<Dictionary<string, int>> GetNewMatchesSinceByUsersAsync(List<string> userIds, Dictionary<string, DateOnly?> sinceMap);
 }

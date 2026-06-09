@@ -100,7 +100,9 @@ namespace NotificationService.Service
         private async Task MarkNotificationsSentAsync(List<string> userIds, string token, CancellationToken ct)
         {
             var client = CreateAuthorizedClient("UserServiceClient", token);
-            await client.PutAsJsonAsync("api/user/notifications/mark-sent", new MarkNotificationsSentRequest { UserIds = userIds }, ct);
+            var response = await client.PutAsJsonAsync("api/user/notifications/mark-sent", new MarkNotificationsSentRequest { UserIds = userIds }, ct);
+            if (!response.IsSuccessStatusCode)
+                _logger.LogError("Failed to mark notifications as sent. Status: {StatusCode}", response.StatusCode);
         }
 
         private HttpClient CreateAuthorizedClient(string clientName, string token)
@@ -186,7 +188,7 @@ namespace NotificationService.Service
                 <!DOCTYPE html>
                 <html lang="es">
                 <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#222;">
-                    <h2 style="color:#1976d2;">Hola, {Encode(user.FirstName)} 👋</h2>
+                    <h2 style="color:#1976d2;">Hola, {Encode(user.FirstName)}</h2>
                     <p>Aquí tienes tu resumen de actividad en MatchTFE:</p>
                     {sections}
                     <hr style="border:none;border-top:1px solid #eee;margin:24px 0;"/>

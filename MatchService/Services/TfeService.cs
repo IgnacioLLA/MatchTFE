@@ -166,16 +166,20 @@ public class TfeService : ITfeService
 
     public async Task<NotificationDataResponse> GetNotificationDataForUsersAsync(NotificationDataRequest request)
     {
-        var data = new List<UserNotificationData>();
         var oneWeekAgo = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-7));
 
-        foreach (var user in request.Users)
-        {
-            var since = user.LastNotificationSentAt.HasValue
-                ? DateOnly.FromDateTime(user.LastNotificationSentAt.Value)
-                : (DateOnly?)null;
+        var userIds = request.Users.Select(u => u.UserId).ToList();
+        var sinceMap = request.Users.ToDictionary(
+            u => u.UserId,
+            u => u.LastNotificationSentAt.HasValue ? DateOnly.FromDateTime(u.LastNotificationSentAt.Value) : (DateOnly?)null);
 
-            var pendingEntities = await _proposalRepository.GetPendingProposalsByAuthorAsync(user.UserId);
+        var pendingByUser  = await _proposalRepository.GetPendingProposalsByAuthorsAsync(userIds);
+        var matchesByUser  = await _proposalRepository.GetNewMatchesSinceByUsersAsync(userIds, sinceMap);
+        var expiredByUser  = await _tfeRepository.GetExpiredTfesByAuthorsAsync(userIds);
+
+        var data = request.Users.Select(user =>
+        {
+            var pendingEntities = pendingByUser.GetValueOrDefault(user.UserId, new List<TFEProposal>());
             var pendingProposals = pendingEntities
                 .GroupBy(p => new { p.TfeId, p.Tfe.Title })
                 .Select(g => new PendingProposalSummary
@@ -186,29 +190,21 @@ public class TfeService : ITfeService
                 })
                 .ToList();
 
-            var newMatches = await _proposalRepository.GetNewMatchesSinceAsync(user.UserId, since);
-
-            var expiredEntities = await _tfeRepository.GetExpiredTfesByAuthorAsync(user.UserId);
+            var expiredEntities = expiredByUser.GetValueOrDefault(user.UserId, new List<TFE>());
             var expiredTfes = expiredEntities
-                .Select(t => new ExpiredTfeSummary
-                {
-                    TfeId = t.Id,
-                    TfeTitle = t.Title,
-                    ExpirationDate = t.ExpirationDate
-                })
+                .Select(t => new ExpiredTfeSummary { TfeId = t.Id, TfeTitle = t.Title, ExpirationDate = t.ExpirationDate })
                 .ToList();
-            var expiredThisWeek = expiredTfes.Count(t => t.ExpirationDate >= oneWeekAgo);
 
-            data.Add(new UserNotificationData
+            return new UserNotificationData
             {
                 UserId = user.UserId,
                 PendingProposals = pendingProposals,
                 TotalPendingProposals = pendingProposals.Sum(p => p.PendingCount),
-                NewMatchesCount = newMatches,
+                NewMatchesCount = matchesByUser.GetValueOrDefault(user.UserId, 0),
                 ExpiredTfes = expiredTfes,
-                ExpiredThisWeekCount = expiredThisWeek
-            });
-        }
+                ExpiredThisWeekCount = expiredTfes.Count(t => t.ExpirationDate >= oneWeekAgo)
+            };
+        }).ToList();
 
         return new NotificationDataResponse { Data = data };
     }
