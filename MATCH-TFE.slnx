@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/test/">
     <Project Path="tests/MatchTFE.UnitTest/MatchTFE.UnitTest.csproj" />
+    <Project Path="tests/MatchTFE.Client.Tests/MatchTFE.Client.Tests.csproj" />
   </Folder>
   <Project Path="AuthService/AuthService.csproj" Id="d0f6b60e-a5df-4610-974a-4b07777c26cb" />
   <Project Path="docker-compose.dcproj">
