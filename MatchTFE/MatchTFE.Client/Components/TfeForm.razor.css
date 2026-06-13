@@ -1,0 +1,47 @@
+.tfe-left-grid {
+    display: grid;
+    grid-template-rows: auto auto auto 1fr;
+    height: 100%;
+}
+
+.tfe-desc-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+.tfe-native-textarea {
+    flex: 1;
+    width: 100%;
+    padding: 14px;
+    border: 1px solid rgba(var(--mud-palette-text-primary-rgb), 0.23);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--mud-palette-text-primary);
+    background-color: transparent;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+
+.tfe-native-textarea::placeholder {
+    color: var(--mud-palette-text-secondary);
+    opacity: 0.6;
+}
+
+.tfe-native-textarea:hover:not(:focus) {
+    border-color: rgba(var(--mud-palette-text-primary-rgb), 0.6);
+}
+
+.tfe-native-textarea:focus {
+    border-color: var(--mud-palette-primary);
+    box-shadow: 0 0 0 1px var(--mud-palette-primary);
+}
+
+.tfe-native-error {
+    border-color: var(--mud-palette-error) !important;
+    box-shadow: 0 0 0 1px var(--mud-palette-error);
+}

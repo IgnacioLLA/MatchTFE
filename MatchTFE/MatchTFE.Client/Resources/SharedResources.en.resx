@@ -113,6 +113,8 @@
   <data name="Profile_Interests"><value>Interests</value></data>
   <data name="Profile_InterestsPlaceholder"><value>Search interests...</value></data>
   <data name="Profile_InterestsHelper"><value>Your interests help the system recommend relevant projects and profiles.</value></data>
+  <data name="Profile_InterestsTooltip"><value>The system uses your interests to recommend proposals and supervisors. Type a topic related to your area and you will see suggested tags.</value></data>
+  <data name="Profile_SkillsTooltip"><value>Your skills appear on your profile and the system uses them to suggest proposals that match your technical background.</value></data>
   <data name="Profile_Discard"><value>Discard</value></data>
   <data name="Profile_SaveChanges"><value>Save Changes</value></data>
   <data name="Profile_Logout"><value>Log out</value></data>
@@ -171,14 +173,25 @@
   <data name="TeacherHome_Card1Desc"><value>Create, adjust, and keep your TFE lines active with clear information for students.</value></data>
   <data name="TeacherHome_Card2"><value>Evaluate candidates</value></data>
   <data name="TeacherHome_Card2Desc"><value>Analyse skills and experience to select profiles truly aligned with your proposal.</value></data>
-  <data name="TeacherHome_Card3"><value>Decide with agility</value></data>
-  <data name="TeacherHome_Card3Desc"><value>Manage each application's status and reduce friction in academic coordination.</value></data>
+  <data name="TeacherHome_Card3"><value>Personalise my profile</value></data>
+  <data name="TeacherHome_Card3Desc"><value>Complete your interests and research areas to receive more proposals and improve the quality of your matches.</value></data>
   <data name="TeacherHome_Cta"><value>Ready for your next proposal?</value></data>
   <data name="TeacherHome_CtaDesc"><value>Create a new TFE proposal, define it in detail and start receiving applications from the best students.</value></data>
   <data name="TeacherHome_CtaBtn"><value>Create proposal</value></data>
   <data name="TeacherHome_InterestsAlert"><value>Add interests to get recommendations</value></data>
   <data name="TeacherHome_InterestsAlertDesc"><value>Your profile has no interests set yet. The system uses them to suggest candidates and projects aligned with your research lines. The more you add, the more relevant the recommendations.</value></data>
   <data name="TeacherHome_InterestsAlertBtn"><value>Add interests now</value></data>
+
+  <!-- Home How It Works -->
+  <data name="Home_HowItWorks"><value>How does the match work?</value></data>
+  <data name="Home_Step1"><value>A TFE proposal is published</value></data>
+  <data name="Home_Step1Desc"><value>A supervisor or a student creates a proposal defining the topic, requirements and duration.</value></data>
+  <data name="Home_Step2"><value>The other user shows interest</value></data>
+  <data name="Home_Step2Desc"><value>The candidate reviews the proposal and submits their application in seconds.</value></data>
+  <data name="Home_Step3"><value>The candidate is accepted</value></data>
+  <data name="Home_Step3Desc"><value>If the profile fits, the application is accepted and a match is formed.</value></data>
+  <data name="Home_Step4"><value>Match! Direct contact</value></data>
+  <data name="Home_Step4Desc"><value>Both receive contact details to get started.</value></data>
 
   <data name="AdminHome_Tag"><value>ADMINISTRATION</value></data>
   <data name="AdminHome_Title"><value>Control the platform from a central view</value></data>
@@ -290,8 +303,10 @@
   <data name="TfeForm_Duration12M"><value>12 months</value></data>
   <data name="TfeForm_DurationError"><value>You must select an estimated duration.</value></data>
   <data name="TfeForm_TopicsLabel"><value>Main Topic</value></data>
+  <data name="TfeForm_TopicsTooltip"><value>Topics help the system find candidates aligned with your proposal. Type a keyword and select from the list.</value></data>
   <data name="TfeForm_TopicsCaption"><value>Select the areas of knowledge that best describe your project.</value></data>
   <data name="TfeForm_SkillsLabel"><value>Technical Requirements (Skills)</value></data>
+  <data name="TfeForm_SkillsTooltip"><value>Specify the technical skills you are looking for in a candidate and the minimum required level (1–5 stars).</value></data>
   <data name="TfeForm_SkillsCaption"><value>Specify the technologies or knowledge the student should have.</value></data>
   <data name="TfeForm_PublishBtn"><value>Publish Proposal</value></data>
   <data name="TfeForm_UpdateBtn"><value>Update Proposal</value></data>

@@ -51,6 +51,13 @@
     animation-delay: 0.32s;
 }
 
+.home-root ::deep .home-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    height: 100%;
+}
+
 .home-root ::deep .home-card {
     padding: 1.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -107,6 +114,24 @@
 .home-root ::deep .home-interests-alert__desc {
     color: rgba(var(--mud-palette-text-primary-rgb), 0.84);
     max-width: 72ch;
+}
+
+.home-root ::deep .home-how-it-works {
+    padding: 1.5rem;
+}
+
+.home-root ::deep .how-it-works__list {
+    margin: 0;
+    padding-left: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.home-root ::deep .how-it-works__list li {
+    color: rgba(var(--mud-palette-text-primary-rgb), 0.84);
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 @media (max-width: 599.98px) {

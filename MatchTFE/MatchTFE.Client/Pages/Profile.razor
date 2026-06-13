@@ -119,9 +119,15 @@ else
                             </MudText>
                         </div>
                     }
+                    <div class="d-flex align-center mb-4">
+                        <MudIcon Icon="@Icons.Material.Filled.LocalOffer" Size="Size.Small" Class="mr-3 app-text-muted" />
+                        <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["Profile_Interests"]</MudText>
+                        <MudTooltip Text="@L["Profile_InterestsTooltip"]" Placement="Placement.Right">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                                     Color="Color.Info" Class="ml-2" Style="cursor: help;" />
+                        </MudTooltip>
+                    </div>
                     <TagSelector @bind-SelectedTags="_profileDto.Interests"
-                                 Title="@L["Profile_Interests"]"
-                                 Icon="@Icons.Material.Filled.LocalOffer"
                                  Placeholder="@L["Profile_InterestsPlaceholder"]" />
                     <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
                         @L["Profile_InterestsHelper"]

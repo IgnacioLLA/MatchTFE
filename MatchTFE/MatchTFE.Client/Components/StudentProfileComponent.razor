@@ -10,7 +10,13 @@
             <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Secondary" />
         </CardHeaderAvatar>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Profile_TechnicalSkills"]</MudText>
+            <div class="d-flex align-center">
+                <MudText Typo="Typo.h6" Class="font-weight-bold text-main">@L["Profile_TechnicalSkills"]</MudText>
+                <MudTooltip Text="@L["Profile_SkillsTooltip"]" Placement="Placement.Right">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                             Color="Color.Info" Class="ml-2" Style="cursor: help;" />
+                </MudTooltip>
+            </div>
             <MudText Typo="Typo.body2" Class="app-text-muted">
                 @L["Profile_TechnicalSkillsSubtitle"]
             </MudText>
