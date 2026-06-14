@@ -105,6 +105,15 @@ public class TfeRepository : ITfeRepository
         return true;
     }
 
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var tfe = await _context.Tfe.FirstOrDefaultAsync(t => t.Id == id);
+        if (tfe == null) return false;
+        _context.Tfe.Remove(tfe);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count)
     {
         var minimumExpirationDate = TfeDateRules.MinimumExpirationDate;

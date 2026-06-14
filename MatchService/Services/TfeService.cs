@@ -109,6 +109,11 @@ public class TfeService : ITfeService
         return await _tfeRepository.DeleteAsync(id, authorId);
     }
 
+    public async Task<bool> DeleteTfeAsync(int id)
+    {
+        return await _tfeRepository.DeleteAsync(id);
+    }
+
     public async Task<TfeRecommendedResponse> GetRecommendedTfesAsync(string userId, TfeRecommendedRequest request)
     {
         if (string.IsNullOrWhiteSpace(userId))
