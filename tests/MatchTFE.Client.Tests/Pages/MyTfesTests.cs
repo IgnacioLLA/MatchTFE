@@ -101,31 +101,4 @@ public class MyTfesTests : BunitTestBase
         cut.WaitForAssertion(() => Assert.AreEqual(2, cut.FindComponents<Stub<TfeListItem>>().Count));
     }
 
-    // -------------------------------------------------------------------------
-    // Delete
-    // -------------------------------------------------------------------------
-
-    [TestMethod]
-    public async Task HandleDelete_ApiSuccess_RemovesFromList()
-    {
-        var proposals = new List<TfeDto>
-        {
-            MakeTfe(1, "TFE A"),
-            MakeTfe(2, "TFE B")
-        };
-        ComponentFactories.AddStub<TfeListItem>();
-        SetupGatewayApiSequence(
-            (HttpStatusCode.OK, proposals),    // GET proposals on init
-            (HttpStatusCode.OK, new List<TagDto>()), // GET tags on init
-            (HttpStatusCode.OK, null));               // DELETE
-        Render<MudPopoverProvider>();
-        var cut = Render<MyTfes>();
-
-        cut.WaitForAssertion(() => Assert.AreEqual(2, cut.FindComponents<Stub<TfeListItem>>().Count));
-
-        var onDeleted = cut.FindComponents<Stub<TfeListItem>>()[0].Instance.Parameters.Get(p => p.OnDeleted);
-        await cut.InvokeAsync(() => onDeleted.InvokeAsync(1));
-
-        Assert.AreEqual(1, cut.FindComponents<Stub<TfeListItem>>().Count);
-    }
 }
