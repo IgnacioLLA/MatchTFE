@@ -352,6 +352,7 @@
   <data name="CandidateStatus_Accepted"><value>Accepted</value></data>
   <data name="CandidateStatus_Rejected"><value>Rejected</value></data>
   <data name="CandidateStatus_Expired"><value>Expired</value></data>
+  <data name="CandidateStatus_NotInterested"><value>Not interested</value></data>
   <data name="CandidateDetail_Back"><value>Back</value></data>
   <data name="CandidateDetail_ProfileNotFound"><value>Could not load the user's profile.</value></data>
   <data name="CandidateDetail_AcceptedMsg"><value>You have accepted {0} for your proposal.</value></data>

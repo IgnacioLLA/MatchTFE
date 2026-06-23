@@ -101,14 +101,6 @@ public class TfeService : ITfeService
         }
     }
 
-    public async Task<bool> DeleteTfeAsync(int id, string authorId)
-    {
-        if (string.IsNullOrWhiteSpace(authorId))
-            throw new ArgumentException("Author ID cannot be empty.");
-
-        return await _tfeRepository.DeleteAsync(id, authorId);
-    }
-
     public async Task<bool> DeleteTfeAsync(int id)
     {
         return await _tfeRepository.DeleteAsync(id);

@@ -120,7 +120,7 @@
   <data name="Profile_Logout"><value>Cerrar sesión</value></data>
   <data name="Profile_SavedSuccess"><value>Perfil actualizado correctamente.</value></data>
   <data name="Profile_SaveError"><value>No se pudieron guardar los cambios.</value></data>
-  <data name="Profile_AcademicData"><value>Información Académica</value></data>
+  <data name="Profile_AcademicData"><value>Datos Académicos</value></data>
   <data name="Profile_AcademicYear"><value>CURSO ACADÉMICO</value></data>
   <data name="Profile_AcademicYearHelper"><value>Indica el curso en el que te encuentras actualmente.</value></data>
   <data name="Profile_TechnicalSkills"><value>Habilidades Técnicas</value></data>
@@ -235,7 +235,7 @@
   <data name="MyTfes_Subtitle"><value>Gestiona y supervisa tus propuestas de TFE.</value></data>
   <data name="MyTfes_CreateBtn"><value>Crear Nueva Propuesta</value></data>
   <data name="MyTfes_SearchPlaceholder"><value>Buscar por título o etiqueta...</value></data>
-  <data name="MyTfes_FilterByTags"><value>Filtrar por tags...</value></data>
+  <data name="MyTfes_FilterByTags"><value>Filtrar por temática...</value></data>
   <data name="MyTfes_SortBy"><value>Ordenar por:</value></data>
   <data name="MyTfes_SortNewest"><value>Más reciente</value></data>
   <data name="MyTfes_SortOldest"><value>Más antiguo</value></data>
@@ -352,6 +352,7 @@
   <data name="CandidateStatus_Accepted"><value>Aceptado</value></data>
   <data name="CandidateStatus_Rejected"><value>Rechazado</value></data>
   <data name="CandidateStatus_Expired"><value>Expirado</value></data>
+  <data name="CandidateStatus_NotInterested"><value>No interesado</value></data>
   <data name="CandidateDetail_Back"><value>Volver</value></data>
   <data name="CandidateDetail_ProfileNotFound"><value>No se ha podido cargar el perfil del usuario.</value></data>
   <data name="CandidateDetail_AcceptedMsg"><value>Has aceptado a {0} para tu propuesta.</value></data>

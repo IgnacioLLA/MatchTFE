@@ -453,20 +453,11 @@ public class TfeServiceTests
     // =========================================================================
 
     [TestMethod]
-    [DataRow("")]
-    [DataRow("   ")]
-    public async Task DeleteTfeAsync_WhenAuthorIdIsInvalid_ThrowsArgumentException(string authorId)
+    public async Task DeleteTfeAsync_WhenTfeNotFound_ReturnsFalse()
     {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.DeleteTfeAsync(1, authorId));
-    }
+        _tfeRepoMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(false);
 
-    [TestMethod]
-    public async Task DeleteTfeAsync_WhenTfeNotFoundOrUnauthorized_ReturnsFalse()
-    {
-        _tfeRepoMock.Setup(r => r.DeleteAsync(1, "author-1")).ReturnsAsync(false);
-
-        var result = await _service.DeleteTfeAsync(1, "author-1");
+        var result = await _service.DeleteTfeAsync(1);
 
         Assert.IsFalse(result);
     }
@@ -474,9 +465,9 @@ public class TfeServiceTests
     [TestMethod]
     public async Task DeleteTfeAsync_WhenSuccess_ReturnsTrue()
     {
-        _tfeRepoMock.Setup(r => r.DeleteAsync(1, "author-1")).ReturnsAsync(true);
+        _tfeRepoMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(true);
 
-        var result = await _service.DeleteTfeAsync(1, "author-1");
+        var result = await _service.DeleteTfeAsync(1);
 
         Assert.IsTrue(result);
     }

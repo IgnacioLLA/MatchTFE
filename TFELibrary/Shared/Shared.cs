@@ -51,7 +51,8 @@ public enum ProposalStatus
     Pending = 1,
     Accepted = 2,
     Rejected = 3,
-    Expired = 0
+    Expired = 0,
+    NotInterested = 4
 }
 
 public static class TfeDateRules

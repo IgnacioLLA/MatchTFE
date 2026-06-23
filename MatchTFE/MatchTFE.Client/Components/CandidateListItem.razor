@@ -64,19 +64,21 @@
 
     private string GetStatusLabel(ProposalStatus status) => status switch
     {
-        ProposalStatus.Pending  => L["CandidateStatus_Pending"].Value,
-        ProposalStatus.Accepted => L["CandidateStatus_Accepted"].Value,
-        ProposalStatus.Rejected => L["CandidateStatus_Rejected"].Value,
-        ProposalStatus.Expired  => L["CandidateStatus_Expired"].Value,
-        _                       => status.ToString()
+        ProposalStatus.Pending       => L["CandidateStatus_Pending"].Value,
+        ProposalStatus.Accepted      => L["CandidateStatus_Accepted"].Value,
+        ProposalStatus.Rejected      => L["CandidateStatus_Rejected"].Value,
+        ProposalStatus.Expired       => L["CandidateStatus_Expired"].Value,
+        ProposalStatus.NotInterested => L["CandidateStatus_NotInterested"].Value,
+        _                            => status.ToString()
     };
 
     private static Color GetStatusColor(ProposalStatus status) => status switch
     {
-        ProposalStatus.Pending  => Color.Info,
-        ProposalStatus.Accepted => Color.Success,
-        ProposalStatus.Rejected => Color.Error,
-        _                       => Color.Secondary
+        ProposalStatus.Pending       => Color.Info,
+        ProposalStatus.Accepted      => Color.Success,
+        ProposalStatus.Rejected      => Color.Error,
+        ProposalStatus.NotInterested => Color.Default,
+        _                            => Color.Secondary
     };
 
     private string GetProfileSubtitle(ProfileDto profile)
