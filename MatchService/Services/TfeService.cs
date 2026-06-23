@@ -240,7 +240,7 @@ public class TfeService : ITfeService
             Id = tfe.Id,
             Title = tfe.Title,
             Description = tfe.Description,
-            TutorName = tfe.Author.FirstName + " " + tfe.Author.LastName,
+            TutorName = $"{tfe.Author.FirstName} {tfe.Author.LastName}",
             Topics = tfe.Topics.Select(tag => new TagDto { Name = tag.Name }).ToList(),
             RequiredSkills = tfe.RequiredSkills
                 .Where(skill => skill.Tag != null)

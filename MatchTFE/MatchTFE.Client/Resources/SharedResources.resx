@@ -276,7 +276,7 @@
   <data name="TfeForm_NewSubtitle"><value>Define los detalles académicos para atraer a los estudiantes con mejor perfil para tu investigación.</value></data>
   <data name="TfeForm_EditTitle"><value>Editar Propuesta</value></data>
   <data name="TfeForm_EditSubtitle"><value>Actualiza los detalles de tu propuesta de TFE.</value></data>
-  <data name="TfeForm_TitleLabel"><value>Título del TFE</value></data>
+  <data name="TfeForm_TitleLabel"><value>Título del proyecto</value></data>
   <data name="TfeForm_TitleFieldLabel"><value>Título del proyecto</value></data>
   <data name="TfeForm_TitleTooltip"><value>Escribe un título descriptivo y atractivo que identifique claramente el proyecto. Máx. 400 caracteres.</value></data>
   <data name="TfeForm_TitleHelper"><value>Ej: Sistema de recomendación de TFE con inteligencia artificial</value></data>
@@ -293,7 +293,7 @@
   <data name="TfeForm_ExpirationError"><value>Debes seleccionar una fecha de caducidad válida.</value></data>
   <data name="TfeForm_ExpirationMinError"><value>La fecha de caducidad debe ser, como mínimo, el {0}.</value></data>
   <data name="TfeForm_RenewBtn"><value>Renovar 3 meses</value></data>
-  <data name="TfeForm_DurationLabel"><value>Duración Estimada</value></data>
+  <data name="TfeForm_DurationLabel"><value>Duración de entrega estimada</value></data>
   <data name="TfeForm_DurationTooltip"><value>Duración orientativa para estimar cuándo podría entregarse el trabajo.</value></data>
   <data name="TfeForm_DurationFieldLabel"><value>Duración estimada</value></data>
   <data name="TfeForm_DurationPlaceholder"><value>Seleccione un rango...</value></data>

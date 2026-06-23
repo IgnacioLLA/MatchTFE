@@ -67,7 +67,7 @@ public class UserProfileRepository : IUserProfileRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception)
+        catch (DbUpdateException)
         {
             return false;
         }

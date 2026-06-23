@@ -755,7 +755,7 @@ teacher&#64;university.es,María,López,Password2!,Teacher</pre>
 
     private async void HandleEditTagCommitAsync(object element)
     {
-        var tag = (TagDto)element;
+        if (element is not TagDto tag) return;
         _tagEditError = string.Empty;
         try
         {

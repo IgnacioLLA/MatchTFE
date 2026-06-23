@@ -231,7 +231,7 @@ public class AuthService : IAuthService
             _tokenHandler.ValidateToken(token, validationParameters, out _);
             return true;
         }
-        catch
+        catch (SecurityTokenException)
         {
             return false;
         }
