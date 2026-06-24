@@ -5,7 +5,7 @@ using Moq;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 
-namespace MatchTFE.UnitTest.MatchService;
+namespace MatchTFE.UnitTest.MatchService.Service;
 
 [TestClass]
 public class TfeServiceTests
@@ -23,7 +23,6 @@ public class TfeServiceTests
         _proposalRepoMock = new Mock<IProposalRepository>();
         _service = new TfeService(_tfeRepoMock.Object, _tagRepoMock.Object, _proposalRepoMock.Object);
 
-        // MapTagsAndSkillsAsync calls GetByNamesAsync (bulk). Default: empty dictionary.
         _tagRepoMock.Setup(r => r.GetByNamesAsync(It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(new Dictionary<string, Tag>());
     }

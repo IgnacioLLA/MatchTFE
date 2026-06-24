@@ -5,7 +5,7 @@ using Moq;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 
-namespace MatchTFE.UnitTest.MatchService;
+namespace MatchTFE.UnitTest.MatchService.Service;
 
 [TestClass]
 public class ProposalServiceTests
@@ -531,7 +531,7 @@ public class ProposalServiceTests
     }
 
     // =========================================================================
-    // TFE status checks (TfeNotOpen)
+    // TFE status checks
     // =========================================================================
 
     [TestMethod]
