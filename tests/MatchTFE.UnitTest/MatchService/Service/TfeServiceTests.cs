@@ -5,7 +5,7 @@ using Moq;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 
-namespace MatchTFE.UnitTest.MatchService;
+namespace MatchTFE.UnitTest.MatchService.Service;
 
 [TestClass]
 public class TfeServiceTests
@@ -23,7 +23,6 @@ public class TfeServiceTests
         _proposalRepoMock = new Mock<IProposalRepository>();
         _service = new TfeService(_tfeRepoMock.Object, _tagRepoMock.Object, _proposalRepoMock.Object);
 
-        // MapTagsAndSkillsAsync calls GetByNamesAsync (bulk). Default: empty dictionary.
         _tagRepoMock.Setup(r => r.GetByNamesAsync(It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync(new Dictionary<string, Tag>());
     }
@@ -453,20 +452,11 @@ public class TfeServiceTests
     // =========================================================================
 
     [TestMethod]
-    [DataRow("")]
-    [DataRow("   ")]
-    public async Task DeleteTfeAsync_WhenAuthorIdIsInvalid_ThrowsArgumentException(string authorId)
+    public async Task DeleteTfeAsync_WhenTfeNotFound_ReturnsFalse()
     {
-        await Assert.ThrowsExactlyAsync<ArgumentException>(
-            () => _service.DeleteTfeAsync(1, authorId));
-    }
+        _tfeRepoMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(false);
 
-    [TestMethod]
-    public async Task DeleteTfeAsync_WhenTfeNotFoundOrUnauthorized_ReturnsFalse()
-    {
-        _tfeRepoMock.Setup(r => r.DeleteAsync(1, "author-1")).ReturnsAsync(false);
-
-        var result = await _service.DeleteTfeAsync(1, "author-1");
+        var result = await _service.DeleteTfeAsync(1);
 
         Assert.IsFalse(result);
     }
@@ -474,9 +464,9 @@ public class TfeServiceTests
     [TestMethod]
     public async Task DeleteTfeAsync_WhenSuccess_ReturnsTrue()
     {
-        _tfeRepoMock.Setup(r => r.DeleteAsync(1, "author-1")).ReturnsAsync(true);
+        _tfeRepoMock.Setup(r => r.DeleteAsync(1)).ReturnsAsync(true);
 
-        var result = await _service.DeleteTfeAsync(1, "author-1");
+        var result = await _service.DeleteTfeAsync(1);
 
         Assert.IsTrue(result);
     }

@@ -44,7 +44,7 @@ public class ProposalService : IProposalService
             TfeId = request.TfeId,
             Status = request.IsInterested
                 ? ProposalStatus.Pending
-                : ProposalStatus.Rejected,
+                : ProposalStatus.NotInterested,
             CreationDate = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
@@ -86,7 +86,7 @@ public class ProposalService : IProposalService
         if (!existingTfe.Status.Equals(ProposalStatus.Pending))
             return new TfeProposalUpdateResponse { Error = new OperationResult(false, "Invalid proposal status.", "InvalidProposalStatus") };
 
-        existingTfe.Status = request.IsInterested ? ProposalStatus.Accepted : ProposalStatus.Rejected;
+        existingTfe.Status = request.IsInterested ? ProposalStatus.Accepted : ProposalStatus.NotInterested;
 
         try
         {

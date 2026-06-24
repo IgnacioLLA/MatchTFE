@@ -5,7 +5,7 @@ using Moq;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 
-namespace MatchTFE.UnitTest.MatchService;
+namespace MatchTFE.UnitTest.MatchService.Service;
 
 [TestClass]
 public class TagServiceTests

@@ -57,7 +57,7 @@ public class AuthControllerTests
     private static string CreateTestJwt(string userId)
     {
         var handler = new JwtSecurityTokenHandler();
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("test-jwt-secret-at-least-32-chars-ok!"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("match-tfe-jwt-secret-testing-32c!"));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
         return handler.WriteToken(handler.CreateToken(new SecurityTokenDescriptor
         {

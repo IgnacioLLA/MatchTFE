@@ -172,27 +172,21 @@ public class MatchController : ControllerBase, IMatchController
         }
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpDelete("tfe/{id}")]
     public async Task<IActionResult> DeleteTfe(int id)
     {
         if (id <= 0) return BadRequest("Invalid TFE ID.");
 
-        var authorId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrWhiteSpace(authorId)) return Unauthorized();
-
         try
         {
-            var deleted = await _tfeService.DeleteTfeAsync(id, authorId);
-            if (!deleted) return NotFound("TFE not found or you don't have permission to delete it.");
+            var deleted = await _tfeService.DeleteTfeAsync(id);
+            if (!deleted) return NotFound("TFE not found.");
             return NoContent();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error while deleting TFE {TfeId} for user {UserId}.", id, authorId);
+            _logger.LogError(ex, "Unexpected error while deleting TFE {TfeId}.", id);
             return StatusCode(500, "Ocurrió un error al eliminar el TFE.");
         }
     }

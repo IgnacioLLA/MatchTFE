@@ -11,10 +11,18 @@
             <MudIcon Icon="@Icon" Size="Size.Small" Class="mr-3 app-text-muted" />
         }
         <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@Title</MudText>
+        @if (!string.IsNullOrWhiteSpace(TooltipText))
+        {
+            <MudTooltip Text="@TooltipText" Placement="Placement.Right">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                         Color="Color.Info" Class="ml-2" Style="cursor: help;" />
+            </MudTooltip>
+        }
     </div>
 }
 
 <MudAutocomplete T="string"
+                 @ref="_autocomplete"
                  Placeholder="@Placeholder"
                  SearchFunc="@SearchTagsAsync"
                  ValueChanged="@OnTagSelected"
@@ -42,10 +50,12 @@
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string Icon { get; set; } = string.Empty;
     [Parameter] public string Placeholder { get; set; } = "Buscar...";
+    [Parameter] public string TooltipText { get; set; } = string.Empty;
 
     [Parameter] public List<string> SelectedTags { get; set; } = new();
     [Parameter] public EventCallback<List<string>> SelectedTagsChanged { get; set; }
 
+    private MudAutocomplete<string> _autocomplete = default!;
     private string _searchQuery = string.Empty;
     private List<string> _availableBackendTags = new();
     private bool _isLoading = true;
@@ -80,6 +90,7 @@
             await SelectedTagsChanged.InvokeAsync(SelectedTags);
         }
         _searchQuery = string.Empty;
+        await _autocomplete.ResetAsync();
     }
 
     private async Task RemoveTagAsync(string tagToRemove)

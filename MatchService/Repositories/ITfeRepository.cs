@@ -10,7 +10,7 @@ public interface ITfeRepository
     Task DeleteAsync(TFE tfe);
     Task<List<TFE>> GetByAuthorIdAsync(string authorId);
     Task UpdateAsync(TFE tfe);
-    Task<bool> DeleteAsync(int id, string authorId);
+    Task<bool> DeleteAsync(int id);
     Task<List<TFE>> GetRecommendedTfesAsync(string userId, List<int> userInterestTagIds, int count);
     Task UpdateStatusAsync(int id, TfeStatus status);
     Task<Dictionary<string, List<TFE>>> GetExpiredTfesByAuthorsAsync(List<string> authorIds);

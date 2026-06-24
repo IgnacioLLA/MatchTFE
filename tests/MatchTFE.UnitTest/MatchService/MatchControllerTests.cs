@@ -43,6 +43,22 @@ public class MatchControllerTests
         };
     }
 
+    private void SetAdminClaims(string userId = "admin-1")
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId),
+            new Claim(ClaimTypes.Role, "Admin")
+        };
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"))
+            }
+        };
+    }
+
     private void SetNoUserClaims()
     {
         _controller.ControllerContext = new ControllerContext
@@ -359,20 +375,10 @@ public class MatchControllerTests
     }
 
     [TestMethod]
-    public async Task DeleteTfe_WhenNoClaimPresent_ReturnsUnauthorized()
+    public async Task DeleteTfe_WhenTfeNotFound_ReturnsNotFound()
     {
-        SetNoUserClaims();
-
-        var result = await _controller.DeleteTfe(1);
-
-        Assert.IsInstanceOfType(result, typeof(UnauthorizedResult));
-    }
-
-    [TestMethod]
-    public async Task DeleteTfe_WhenTfeNotFoundOrNotOwner_ReturnsNotFound()
-    {
-        SetUserClaims("user-1");
-        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(99, "user-1")).ReturnsAsync(false);
+        SetAdminClaims();
+        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(99)).ReturnsAsync(false);
 
         var result = await _controller.DeleteTfe(99);
 
@@ -382,8 +388,8 @@ public class MatchControllerTests
     [TestMethod]
     public async Task DeleteTfe_WhenUnexpectedError_Returns500()
     {
-        SetUserClaims("user-1");
-        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(1, "user-1"))
+        SetAdminClaims();
+        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(1))
             .ThrowsAsync(new Exception("DB error"));
 
         var result = await _controller.DeleteTfe(1);
@@ -395,8 +401,8 @@ public class MatchControllerTests
     [TestMethod]
     public async Task DeleteTfe_WhenSuccess_ReturnsNoContent()
     {
-        SetUserClaims("user-1");
-        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(1, "user-1")).ReturnsAsync(true);
+        SetAdminClaims();
+        _tfeServiceMock.Setup(s => s.DeleteTfeAsync(1)).ReturnsAsync(true);
 
         var result = await _controller.DeleteTfe(1);
 

@@ -90,7 +90,7 @@
     <div class="px-6">
         @foreach (var proposal in GetPaginatedProposals())
         {
-            <TfeListItem Model="proposal" OnDeleted="HandleDeleteProposal" />
+            <TfeListItem Model="proposal" />
         }
     </div>
 
@@ -219,32 +219,4 @@
         StateHasChanged();
     }
 
-    private async Task HandleDeleteProposal(int tfeId)
-    {
-        try
-        {
-            var client = HttpClientFactory.CreateClient("GatewayAPI");
-            var response = await client.DeleteAsync($"api/match/tfe/{tfeId}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                Snackbar.Add(L["MyTfes_DeleteSuccess"].Value, Severity.Success);
-
-                _proposals.RemoveAll(p => p.Id == tfeId);
-
-                var maxPages = GetTotalPages();
-                if (_currentPage > maxPages && maxPages > 0)
-                {
-                    _currentPage = maxPages;
-                }
-
-                StateHasChanged();
-            }
-            else
-            {
-                Snackbar.Add(L["MyTfes_DeleteError"].Value, Severity.Error);
-            }
-        }
-        catch { }
-    }
 }

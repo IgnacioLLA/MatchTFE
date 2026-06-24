@@ -12,31 +12,57 @@
               SecondaryHref="/match"
               SecondaryIcon="@Icons.Material.Filled.Layers" />
 
+    <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
+        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Cta"]</MudText>
+        <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
+            @L["StudentHome_CtaDesc"]
+        </MudText>
+        <MudButton Href="/tfe/create" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline" Class="rounded-lg font-weight-bold">
+            @L["StudentHome_CtaBtn"]
+        </MudButton>
+    </MudPaper>
+
+    <MudPaper Elevation="0" Class="home-how-it-works border-all rounded-xl">
+        <MudText Typo="Typo.h6" Class="app-title-tight mb-3">@L["Home_HowItWorks"]</MudText>
+        <ol class="how-it-works__list">
+            <li><strong>@L["Home_Step1"]</strong> — @L["Home_Step1Desc"]</li>
+            <li><strong>@L["Home_Step2"]</strong> — @L["Home_Step2Desc"]</li>
+            <li><strong>@L["Home_Step3"]</strong> — @L["Home_Step3Desc"]</li>
+            <li><strong>@L["Home_Step4"]</strong> — @L["Home_Step4Desc"]</li>
+        </ol>
+    </MudPaper>
+
     <HomeFeatureGrid SectionId="student-capabilities"
                      Title="@L["StudentHome_GridTitle"].Value"
                      Subtitle="@L["StudentHome_GridSubtitle"].Value">
         <MudItem xs="12" md="4">
-            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
-                <MudIcon Icon="@Icons.Material.Filled.AutoStories" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card1"]</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card1Desc"]</MudText>
-            </MudPaper>
+            <a href="/tfe/feed" class="home-card-link">
+                <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                    <MudIcon Icon="@Icons.Material.Filled.AutoStories" Color="Color.Primary" Size="Size.Large" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card1"]</MudText>
+                    <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card1Desc"]</MudText>
+                </MudPaper>
+            </a>
         </MudItem>
 
         <MudItem xs="12" md="4">
-            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
-                <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Success" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card2"]</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card2Desc"]</MudText>
-            </MudPaper>
+            <a href="/match" class="home-card-link">
+                <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                    <MudIcon Icon="@Icons.Material.Filled.Favorite" Color="Color.Success" Size="Size.Large" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card2"]</MudText>
+                    <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card2Desc"]</MudText>
+                </MudPaper>
+            </a>
         </MudItem>
 
         <MudItem xs="12" md="4">
-            <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
-                <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Info" Size="Size.Large" Class="mb-3" />
-                <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card3"]</MudText>
-                <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card3Desc"]</MudText>
-            </MudPaper>
+            <a href="/profile" class="home-card-link">
+                <MudPaper Elevation="0" Class="home-card border-all rounded-xl h-100">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Info" Size="Size.Large" Class="mb-3" />
+                    <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Card3"]</MudText>
+                    <MudText Typo="Typo.body2" Class="home-card__description">@L["StudentHome_Card3Desc"]</MudText>
+                </MudPaper>
+            </a>
         </MudItem>
     </HomeFeatureGrid>
 
@@ -57,16 +83,6 @@
             </div>
         </MudPaper>
     }
-
-    <MudPaper Elevation="0" Class="home-highlight border-all rounded-xl">
-        <MudText Typo="Typo.h6" Class="app-title-tight mb-2">@L["StudentHome_Cta"]</MudText>
-        <MudText Typo="Typo.body2" Class="home-highlight__description mb-4">
-            @L["StudentHome_CtaDesc"]
-        </MudText>
-        <MudButton Href="/tfe/create" Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline" Class="rounded-lg font-weight-bold">
-            @L["StudentHome_CtaBtn"]
-        </MudButton>
-    </MudPaper>
 </div>
 
 @code {

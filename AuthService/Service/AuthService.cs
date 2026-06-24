@@ -231,8 +231,11 @@ public class AuthService : IAuthService
             _tokenHandler.ValidateToken(token, validationParameters, out _);
             return true;
         }
-        catch
+        catch (Exception)
         {
+            // ValidateToken lanza distintas subclases de SecurityTokenException según el motivo
+            // (malformado, expirado, firma inválida…). En todos los casos el resultado es el mismo:
+            // token no válido. CA1031 se suprime aquí intencionadamente.
             return false;
         }
     }

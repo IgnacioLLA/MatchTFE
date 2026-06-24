@@ -24,8 +24,8 @@ public class AuthServiceTests
     private Mock<IHttpContextAccessor> _httpContextAccessorMock = null!;
     private global::AuthService.Service.AuthService _service = null!;
 
-    private const string JwtSecret = "test-jwt-secret-at-least-32-chars-ok!";
-    private const string JwtRefreshSecret = "test-refresh-secret-at-32-chars-ok!";
+    private const string JwtSecret = "match-tfe-jwt-secret-testing-32c!";
+    private const string JwtRefreshSecret = "match-tfe-refresh-secret-test-32c!";
     private const string JwtIssuer = "test-issuer";
     private const string JwtAudience = "test-audience";
 

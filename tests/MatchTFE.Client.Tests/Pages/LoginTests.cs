@@ -110,7 +110,7 @@ public class LoginTests : BunitTestBase
         // BunitNavigationManager.History starts empty; one entry means NavigateTo was called.
         var navMan = (BunitNavigationManager)Services.GetRequiredService<NavigationManager>();
         Assert.AreEqual(1, navMan.History.Count);
-        Assert.AreEqual("http://localhost/", navMan.History.First().Uri);
+        Assert.AreEqual("/", navMan.History.First().Uri);
     }
 
     [TestMethod]

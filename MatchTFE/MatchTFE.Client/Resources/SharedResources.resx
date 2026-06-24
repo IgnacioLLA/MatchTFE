@@ -113,12 +113,14 @@
   <data name="Profile_Interests"><value>Intereses</value></data>
   <data name="Profile_InterestsPlaceholder"><value>Buscar intereses...</value></data>
   <data name="Profile_InterestsHelper"><value>Tus intereses ayudan al sistema a recomendarte proyectos y perfiles afines.</value></data>
+  <data name="Profile_InterestsTooltip"><value>El sistema usa tus intereses para recomendarte propuestas y tutores. Escribe un tema relacionado con tu área y verás etiquetas sugeridas.</value></data>
+  <data name="Profile_SkillsTooltip"><value>Tus habilidades aparecen en tu perfil y el sistema las usa para sugerirte propuestas que requieran tu perfil técnico.</value></data>
   <data name="Profile_Discard"><value>Descartar</value></data>
   <data name="Profile_SaveChanges"><value>Guardar Cambios</value></data>
   <data name="Profile_Logout"><value>Cerrar sesión</value></data>
   <data name="Profile_SavedSuccess"><value>Perfil actualizado correctamente.</value></data>
   <data name="Profile_SaveError"><value>No se pudieron guardar los cambios.</value></data>
-  <data name="Profile_AcademicData"><value>Información Académica</value></data>
+  <data name="Profile_AcademicData"><value>Datos Académicos</value></data>
   <data name="Profile_AcademicYear"><value>CURSO ACADÉMICO</value></data>
   <data name="Profile_AcademicYearHelper"><value>Indica el curso en el que te encuentras actualmente.</value></data>
   <data name="Profile_TechnicalSkills"><value>Habilidades Técnicas</value></data>
@@ -171,14 +173,25 @@
   <data name="TeacherHome_Card1Desc"><value>Crea, ajusta y mantén activas tus líneas de TFE con información clara para estudiantes.</value></data>
   <data name="TeacherHome_Card2"><value>Evaluar candidatos</value></data>
   <data name="TeacherHome_Card2Desc"><value>Analiza competencias y experiencia para seleccionar perfiles realmente alineados con tu propuesta.</value></data>
-  <data name="TeacherHome_Card3"><value>Decidir con agilidad</value></data>
-  <data name="TeacherHome_Card3Desc"><value>Gestiona el estado de cada candidatura y reduce fricción en la coordinación docente.</value></data>
+  <data name="TeacherHome_Card3"><value>Personalizar mi perfil</value></data>
+  <data name="TeacherHome_Card3Desc"><value>Completa tus intereses y áreas de investigación para recibir más propuestas y mejorar la calidad de tus matches.</value></data>
   <data name="TeacherHome_Cta"><value>¿Lista tu próxima propuesta?</value></data>
   <data name="TeacherHome_CtaDesc"><value>Crea una nueva propuesta de TFE, defínela con detalle y empieza a recibir candidaturas de los mejores estudiantes.</value></data>
   <data name="TeacherHome_CtaBtn"><value>Crear propuesta</value></data>
   <data name="TeacherHome_InterestsAlert"><value>Añade intereses para recibir recomendaciones</value></data>
   <data name="TeacherHome_InterestsAlertDesc"><value>Tu perfil aún no tiene intereses configurados. El sistema los usa para sugerirte candidatos y proyectos afines a tus líneas de investigación. Cuantos más añadas, más relevantes serán las recomendaciones.</value></data>
   <data name="TeacherHome_InterestsAlertBtn"><value>Añadir intereses ahora</value></data>
+
+  <!-- Home How It Works -->
+  <data name="Home_HowItWorks"><value>¿Cómo funciona el match?</value></data>
+  <data name="Home_Step1"><value>Se publica una propuesta de TFE</value></data>
+  <data name="Home_Step1Desc"><value>Un profesor o un estudiante crea una propuesta definiendo el tema, los requisitos y la duración.</value></data>
+  <data name="Home_Step2"><value>El otro usuario muestra interés</value></data>
+  <data name="Home_Step2Desc"><value>El candidato revisa la propuesta y envía su solicitud en segundos.</value></data>
+  <data name="Home_Step3"><value>Se acepta al candidato</value></data>
+  <data name="Home_Step3Desc"><value>Si el perfil encaja, se acepta la candidatura y se forma el match.</value></data>
+  <data name="Home_Step4"><value>¡Match! Contacto directo</value></data>
+  <data name="Home_Step4Desc"><value>Ambos reciben los datos de contacto para empezar.</value></data>
 
   <data name="AdminHome_Tag"><value>ADMINISTRACIÓN</value></data>
   <data name="AdminHome_Title"><value>Controla la plataforma desde una vista central</value></data>
@@ -222,7 +235,7 @@
   <data name="MyTfes_Subtitle"><value>Gestiona y supervisa tus propuestas de TFE.</value></data>
   <data name="MyTfes_CreateBtn"><value>Crear Nueva Propuesta</value></data>
   <data name="MyTfes_SearchPlaceholder"><value>Buscar por título o etiqueta...</value></data>
-  <data name="MyTfes_FilterByTags"><value>Filtrar por tags...</value></data>
+  <data name="MyTfes_FilterByTags"><value>Filtrar por temática...</value></data>
   <data name="MyTfes_SortBy"><value>Ordenar por:</value></data>
   <data name="MyTfes_SortNewest"><value>Más reciente</value></data>
   <data name="MyTfes_SortOldest"><value>Más antiguo</value></data>
@@ -263,7 +276,7 @@
   <data name="TfeForm_NewSubtitle"><value>Define los detalles académicos para atraer a los estudiantes con mejor perfil para tu investigación.</value></data>
   <data name="TfeForm_EditTitle"><value>Editar Propuesta</value></data>
   <data name="TfeForm_EditSubtitle"><value>Actualiza los detalles de tu propuesta de TFE.</value></data>
-  <data name="TfeForm_TitleLabel"><value>Título del TFE</value></data>
+  <data name="TfeForm_TitleLabel"><value>Título del proyecto</value></data>
   <data name="TfeForm_TitleFieldLabel"><value>Título del proyecto</value></data>
   <data name="TfeForm_TitleTooltip"><value>Escribe un título descriptivo y atractivo que identifique claramente el proyecto. Máx. 400 caracteres.</value></data>
   <data name="TfeForm_TitleHelper"><value>Ej: Sistema de recomendación de TFE con inteligencia artificial</value></data>
@@ -280,7 +293,7 @@
   <data name="TfeForm_ExpirationError"><value>Debes seleccionar una fecha de caducidad válida.</value></data>
   <data name="TfeForm_ExpirationMinError"><value>La fecha de caducidad debe ser, como mínimo, el {0}.</value></data>
   <data name="TfeForm_RenewBtn"><value>Renovar 3 meses</value></data>
-  <data name="TfeForm_DurationLabel"><value>Duración Estimada</value></data>
+  <data name="TfeForm_DurationLabel"><value>Duración de entrega estimada</value></data>
   <data name="TfeForm_DurationTooltip"><value>Duración orientativa para estimar cuándo podría entregarse el trabajo.</value></data>
   <data name="TfeForm_DurationFieldLabel"><value>Duración estimada</value></data>
   <data name="TfeForm_DurationPlaceholder"><value>Seleccione un rango...</value></data>
@@ -290,8 +303,10 @@
   <data name="TfeForm_Duration12M"><value>12 meses</value></data>
   <data name="TfeForm_DurationError"><value>Debes seleccionar una duración estimada.</value></data>
   <data name="TfeForm_TopicsLabel"><value>Temática Principal</value></data>
+  <data name="TfeForm_TopicsTooltip"><value>Las temáticas ayudan al sistema a encontrar candidatos afines a tu propuesta. Escribe una palabra clave y selecciona de la lista.</value></data>
   <data name="TfeForm_TopicsCaption"><value>Selecciona las áreas de conocimiento que mejor describen tu proyecto.</value></data>
   <data name="TfeForm_SkillsLabel"><value>Requisitos Técnicos (Skills)</value></data>
+  <data name="TfeForm_SkillsTooltip"><value>Indica las habilidades técnicas que buscas en el candidato y el nivel mínimo requerido (1–5 estrellas).</value></data>
   <data name="TfeForm_SkillsCaption"><value>Especifica las tecnologías o conocimientos que debería tener el estudiante.</value></data>
   <data name="TfeForm_PublishBtn"><value>Publicar Propuesta</value></data>
   <data name="TfeForm_UpdateBtn"><value>Actualizar Propuesta</value></data>
@@ -337,6 +352,7 @@
   <data name="CandidateStatus_Accepted"><value>Aceptado</value></data>
   <data name="CandidateStatus_Rejected"><value>Rechazado</value></data>
   <data name="CandidateStatus_Expired"><value>Expirado</value></data>
+  <data name="CandidateStatus_NotInterested"><value>No interesado</value></data>
   <data name="CandidateDetail_Back"><value>Volver</value></data>
   <data name="CandidateDetail_ProfileNotFound"><value>No se ha podido cargar el perfil del usuario.</value></data>
   <data name="CandidateDetail_AcceptedMsg"><value>Has aceptado a {0} para tu propuesta.</value></data>

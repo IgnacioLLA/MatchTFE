@@ -40,7 +40,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
             ValidAudience = builder.Configuration["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration["JwtSettings:Secret"]
+                ?? throw new InvalidOperationException("Missing configuration: JwtSettings:Secret"))),
             ClockSkew = TimeSpan.Zero
         };
     });

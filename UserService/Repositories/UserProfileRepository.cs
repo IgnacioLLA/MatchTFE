@@ -67,7 +67,7 @@ public class UserProfileRepository : IUserProfileRepository
             await _context.SaveChangesAsync();
             return true;
         }
-        catch (Exception)
+        catch (DbUpdateException)
         {
             return false;
         }
@@ -133,7 +133,7 @@ public class UserProfileRepository : IUserProfileRepository
             .Include(u => u.StudentSkills)
                 .ThenInclude(ss => ss.Tag)
             .Include(u => u.TfeProposals)
-            .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId))
+            .Where(u => u.TfeProposals.Any(tp => tp.TfeId == tfeId && tp.Status != ProposalStatus.NotInterested))
             .AsNoTracking()
             .ToListAsync();
     }

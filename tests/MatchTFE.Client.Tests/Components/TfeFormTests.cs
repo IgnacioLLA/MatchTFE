@@ -37,8 +37,10 @@ public class TfeFormTests : BunitTestBase
         var fields = cut.FindComponents<MudTextField<string>>();
         Assert.IsTrue(fields[0].Instance.Error);
         Assert.AreEqual("TfeForm_TitleError", fields[0].Instance.ErrorText);
-        Assert.IsTrue(fields[1].Instance.Error);
-        Assert.AreEqual("TfeForm_DescriptionError", fields[1].Instance.ErrorText);
+
+        // La descripción es un <textarea> nativo; el error se muestra como MudText con clase mud-error-text.
+        var descError = cut.Find(".mud-error-text");
+        Assert.AreEqual("TfeForm_DescriptionError", descError.TextContent.Trim());
     }
 
     [TestMethod]
@@ -47,11 +49,11 @@ public class TfeFormTests : BunitTestBase
         var cut = RenderForm();
 
         cut.FindComponents<MudTextField<string>>()[0].Find("input").Change("Valid Title");
-        cut.FindComponents<MudTextField<string>>()[1].Find("textarea").Change("Valid Description");
+        cut.Find("textarea").Change("Valid Description");
         cut.Find("input[type=date]").Change("2020-01-01");
         cut.FindComponents<MudButton>()[0].Find("button").Click();
 
-        var expirationField = cut.FindComponents<MudTextField<string>>()[2];
+        var expirationField = cut.FindComponents<MudTextField<string>>()[1];
         Assert.IsTrue(expirationField.Instance.Error);
         Assert.AreEqual("TfeForm_ExpirationMinError", expirationField.Instance.ErrorText);
     }
@@ -62,8 +64,8 @@ public class TfeFormTests : BunitTestBase
         var cut = RenderForm();
 
         cut.FindComponents<MudTextField<string>>()[0].Find("input").Change("Valid Title");
-        cut.FindComponents<MudTextField<string>>()[1].Find("textarea").Change("Valid Description");
-        
+        cut.Find("textarea").Change("Valid Description");
+
         cut.FindComponents<MudButton>()[0].Find("button").Click();
 
         var durationSelect = cut.FindComponent<MudSelect<string>>();
@@ -82,7 +84,7 @@ public class TfeFormTests : BunitTestBase
         var cut = RenderForm(dto => captured = dto);
 
         cut.FindComponents<MudTextField<string>>()[0].Find("input").Change("Valid Title");
-        cut.FindComponents<MudTextField<string>>()[1].Find("textarea").Change("Valid Description");
+        cut.Find("textarea").Change("Valid Description");
 
         await cut.InvokeAsync(() =>
             cut.FindComponent<MudSelect<string>>().Instance.ValueChanged.InvokeAsync("6"));

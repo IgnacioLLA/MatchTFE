@@ -101,12 +101,9 @@ public class TfeService : ITfeService
         }
     }
 
-    public async Task<bool> DeleteTfeAsync(int id, string authorId)
+    public async Task<bool> DeleteTfeAsync(int id)
     {
-        if (string.IsNullOrWhiteSpace(authorId))
-            throw new ArgumentException("Author ID cannot be empty.");
-
-        return await _tfeRepository.DeleteAsync(id, authorId);
+        return await _tfeRepository.DeleteAsync(id);
     }
 
     public async Task<TfeRecommendedResponse> GetRecommendedTfesAsync(string userId, TfeRecommendedRequest request)
@@ -243,7 +240,7 @@ public class TfeService : ITfeService
             Id = tfe.Id,
             Title = tfe.Title,
             Description = tfe.Description,
-            TutorName = tfe.Author.FirstName + " " + tfe.Author.LastName,
+            TutorName = $"{tfe.Author.FirstName} {tfe.Author.LastName}",
             Topics = tfe.Topics.Select(tag => new TagDto { Name = tag.Name }).ToList(),
             RequiredSkills = tfe.RequiredSkills
                 .Where(skill => skill.Tag != null)

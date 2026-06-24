@@ -126,8 +126,9 @@ public class AuthController : ControllerBase, IAuthController
             userId = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value
                   ?? jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Invalid JWT token format received in refresh request.");
             return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid token format." });
         }
 

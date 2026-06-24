@@ -5,7 +5,7 @@ using Moq;
 using TFELibrary.Data;
 using TFELibrary.Shared;
 
-namespace MatchTFE.UnitTest.MatchService;
+namespace MatchTFE.UnitTest.MatchService.Service;
 
 [TestClass]
 public class ProposalServiceTests
@@ -156,7 +156,7 @@ public class ProposalServiceTests
     }
 
     [TestMethod]
-    public async Task CreateTfeProposalAsync_WhenInterestedIsFalse_CreatesProposalWithRejectedStatus()
+    public async Task CreateTfeProposalAsync_WhenInterestedIsFalse_CreatesProposalWithNotInterestedStatus()
     {
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateValidTfe());
         _proposalRepoMock.Setup(r => r.TfeProposalExistsAsync("user-1", 1)).ReturnsAsync(false);
@@ -166,7 +166,7 @@ public class ProposalServiceTests
 
         Assert.IsTrue(result.Error.IsSuccess);
         _proposalRepoMock.Verify(r => r.CreateTfeProposalAsync(It.Is<TFEProposal>(p =>
-            p.Status == ProposalStatus.Rejected)), Times.Once);
+            p.Status == ProposalStatus.NotInterested)), Times.Once);
     }
 
     // =========================================================================
@@ -251,6 +251,19 @@ public class ProposalServiceTests
     }
 
     [TestMethod]
+    public async Task UpdateTfeProposalAsync_WhenProposalIsNotInterested_ReturnsInvalidStatusError()
+    {
+        _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateValidTfe());
+        _proposalRepoMock.Setup(r => r.GetTfeProposalByUserIdAsync("user-1", 1))
+            .ReturnsAsync(CreateProposal("user-1", 1, ProposalStatus.NotInterested));
+
+        var result = await _service.UpdateTfeProposalAsync(new TfeProposalUpdateRequest { UserId = "user-1", TfeId = 1 });
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("InvalidProposalStatus", result.Error.ErrorCode);
+    }
+
+    [TestMethod]
     public async Task UpdateTfeProposalAsync_WhenRepositoryThrows_ReturnsDatabaseError()
     {
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateValidTfe());
@@ -281,7 +294,7 @@ public class ProposalServiceTests
     }
 
     [TestMethod]
-    public async Task UpdateTfeProposalAsync_WhenInterestedIsFalse_SetsStatusToRejected()
+    public async Task UpdateTfeProposalAsync_WhenInterestedIsFalse_SetsStatusToNotInterested()
     {
         var proposal = CreateProposal("user-1", 1, ProposalStatus.Pending);
         _tfeRepoMock.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(CreateValidTfe());
@@ -291,7 +304,7 @@ public class ProposalServiceTests
         var result = await _service.UpdateTfeProposalAsync(new TfeProposalUpdateRequest { UserId = "user-1", TfeId = 1, IsInterested = false });
 
         Assert.IsTrue(result.Error.IsSuccess);
-        Assert.AreEqual(ProposalStatus.Rejected, proposal.Status);
+        Assert.AreEqual(ProposalStatus.NotInterested, proposal.Status);
     }
 
     // =========================================================================
@@ -392,6 +405,7 @@ public class ProposalServiceTests
     [TestMethod]
     [DataRow(ProposalStatus.Pending)]
     [DataRow(ProposalStatus.Expired)]
+    [DataRow(ProposalStatus.NotInterested)]
     public async Task DecideTfeCandidateAsync_WhenStatusIsInvalid_ReturnsInvalidStatusError(ProposalStatus status)
     {
         var result = await _service.DecideTfeCandidateAsync("author-1", new TfeCandidateDecisionRequest { TfeId = 1, CandidateId = "cand-1", Status = status });
@@ -517,7 +531,7 @@ public class ProposalServiceTests
     }
 
     // =========================================================================
-    // TFE status checks (TfeNotOpen)
+    // TFE status checks
     // =========================================================================
 
     [TestMethod]

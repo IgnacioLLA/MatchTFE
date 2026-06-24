@@ -82,10 +82,6 @@
                                Color="Color.Default"
                                Href="@($"/tfe/edit/{Model.Id}")" />
 
-                <MudIconButton Icon="@Icons.Material.Filled.Delete"
-                               Size="Size.Small"
-                               Color="Color.Error"
-                               OnClick="OnDeleteClicked" />
             }
             else if (Model.Status == TfeStatus.Completed)
             {
@@ -102,17 +98,6 @@
 @code {
     [Parameter, EditorRequired]
     public TfeDto Model { get; set; } = default!;
-
-    [Parameter]
-    public EventCallback<int> OnDeleted { get; set; }
-
-    private async Task OnDeleteClicked()
-    {
-        if (OnDeleted.HasDelegate)
-        {
-            await OnDeleted.InvokeAsync(Model.Id);
-        }
-    }
 
     private Color GetStatusColor(TfeStatus status) => status switch
     {

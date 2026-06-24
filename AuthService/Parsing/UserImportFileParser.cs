@@ -106,7 +106,7 @@ public static class UserImportFileParser
     private static bool IsValidEmail(string email)
     {
         try { return new MailAddress(email).Address == email; }
-        catch { return false; }
+        catch (FormatException) { return false; }
     }
 
     private static string TrimCsvHelperState(string message)

@@ -14,45 +14,47 @@
     @* --- LEFT COLUMN --- *@
     <MudItem xs="12" md="7" lg="7">
         <MudPaper Elevation="0" Class="pa-8 rounded-xl border-all h-100">
-            <div class="d-flex align-center mb-2">
-                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_TitleLabel"]</MudText>
-                <MudTooltip Text="@L["TfeForm_TitleTooltip"]" Placement="Placement.Right">
-                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
-                             Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="@L["TfeForm_TitleLabel"]" />
-                </MudTooltip>
-            </div>
-            <MudTextField @bind-Value="_title"
-                          T="string"
-                          Label="@L["TfeForm_TitleFieldLabel"]"
-                          Variant="Variant.Outlined"
-                          Margin="Margin.Dense"
-                          HelperText="@L["TfeForm_TitleHelper"]"
-                          Error="@(!string.IsNullOrWhiteSpace(_titleError))"
-                          ErrorText="@_titleError"
-                          ReadOnly="@IsReadOnly"
-                          Class="mb-8 rounded-lg"
-                          aria-required="true" />
+            <div class="tfe-left-grid">
+                <div class="d-flex align-center mb-2">
+                    <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_TitleLabel"]</MudText>
+                    <MudTooltip Text="@L["TfeForm_TitleTooltip"]" Placement="Placement.Right">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                                 Color="Color.Info" Class="ml-2" Style="cursor: help;"
+                                 aria-label="@L["TfeForm_TitleLabel"]" />
+                    </MudTooltip>
+                </div>
+                <MudTextField @bind-Value="_title"
+                              T="string"
+                              Label="@L["TfeForm_TitleFieldLabel"]"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              HelperText="@L["TfeForm_TitleHelper"]"
+                              Error="@(!string.IsNullOrWhiteSpace(_titleError))"
+                              ErrorText="@_titleError"
+                              ReadOnly="@IsReadOnly"
+                              Class="mb-4 rounded-lg"
+                              aria-required="true" />
 
-            <div class="d-flex align-center mb-2">
-                <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_DescriptionLabel"]</MudText>
-                <MudTooltip Text="@L["TfeForm_DescriptionTooltip"]" Placement="Placement.Right">
-                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
-                             Class="ml-2 app-text-muted" Style="cursor: help;"
-                             aria-label="@L["TfeForm_DescriptionLabel"]" />
-                </MudTooltip>
+                <div class="d-flex align-center mb-2">
+                    <MudText Typo="Typo.subtitle2" Class="app-subtitle mb-0">@L["TfeForm_DescriptionLabel"]</MudText>
+                    <MudTooltip Text="@L["TfeForm_DescriptionTooltip"]" Placement="Placement.Right">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
+                                 Color="Color.Info" Class="ml-2" Style="cursor: help;"
+                                 aria-label="@L["TfeForm_DescriptionLabel"]" />
+                    </MudTooltip>
+                </div>
+                <div class="tfe-desc-wrap" style="@(IsReadOnly ? "pointer-events: none; opacity: 0.7;" : string.Empty)">
+                    <textarea @bind="_description"
+                              placeholder="@L["TfeForm_DescriptionFieldLabel"]"
+                              class="tfe-native-textarea @(!string.IsNullOrWhiteSpace(_descriptionError) ? "tfe-native-error" : "")"
+                              aria-required="true">
+                    </textarea>
+                    <MudText Typo="Typo.caption"
+                             Class="@(!string.IsNullOrWhiteSpace(_descriptionError) ? "mud-error-text mt-1" : "app-text-muted mt-1")">
+                        @(!string.IsNullOrWhiteSpace(_descriptionError) ? _descriptionError : L["TfeForm_DescriptionHelper"].Value)
+                    </MudText>
+                </div>
             </div>
-            <MudTextField @bind-Value="_description"
-                          T="string"
-                          Label="@L["TfeForm_DescriptionFieldLabel"]"
-                          Variant="Variant.Outlined"
-                          Lines="15"
-                          HelperText="@L["TfeForm_DescriptionHelper"]"
-                          Error="@(!string.IsNullOrWhiteSpace(_descriptionError))"
-                          ErrorText="@_descriptionError"
-                          ReadOnly="@IsReadOnly"
-                          Class="rounded-lg"
-                          aria-required="true" />
         </MudPaper>
     </MudItem>
 
@@ -66,7 +68,7 @@
                 </MudText>
                 <MudTooltip Text="@L["TfeForm_ExpirationTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
-                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             Color="Color.Info" Class="ml-2" Style="cursor: help;"
                              aria-label="@L["TfeForm_ExpirationLabel"]" />
                 </MudTooltip>
             </div>
@@ -120,7 +122,7 @@
                 </MudText>
                 <MudTooltip Text="@L["TfeForm_DurationTooltip"]" Placement="Placement.Right">
                     <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
-                             Class="ml-2 app-text-muted" Style="cursor: help;"
+                             Color="Color.Info" Class="ml-2" Style="cursor: help;"
                              aria-label="@L["TfeForm_DurationLabel"]" />
                 </MudTooltip>
             </div>
@@ -147,7 +149,8 @@
                 <TagSelector @bind-SelectedTags="_selectedTopics"
                              Title="@L["TfeForm_TopicsLabel"]"
                              Icon="@Icons.Material.Filled.Category"
-                             Placeholder="@L["TfeForm_TopicsPlaceholder"].Value" />
+                             Placeholder="@L["TfeForm_TopicsPlaceholder"].Value"
+                             TooltipText="@L["TfeForm_TopicsTooltip"]" />
             </div>
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
                 @L["TfeForm_TopicsCaption"]
@@ -159,7 +162,8 @@
                 <SkillSelector @bind-SelectedSkills="_requiredSkills"
                                Title="@L["TfeForm_SkillsLabel"]"
                                Icon="@Icons.Material.Filled.Build"
-                               Placeholder="@L["TfeForm_SkillsPlaceholder"].Value" />
+                               Placeholder="@L["TfeForm_SkillsPlaceholder"].Value"
+                               TooltipText="@L["TfeForm_SkillsTooltip"]" />
             </div>
             <MudText Typo="Typo.caption" Class="app-text-muted mt-2">
                 @L["TfeForm_SkillsCaption"]
