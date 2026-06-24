@@ -39,10 +39,8 @@
                       Placeholder="@L["Register_EmailPlaceholder"]"
                       Variant="Variant.Outlined"
                       InputType="InputType.Email"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Outlined.Email"
                       AutoComplete="email"
-                      Class="auth-input"
+                      Class="auth-input register-email-input"
                       Error="@(_emailError != null)"
                       ErrorText="@_emailError" />
 
@@ -51,8 +49,6 @@
                       Placeholder="@L["Register_ConfirmEmailPlaceholder"]"
                       Variant="Variant.Outlined"
                       InputType="InputType.Email"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Outlined.MarkEmailRead"
                       AutoComplete="email"
                       Class="auth-input"
                       Error="@(_confirmEmailError != null)"

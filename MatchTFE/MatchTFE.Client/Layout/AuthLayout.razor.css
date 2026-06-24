@@ -134,6 +134,10 @@
         margin-bottom: 0 !important;
     }
 
+::deep .register-email-input {
+    margin-bottom: 0.25rem !important;
+}
+
 ::deep .register-password-input {
     margin-bottom: 0.25rem !important;
 }
