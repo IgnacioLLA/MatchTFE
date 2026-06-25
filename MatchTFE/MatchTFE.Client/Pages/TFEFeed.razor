@@ -71,8 +71,12 @@
                 _proposalsQueue.Clear();
 
             if (response?.Tfes != null)
+            {
+                var existingIds = _proposalsQueue.Select(t => t.Id).ToHashSet();
                 foreach (var tfe in response.Tfes)
-                    _proposalsQueue.Enqueue(tfe);
+                    if (existingIds.Add(tfe.Id))
+                        _proposalsQueue.Enqueue(tfe);
+            }
         }
         catch { }
         finally

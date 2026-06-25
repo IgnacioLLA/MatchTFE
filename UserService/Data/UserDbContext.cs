@@ -54,7 +54,7 @@ public class UserDbContext : DbContext
             ss.HasKey(ss => new { ss.StudentProfileId, ss.TagId });
 
             ss.HasOne(s => s.StudentProfile)
-              .WithMany()
+              .WithMany(u => u.StudentSkills)
               .HasForeignKey(s => s.StudentProfileId)
               .OnDelete(DeleteBehavior.Cascade);
 

@@ -65,7 +65,7 @@ public class ProposalRepository : IProposalRepository
             .Where(tp => (tp.Tfe.AuthorId == userId || tp.OriginUserId == userId)
                       && tp.Status == ProposalStatus.Accepted
                       && tp.Tfe.ExpirationDate >= today
-                      && tp.Tfe.Status != TfeStatus.Completed)
+                      && tp.Tfe.Status == TfeStatus.Open)
             .Include(tp => tp.OriginUser)
             .Include(tp => tp.Tfe)
             .ThenInclude(t => t.Author)
