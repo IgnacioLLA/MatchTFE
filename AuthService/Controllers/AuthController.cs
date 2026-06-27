@@ -202,20 +202,6 @@ public class AuthController : ControllerBase, IAuthController
         return Ok(new { IsSuccess = true, Message = "Sesión cerrada correctamente." });
     }
 
-    [HttpGet("test-auth")]
-    [Authorize]
-    public IActionResult TestAuth()
-    {
-        var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-
-        return Ok(new
-        {
-            IsSuccess = true,
-            Message = "¡Autenticación exitosa! El token es válido.",
-            Email = email
-        });
-    }
-
     [HttpPut("role")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ChangeRole([FromBody] UserRoleUpdateRequest request)

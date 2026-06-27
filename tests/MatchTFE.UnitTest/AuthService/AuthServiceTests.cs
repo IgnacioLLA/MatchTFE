@@ -462,7 +462,7 @@ public class AuthServiceTests
     [TestMethod]
     public async Task BulkImportUsersAsync_WhenRowHasTooFewFields_ReturnsParseErrorAndCreatesNothing()
     {
-        var content = CsvBytes("a@a.com,Juan,García");   // only 3 fields, row 1
+        var content = CsvBytes("a@a.com,Juan,García");
 
         var result = await _service.BulkImportUsersAsync(
             new BulkUserImportRequest { FileName = "f.csv", FileContent = content });
@@ -489,7 +489,6 @@ public class AuthServiceTests
     [TestMethod]
     public async Task BulkImportUsersAsync_WhenSecondRowIsInvalid_AbortsWithoutCreatingFirstValidRow()
     {
-        // Row 1 valid, row 2 has empty firstName — parser aborts on row 2, row 1 is not created
         var content = CsvBytes(
             "ok@a.com,Juan,García,Pass123!,Student",
             "bad@a.com,,García,Pass123!,Teacher");
@@ -576,8 +575,6 @@ public class AuthServiceTests
         _repositoryMock.Verify(r => r.CreateUserAsync(It.IsAny<MatchUser>(), It.IsAny<string>()), Times.Never);
     }
 
-    // --- CsvHelper-specific scenarios ---
-
     [TestMethod]
     public async Task BulkImportUsersAsync_WhenRoleIsAllUpperCase_ParsesCorrectlyAndCreatesUser()
     {
@@ -604,7 +601,6 @@ public class AuthServiceTests
     [TestMethod]
     public async Task BulkImportUsersAsync_WhenFileHasUtf8Bom_ParsesCorrectlyAndCreatesUser()
     {
-        // Some editors (e.g. Excel, Notepad on Windows) save UTF-8 files with a BOM prefix
         var bom = new byte[] { 0xEF, 0xBB, 0xBF };
         var body = System.Text.Encoding.UTF8.GetBytes("a@a.com,Juan,García,Pass123!,Student");
         var content = bom.Concat(body).ToArray();
@@ -630,7 +626,6 @@ public class AuthServiceTests
     [TestMethod]
     public async Task BulkImportUsersAsync_WhenLastNameContainsCommaInsideQuotes_ParsesCorrectlyAndCreatesUser()
     {
-        // CsvHelper supports quoted fields — our previous manual parser did not
         var content = CsvBytes("a@a.com,Juan,\"García, Jr.\",Pass123!,Student");
 
         MatchUser? capturedUser = null;
