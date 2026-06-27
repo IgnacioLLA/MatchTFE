@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using MatchTFE.Client.Pages;
 using MatchTFE.Client.Tests.Shared;
 using Microsoft.AspNetCore.Components;
@@ -214,7 +214,7 @@ public class RegisterTests : BunitTestBase
     public void Submit_AllValidInputs_DoesNotShowErrors()
     {
         SetupGatewayApi(HttpStatusCode.OK,
-            new RegisterResponseDto { Error = new OperationResult(true, "OK") });
+            new RegisterResponse { Error = new OperationResult(true, "OK") });
         var cut = Render<Register>();
 
         FillAllValid(cut);
@@ -250,7 +250,7 @@ public class RegisterTests : BunitTestBase
     public void Submit_ApiSuccess_ShowsSuccessSnackbarAndNavigatesToLogin()
     {
         SetupGatewayApi(HttpStatusCode.OK,
-            new RegisterResponseDto { Error = new OperationResult(true, "OK") });
+            new RegisterResponse { Error = new OperationResult(true, "OK") });
         var snackbar = SetupSnackbar();
         var cut = Render<Register>();
 
@@ -270,7 +270,7 @@ public class RegisterTests : BunitTestBase
     {
         // 200 OK but IsSuccess=false with DuplicateEmail code
         SetupGatewayApi(HttpStatusCode.OK,
-            new RegisterResponseDto { Error = new OperationResult(false, "Duplicate", "DuplicateEmail") });
+            new RegisterResponse { Error = new OperationResult(false, "Duplicate", "DuplicateEmail") });
         var snackbar = SetupSnackbar();
         var cut = Render<Register>();
 
@@ -286,7 +286,7 @@ public class RegisterTests : BunitTestBase
     public void Submit_ApiReturnsServerError_ShowsErrorSnackbar()
     {
         SetupGatewayApi(HttpStatusCode.InternalServerError,
-            new RegisterResponseDto { Error = new OperationResult(false, "Server error", "ServerError") });
+            new RegisterResponse { Error = new OperationResult(false, "Server error", "ServerError") });
         var snackbar = SetupSnackbar();
         var cut = Render<Register>();
 

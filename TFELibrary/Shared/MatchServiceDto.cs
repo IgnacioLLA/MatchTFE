@@ -51,7 +51,6 @@ public class TfeRecommendedResponse
     public int TotalCount { get; set; }
 }
 
-// -- Proposals --
 public class TfeProposalCreationRequest
 {
     [Required]
@@ -109,7 +108,6 @@ public class TfeCandidateDto
     public bool CanDecide => Status == ProposalStatus.Pending;
 }
 
-// -- Accepted Matches --
 public class AcceptedMatchDto
 {
     public string MatchedUserId { get; set; } = string.Empty;

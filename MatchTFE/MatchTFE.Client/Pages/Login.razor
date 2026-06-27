@@ -1,4 +1,4 @@
-@page "/login"
+﻿@page "/login"
 @using TFELibrary.Shared
 @using System.Net.Http.Json
 @layout AuthLayout
@@ -88,7 +88,7 @@
 </MudCard>
 
 @code {
-    private LoginRequestDto _loginModel = new();
+    private LoginRequest _loginModel = new();
     private bool _isLoading = false;
     private bool _isSuspended = false;
     private string _loginError = string.Empty;
@@ -163,7 +163,7 @@
             }
             else
             {
-                var errorResult = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+                var errorResult = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
                 if (errorResult?.Error?.ErrorCode == "AccountSuspended")
                     _isSuspended = true;

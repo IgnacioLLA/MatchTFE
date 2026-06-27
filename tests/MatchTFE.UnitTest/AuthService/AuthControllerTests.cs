@@ -1,4 +1,4 @@
-using AuthService.Controllers;
+﻿using AuthService.Controllers;
 using AuthService.Service;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -76,7 +76,7 @@ public class AuthControllerTests
     {
         _controller.ModelState.AddModelError("Email", "Required");
 
-        var result = await _controller.Login(new LoginRequestDto());
+        var result = await _controller.Login(new LoginRequest());
 
         Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
     }
@@ -84,10 +84,10 @@ public class AuthControllerTests
     [TestMethod]
     public async Task Login_WhenCredentialsInvalid_ReturnsUnauthorized()
     {
-        _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequestDto>()))
-            .ReturnsAsync((new LoginResponseDto { Error = new OperationResult(false, "Invalid credentials.") }, null));
+        _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequest>()))
+            .ReturnsAsync((new LoginResponse { Error = new OperationResult(false, "Invalid credentials.") }, null));
 
-        var result = await _controller.Login(new LoginRequestDto { Email = "x@x.com", Password = "wrong" });
+        var result = await _controller.Login(new LoginRequest { Email = "x@x.com", Password = "wrong" });
 
         Assert.IsInstanceOfType(result, typeof(UnauthorizedObjectResult));
     }
@@ -95,15 +95,15 @@ public class AuthControllerTests
     [TestMethod]
     public async Task Login_WhenCredentialsValid_ReturnsOk()
     {
-        _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequestDto>()))
-            .ReturnsAsync((new LoginResponseDto
+        _serviceMock.Setup(s => s.LoginAsync(It.IsAny<LoginRequest>()))
+            .ReturnsAsync((new LoginResponse
             {
                 Error = new OperationResult(true, string.Empty),
                 FirstName = "Test",
                 LastName = "User"
             }, null));
 
-        var result = await _controller.Login(new LoginRequestDto { Email = "x@x.com", Password = "pass" });
+        var result = await _controller.Login(new LoginRequest { Email = "x@x.com", Password = "pass" });
 
         Assert.IsInstanceOfType(result, typeof(OkObjectResult));
     }
@@ -117,7 +117,7 @@ public class AuthControllerTests
     {
         _controller.ModelState.AddModelError("Email", "Required");
 
-        var result = await _controller.Register(new RegisterRequestDto());
+        var result = await _controller.Register(new RegisterRequest());
 
         Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
     }
@@ -125,13 +125,13 @@ public class AuthControllerTests
     [TestMethod]
     public async Task Register_WhenDuplicateEmail_ReturnsConflict()
     {
-        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
-            .ReturnsAsync((new RegisterResponseDto
+        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequest>()))
+            .ReturnsAsync((new RegisterResponse
             {
                 Error = new OperationResult(false, "Email already taken.", "DuplicateEmail")
             }, null));
 
-        var result = await _controller.Register(new RegisterRequestDto { Email = "dup@test.com" });
+        var result = await _controller.Register(new RegisterRequest { Email = "dup@test.com" });
 
         Assert.IsInstanceOfType(result, typeof(ConflictObjectResult));
     }
@@ -139,13 +139,13 @@ public class AuthControllerTests
     [TestMethod]
     public async Task Register_WhenGenericError_ReturnsBadRequest()
     {
-        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
-            .ReturnsAsync((new RegisterResponseDto
+        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequest>()))
+            .ReturnsAsync((new RegisterResponse
             {
                 Error = new OperationResult(false, "Could not create profile.")
             }, null));
 
-        var result = await _controller.Register(new RegisterRequestDto { Email = "x@x.com" });
+        var result = await _controller.Register(new RegisterRequest { Email = "x@x.com" });
 
         Assert.IsInstanceOfType(result, typeof(BadRequestObjectResult));
     }
@@ -153,13 +153,13 @@ public class AuthControllerTests
     [TestMethod]
     public async Task Register_WhenSuccess_ReturnsOk()
     {
-        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequestDto>()))
-            .ReturnsAsync((new RegisterResponseDto
+        _serviceMock.Setup(s => s.RegisterAsync(It.IsAny<RegisterRequest>()))
+            .ReturnsAsync((new RegisterResponse
             {
                 Error = new OperationResult(true, string.Empty)
             }, null));
 
-        var result = await _controller.Register(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
+        var result = await _controller.Register(new RegisterRequest { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
 
         Assert.IsInstanceOfType(result, typeof(OkObjectResult));
     }
@@ -190,8 +190,8 @@ public class AuthControllerTests
     public async Task RefreshToken_WhenServiceFails_ReturnsUnauthorized()
     {
         SetCookies(CreateTestJwt("user-1"), "refresh-token");
-        _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequestDto>()))
-            .ReturnsAsync((new RefreshTokenResponseDto { Error = new OperationResult(false, "Token revocado.") }, null));
+        _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequest>()))
+            .ReturnsAsync((new RefreshTokenResponse { Error = new OperationResult(false, "Token revocado.") }, null));
 
         var result = await _controller.RefreshToken();
 
@@ -202,8 +202,8 @@ public class AuthControllerTests
     public async Task RefreshToken_WhenSuccess_ReturnsOk()
     {
         SetCookies(CreateTestJwt("user-1"), "refresh-token");
-        _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequestDto>()))
-            .ReturnsAsync((new RefreshTokenResponseDto { Error = new OperationResult(true, string.Empty) }, null));
+        _serviceMock.Setup(s => s.RefreshTokenAsync(It.IsAny<RefreshTokenRequest>()))
+            .ReturnsAsync((new RefreshTokenResponse { Error = new OperationResult(true, string.Empty) }, null));
 
         var result = await _controller.RefreshToken();
 

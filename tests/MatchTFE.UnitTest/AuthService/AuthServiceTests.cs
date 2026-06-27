@@ -1,4 +1,4 @@
-using AuthService.Data;
+﻿using AuthService.Data;
 using AuthService.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -114,7 +114,7 @@ public class AuthServiceTests
     [TestMethod]
     public async Task LoginAsync_WhenEmailIsBlank_ReturnsError()
     {
-        var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "   ", Password = "pass" });
+        var (result, _) = await _service.LoginAsync(new LoginRequest { Email = "   ", Password = "pass" });
 
         Assert.IsFalse(result.Error.IsSuccess);
     }
@@ -124,7 +124,7 @@ public class AuthServiceTests
     {
         _repositoryMock.Setup(r => r.GetUserByEmailAsync("x@x.com")).ReturnsAsync((MatchUser?)null);
 
-        var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "pass" });
+        var (result, _) = await _service.LoginAsync(new LoginRequest { Email = "x@x.com", Password = "pass" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.AreEqual("Invalid credentials.", result.Error.Message);
@@ -137,7 +137,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.GetUserByEmailAsync("x@x.com")).ReturnsAsync(user);
         _repositoryMock.Setup(r => r.CheckPasswordAsync(user, "wrong")).ReturnsAsync(false);
 
-        var (result, _) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "wrong" });
+        var (result, _) = await _service.LoginAsync(new LoginRequest { Email = "x@x.com", Password = "wrong" });
 
         Assert.IsFalse(result.Error.IsSuccess);
     }
@@ -151,7 +151,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.IsLockedOutAsync(user)).ReturnsAsync(false);
         SetupSuccessfulTokenGeneration(user);
 
-        var (result, tokens) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
+        var (result, tokens) = await _service.LoginAsync(new LoginRequest { Email = "x@x.com", Password = "Abc@1234" });
 
         Assert.IsTrue(result.Error.IsSuccess);
         Assert.IsNotNull(tokens);
@@ -168,7 +168,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.CheckPasswordAsync(user, "Abc@1234")).ReturnsAsync(true);
         _repositoryMock.Setup(r => r.IsLockedOutAsync(user)).ReturnsAsync(true);
 
-        var (result, tokens) = await _service.LoginAsync(new LoginRequestDto { Email = "x@x.com", Password = "Abc@1234" });
+        var (result, tokens) = await _service.LoginAsync(new LoginRequest { Email = "x@x.com", Password = "Abc@1234" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.AreEqual("Account suspended.", result.Error.Message);
@@ -191,7 +191,7 @@ public class AuthServiceTests
     [TestMethod]
     public async Task RefreshTokenAsync_WhenRefreshTokenIsInvalid_ReturnsError()
     {
-        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequestDto
+        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequest
         {
             UserId = "user-1",
             RefreshToken = "not-a-valid-jwt"
@@ -205,7 +205,7 @@ public class AuthServiceTests
     {
         _repositoryMock.Setup(r => r.GetUserByIdAsync("user-99")).ReturnsAsync((MatchUser?)null);
 
-        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequestDto
+        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequest
         {
             UserId = "user-99",
             RefreshToken = CreateValidRefreshToken()
@@ -223,7 +223,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.GetUserByIdAsync("user-1")).ReturnsAsync(user);
         _repositoryMock.Setup(r => r.GetRefreshTokenAsync(user)).ReturnsAsync("a-different-token");
 
-        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequestDto
+        var (result, _) = await _service.RefreshTokenAsync(new RefreshTokenRequest
         {
             UserId = "user-1",
             RefreshToken = validToken
@@ -242,7 +242,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.GetRefreshTokenAsync(user)).ReturnsAsync(validToken);
         SetupSuccessfulTokenGeneration(user);
 
-        var (result, tokens) = await _service.RefreshTokenAsync(new RefreshTokenRequestDto
+        var (result, tokens) = await _service.RefreshTokenAsync(new RefreshTokenRequest
         {
             UserId = "user-1",
             RefreshToken = validToken
@@ -298,7 +298,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<MatchUser>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = "DuplicateUserName", Description = "Email 'x@x.com' is already taken." }));
 
-        var (result, _) = await _service.RegisterAsync(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
+        var (result, _) = await _service.RegisterAsync(new RegisterRequest { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.AreEqual("DuplicateEmail", result.Error.ErrorCode);
@@ -310,7 +310,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<MatchUser>(), It.IsAny<string>()))
             .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = "PasswordTooShort", Description = "Password too short." }));
 
-        var (result, _) = await _service.RegisterAsync(new RegisterRequestDto { Email = "x@x.com", Password = "123", FirstName = "Test", LastName = "User" });
+        var (result, _) = await _service.RegisterAsync(new RegisterRequest { Email = "x@x.com", Password = "123", FirstName = "Test", LastName = "User" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         Assert.IsNull(result.Error.ErrorCode);
@@ -328,7 +328,7 @@ public class AuthServiceTests
         SetupHttpClient(HttpStatusCode.BadRequest,
             """{"Error":{"IsSuccess":false,"Message":"Profile creation failed.","ErrorCode":null},"UserId":null}""");
 
-        var (result, _) = await _service.RegisterAsync(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
+        var (result, _) = await _service.RegisterAsync(new RegisterRequest { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
 
         Assert.IsFalse(result.Error.IsSuccess);
         _repositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<MatchUser>()), Times.Once);
@@ -342,7 +342,7 @@ public class AuthServiceTests
         _repositoryMock.Setup(r => r.GetUserRolesAsync(It.IsAny<MatchUser>())).ReturnsAsync(new List<string> { "User" });
         _repositoryMock.Setup(r => r.SaveRefreshTokenAsync(It.IsAny<MatchUser>(), It.IsAny<string>())).Returns(Task.CompletedTask);
 
-        var (result, tokens) = await _service.RegisterAsync(new RegisterRequestDto { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
+        var (result, tokens) = await _service.RegisterAsync(new RegisterRequest { Email = "x@x.com", Password = "Abc@1234", FirstName = "Test", LastName = "User" });
 
         Assert.IsTrue(result.Error.IsSuccess);
         Assert.IsNotNull(tokens);

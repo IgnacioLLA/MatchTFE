@@ -1,4 +1,4 @@
-using AuthService.Data;
+﻿using AuthService.Data;
 using AuthService.Parsing;
 using AuthService.Repositories;
 using Microsoft.IdentityModel.Tokens;
@@ -31,10 +31,10 @@ public class AuthService : IAuthService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<(RegisterResponseDto Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequestDto request)
+    public async Task<(RegisterResponse Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequest request)
     {
         if (request == null)
-            return (new RegisterResponseDto
+            return (new RegisterResponse
             {
                 Error = new OperationResult(false, "Registration request cannot be null.")
             }, null);
@@ -55,7 +55,7 @@ public class AuthService : IAuthService
             var isDuplicateUser = result.Errors.Any(e =>
                 e.Code.Contains("Duplicate", StringComparison.OrdinalIgnoreCase));
 
-            return (new RegisterResponseDto
+            return (new RegisterResponse
             {
                 Error = new OperationResult(false, errors, isDuplicateUser ? "DuplicateEmail" : null)
             }, null);
@@ -71,28 +71,28 @@ public class AuthService : IAuthService
         if (!profileResult.IsSuccess)
         {
             await _authRepository.DeleteUserAsync(newUser);
-            return (new RegisterResponseDto
+            return (new RegisterResponse
             {
                 Error = profileResult
             }, null);
         }
 
-        return (new RegisterResponseDto
+        return (new RegisterResponse
         {
             Error = new OperationResult(true, string.Empty)
         }, authTokens);
     }
 
-    public async Task<(LoginResponseDto Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequestDto request)
+    public async Task<(LoginResponse Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequest request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
-            return (new LoginResponseDto { Error = new OperationResult(false, "Email and password are required.") }, null);
+            return (new LoginResponse { Error = new OperationResult(false, "Email and password are required.") }, null);
 
         var user = await _authRepository.GetUserByEmailAsync(request.Email);
 
         if (user == null || !await _authRepository.CheckPasswordAsync(user, request.Password))
         {
-            return (new LoginResponseDto
+            return (new LoginResponse
             {
                 Error = new OperationResult(false, "Invalid credentials.")
             }, null);
@@ -100,7 +100,7 @@ public class AuthService : IAuthService
 
         if (await _authRepository.IsLockedOutAsync(user))
         {
-            return (new LoginResponseDto
+            return (new LoginResponse
             {
                 Error = new OperationResult(false, "Account suspended.", "AccountSuspended")
             }, null);
@@ -108,7 +108,7 @@ public class AuthService : IAuthService
 
         var (authResult, authTokens) = await GenerateAndSaveTokensAsync(user);
 
-        return (new LoginResponseDto
+        return (new LoginResponse
         {
             FirstName = user.Name,
             LastName = user.Surname,
@@ -116,33 +116,33 @@ public class AuthService : IAuthService
         }, authTokens);
     }
 
-    public async Task<(RefreshTokenResponseDto Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequestDto request)
+    public async Task<(RefreshTokenResponse Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequest request)
     {
         if (request == null || string.IsNullOrWhiteSpace(request.UserId) || string.IsNullOrWhiteSpace(request.RefreshToken))
-            return (new RefreshTokenResponseDto { Error = new OperationResult(false, "Invalid refresh token request.") }, null);
+            return (new RefreshTokenResponse { Error = new OperationResult(false, "Invalid refresh token request.") }, null);
 
         var refreshSecret = _configuration.GetSection("JwtSettings")["RefreshSecret"]!;
 
         if (!IsValidToken(request.RefreshToken, refreshSecret))
         {
-            return (new RefreshTokenResponseDto { Error = new OperationResult(false, "Token expirado, falso o incorrecto.") }, null);
+            return (new RefreshTokenResponse { Error = new OperationResult(false, "Token expirado, falso o incorrecto.") }, null);
         }
 
         var user = await _authRepository.GetUserByIdAsync(request.UserId);
 
         if (user == null)
         {
-            return (new RefreshTokenResponseDto { Error = new OperationResult(false, "User not found.") }, null);
+            return (new RefreshTokenResponse { Error = new OperationResult(false, "User not found.") }, null);
         }
 
         if (await _authRepository.GetRefreshTokenAsync(user) != request.RefreshToken)
         {
-            return (new RefreshTokenResponseDto { Error = new OperationResult(false, "Token revocado o reemplazado.") }, null);
+            return (new RefreshTokenResponse { Error = new OperationResult(false, "Token revocado o reemplazado.") }, null);
         }
 
         var (authResult, authTokens) = await GenerateAndSaveTokensAsync(user);
 
-        return (new RefreshTokenResponseDto { Error = authResult }, authTokens);
+        return (new RefreshTokenResponse { Error = authResult }, authTokens);
     }
 
     private async Task<(OperationResult Result, AuthTokenPair Tokens)> GenerateAndSaveTokensAsync(MatchUser user)

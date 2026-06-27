@@ -21,8 +21,6 @@ public class MarkNotificationsSentRequest
     public List<string> UserIds { get; set; } = new();
 }
 
-// -- Notification data from MatchService --
-
 public class NotificationDataRequest
 {
     public List<UserNotificationContext> Users { get; set; } = new();

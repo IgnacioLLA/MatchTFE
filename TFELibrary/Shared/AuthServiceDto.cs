@@ -2,6 +2,66 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TFELibrary.Shared;
 
+public class LoginRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    public string Password { get; set; } = string.Empty;
+}
+
+public class LoginResponse
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+}
+
+public class RegisterRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    [StringLength(100, MinimumLength = 6)]
+    public string Password { get; set; } = string.Empty;
+
+    [Required]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required]
+    public string LastName { get; set; } = string.Empty;
+}
+
+public class RegisterResponse
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+}
+
+public class RefreshTokenRequest
+{
+    [Required]
+    public string UserId { get; set; } = string.Empty;
+
+    [Required]
+    public string RefreshToken { get; set; } = string.Empty;
+}
+
+public class RefreshTokenResponse
+{
+    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
+}
+
+public enum BulkUserActionType
+{
+    Suspend,
+    Delete,
+    Unsuspend
+}
+
 public class UserRoleUpdateRequest
 {
     [Required]
@@ -31,13 +91,6 @@ public class BulkUserImportResponse
     public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
     public int CreatedCount { get; set; }
     public int SkippedCount { get; set; }
-}
-
-public enum BulkUserActionType
-{
-    Suspend,
-    Delete,
-    Unsuspend
 }
 
 public class BulkUserActionRequest

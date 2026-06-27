@@ -7,9 +7,9 @@ namespace AuthService.Controllers
     public interface IAuthController
     {
         [HttpPost("login")]
-        Task<IActionResult> Login(LoginRequestDto loginDto);
+        Task<IActionResult> Login(LoginRequest loginDto);
         [HttpPost("register")]
-        Task<IActionResult> Register(RegisterRequestDto request);
+        Task<IActionResult> Register(RegisterRequest request);
         [HttpPost("refresh")]
         Task<IActionResult> RefreshToken();
         [HttpPost("logout")]

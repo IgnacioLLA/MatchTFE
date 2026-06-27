@@ -24,21 +24,6 @@ public enum NotificationFrequency
     Monthly = 3
 }
 
-public class TfeDto
-{
-    public int Id { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string TutorName { get; set; } = string.Empty;
-    public int InterestedAmount { get; set; }
-    public List<TagDto> Topics { get; set; } = new();
-    public List<SkillDto> RequiredSkills { get; set; } = new();
-    public DateTime EstimatedDelivery { get; set; }
-    public DateTime ExpirationDate { get; set; }
-    public DateTime CreationDate { get; set; }
-    public TfeStatus Status { get; set; }
-}
-
 public enum TfeStatus
 {
     Open = 1,
@@ -54,6 +39,8 @@ public enum ProposalStatus
     Expired = 0,
     NotInterested = 4
 }
+
+public record OperationResult(bool IsSuccess, string Message, string? ErrorCode = null);
 
 public static class TfeDateRules
 {
@@ -75,6 +62,38 @@ public static class TfeDateRules
     }
 }
 
+public class TfeDto
+{
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string TutorName { get; set; } = string.Empty;
+    public int InterestedAmount { get; set; }
+    public List<TagDto> Topics { get; set; } = new();
+    public List<SkillDto> RequiredSkills { get; set; } = new();
+    public DateTime EstimatedDelivery { get; set; }
+    public DateTime ExpirationDate { get; set; }
+    public DateTime CreationDate { get; set; }
+    public TfeStatus Status { get; set; }
+}
+
+public class ProfileDto
+{
+    public string Id { get; set; } = string.Empty;
+    public RoleType Role { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
+    public bool IsSuspended { get; set; } = false;
+    public List<string> Interests { get; set; } = new();
+    public string AcademicYear { get; set; } = string.Empty;
+    public List<SkillDto> Skills { get; set; } = new();
+    public string Department { get; set; } = string.Empty;
+    public string OfficeLocation { get; set; } = string.Empty;
+    public NotificationFrequency NotificationFrequency { get; set; } = NotificationFrequency.Disabled;
+}
+
 public class CandidateProfileDto
 {
     public int Id { get; set; }
@@ -85,36 +104,6 @@ public class CandidateProfileDto
     public List<string> AreasOfInterest { get; set; } = new();
     public string Biography { get; set; } = string.Empty;
     public List<CompetencyDto> Competencies { get; set; } = new();
-}
-
-public class ProfileDto
-{
-    public string Id { get; set; } = string.Empty;
-    public RoleType Role { get; set; }
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-
-    public string Bio { get; set; } = string.Empty;
-    public bool IsSuspended { get; set; } = false;
-    public List<string> Interests { get; set; } = new();
-
-    // ----------------------------------
-    // STUDENT
-    // ----------------------------------
-    public string AcademicYear { get; set; } = string.Empty;
-    public List<SkillDto> Skills { get; set; } = new();
-
-    // ----------------------------------
-    // TEACHER
-    // ----------------------------------
-    public string Department { get; set; } = string.Empty;
-    public string OfficeLocation { get; set; } = string.Empty;
-
-    // ----------------------------------
-    // NOTIFICATIONS
-    // ----------------------------------
-    public NotificationFrequency NotificationFrequency { get; set; } = NotificationFrequency.Disabled;
 }
 
 public class SkillDto
@@ -134,59 +123,4 @@ public class TagDto
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-}
-
-public class LoginRequestDto
-{
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; } = string.Empty;
-
-    [Required]
-    public string Password { get; set; } = string.Empty;
-}
-
-public record OperationResult(bool IsSuccess, string Message, string? ErrorCode = null);
-
-public class LoginResponseDto
-{
-    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-}
-
-public class RegisterRequestDto
-{
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; } = string.Empty;
-
-    [Required]
-    [StringLength(100, MinimumLength = 6)]
-    public string Password { get; set; } = string.Empty;
-
-    [Required]
-    public string FirstName { get; set; } = string.Empty;
-
-    [Required]
-    public string LastName { get; set; } = string.Empty;
-}
-
-public class RegisterResponseDto
-{
-    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
-}
-
-public class RefreshTokenRequestDto
-{
-    [Required]
-    public string UserId { get; set; } = string.Empty;
-
-    [Required]
-    public string RefreshToken { get; set; } = string.Empty;
-}
-
-public class RefreshTokenResponseDto
-{
-    public OperationResult Error { get; set; } = new OperationResult(false, string.Empty);
 }

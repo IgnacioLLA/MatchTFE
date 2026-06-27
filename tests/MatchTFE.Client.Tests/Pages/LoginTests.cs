@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using Bunit.TestDoubles;
 using MatchTFE.Client.Pages;
 using MatchTFE.Client.Tests.Shared;
@@ -131,7 +131,7 @@ public class LoginTests : BunitTestBase
     [TestMethod]
     public void Submit_ApiReturnsAccountSuspended_ShowsSuspendedAlert()
     {
-        var body = new LoginResponseDto
+        var body = new LoginResponse
         {
             Error = new OperationResult(false, "Account suspended", "AccountSuspended")
         };
@@ -150,7 +150,7 @@ public class LoginTests : BunitTestBase
     [TestMethod]
     public void Submit_ApiReturnsGenericError_ShowsDefaultErrorAlert()
     {
-        var body = new LoginResponseDto
+        var body = new LoginResponse
         {
             Error = new OperationResult(false, "Unknown error", "OtherError")
         };

@@ -1,4 +1,4 @@
-using TFELibrary.Shared;
+﻿using TFELibrary.Shared;
 
 namespace AuthService.Service;
 
@@ -8,9 +8,9 @@ public interface IAuthService
 {
     int TokenLifetime { get; }
     int RefreshTokenLifetime { get; }
-    Task<(LoginResponseDto Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequestDto request);
-    Task<(RegisterResponseDto Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequestDto request);
-    Task<(RefreshTokenResponseDto Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequestDto request);
+    Task<(LoginResponse Response, AuthTokenPair? Tokens)> LoginAsync(LoginRequest request);
+    Task<(RegisterResponse Response, AuthTokenPair? Tokens)> RegisterAsync(RegisterRequest request);
+    Task<(RefreshTokenResponse Response, AuthTokenPair? Tokens)> RefreshTokenAsync(RefreshTokenRequest request);
     Task<bool> LogoutAsync(string id);
     Task<UserRoleUpdateResponse> ChangeUserRoleAsync(UserRoleUpdateRequest request, string currentUserId);
     Task<BulkUserActionResponse> ExecuteBulkActionAsync(BulkUserActionRequest request, string currentUserId);

@@ -1,4 +1,4 @@
-@page "/register"
+﻿@page "/register"
 @using TFELibrary.Shared
 
 @inject IHttpClientFactory ClientFactory
@@ -110,7 +110,7 @@
 </MudCard>
 
 @code {
-    private RegisterRequestDto _model = new();
+    private RegisterRequest _model = new();
     private string _confirmEmail = string.Empty;
     private string _confirmPassword = string.Empty;
     private bool _isLoading = false;
@@ -226,7 +226,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
+                var result = await response.Content.ReadFromJsonAsync<RegisterResponse>();
 
                 if (result != null && result.Error.IsSuccess)
                 {
@@ -245,7 +245,7 @@
             }
             else
             {
-                var errorResult = await response.Content.ReadFromJsonAsync<RegisterResponseDto>();
+                var errorResult = await response.Content.ReadFromJsonAsync<RegisterResponse>();
                 var errMsg = errorResult?.Error?.ErrorCode switch
                 {
                     "DuplicateEmail" => L["Register_EmailAlreadyTaken"].Value,

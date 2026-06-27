@@ -1,4 +1,4 @@
-using AuthService.Service;
+﻿using AuthService.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,7 +26,7 @@ public class AuthController : ControllerBase, IAuthController
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequestDto loginDto)
+    public async Task<IActionResult> Login([FromBody] LoginRequest loginDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -64,7 +64,7 @@ public class AuthController : ControllerBase, IAuthController
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -137,7 +137,7 @@ public class AuthController : ControllerBase, IAuthController
             return Unauthorized(new { IsSuccess = false, ErrorMessage = "Invalid Token." });
         }
 
-        var requestDto = new RefreshTokenRequestDto
+        var requestDto = new RefreshTokenRequest
         {
             UserId = userId,
             RefreshToken = refreshToken
