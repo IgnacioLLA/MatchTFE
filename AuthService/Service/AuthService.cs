@@ -329,11 +329,13 @@ public class AuthService : IAuthService
         if (request.Action == BulkUserActionType.Delete)
         {
             var users = await _authRepository.GetUsersByIdsAsync(request.UserIds);
+            var adminToken = ExtractBearerToken();
             foreach (var user in users)
             {
                 var result = await _authRepository.DeleteUserAsync(user);
                 if (result.Succeeded)
                 {
+                    await DeleteUserProfileInUserServiceAsync(user.Id, adminToken);
                     response.AffectedCount++;
                 }
                 else
@@ -513,6 +515,27 @@ public class AuthService : IAuthService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Critical error connecting to UserService during suspension update for user {UserId}.", userId);
+        }
+    }
+
+    private async Task DeleteUserProfileInUserServiceAsync(string userId, string? adminToken)
+    {
+        try
+        {
+            var client = _httpClientFactory.CreateClient("UserServiceClient");
+            if (!string.IsNullOrEmpty(adminToken))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", adminToken);
+
+            var deleteResponse = await client.DeleteAsync($"api/user/profile/{userId}");
+
+            if (!deleteResponse.IsSuccessStatusCode)
+                _logger.LogWarning("Profile deletion for user {UserId} failed in UserService. StatusCode: {StatusCode}", userId, deleteResponse.StatusCode);
+            else
+                _logger.LogInformation("Profile for user {UserId} deleted successfully in UserService.", userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Critical error connecting to UserService during profile deletion for user {UserId}.", userId);
         }
     }
 

@@ -28,5 +28,8 @@ namespace UserService.Controllers
 
         [HttpGet("profiles")]
         Task<ActionResult<GetAllProfilesResponse>> GetAllProfiles();
+
+        [HttpDelete("profile/{userId}")]
+        Task<ActionResult<DeleteProfileResponse>> DeleteProfile([FromRoute] string userId);
     }
 }

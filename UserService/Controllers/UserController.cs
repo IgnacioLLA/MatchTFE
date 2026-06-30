@@ -156,6 +156,24 @@ public class UserController : ControllerBase, IUserController
         return Ok(response);
     }
 
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("profile/{userId}")]
+    public async Task<ActionResult<DeleteProfileResponse>> DeleteProfile([FromRoute] string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return BadRequest(new DeleteProfileResponse(new OperationResult(false, "Invalid user ID.")));
+
+        var response = await _profileService.DeleteProfileAsync(userId);
+
+        if (response.Error.IsSuccess)
+            return Ok(response);
+
+        if (response.Error.ErrorCode == "UserNotFound")
+            return NotFound(response);
+
+        return BadRequest(response);
+    }
+
     [Authorize(Roles = "Service")]
     [HttpGet("notifications/pending")]
     public async Task<ActionResult<PendingNotificationsResponse>> GetPendingNotifications()

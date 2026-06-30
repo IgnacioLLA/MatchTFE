@@ -258,6 +258,27 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<DeleteProfileResponse> DeleteProfileAsync(string userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return new DeleteProfileResponse(new OperationResult(false, "User ID is required."));
+
+        try
+        {
+            var isDeleted = await _userRepository.DeleteProfileAsync(userId);
+
+            if (isDeleted)
+                return new DeleteProfileResponse(new OperationResult(true, "User profile deleted successfully."));
+
+            return new DeleteProfileResponse(new OperationResult(false, "User not found.", "UserNotFound"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while deleting profile for user {UserId}.", userId);
+            return new DeleteProfileResponse(new OperationResult(false, "Could not delete profile due to an unexpected error.", "DatabaseError"));
+        }
+    }
+
     // --------------------------------------------------
 
     private ProfileDto GetProfileDto(UserProfile profile)

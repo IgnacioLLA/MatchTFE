@@ -13,5 +13,6 @@ namespace UserService.Service
         Task<GetAllProfilesResponse> GetAllProfilesAsync(GetAllProfilesRequest request);
         Task<PendingNotificationsResponse> GetUsersForNotificationAsync();
         Task MarkNotificationSentAsync(List<string> userIds);
+        Task<DeleteProfileResponse> DeleteProfileAsync(string userId);
     }
 }

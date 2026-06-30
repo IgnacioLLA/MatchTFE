@@ -155,6 +155,16 @@ public class UserProfileRepository : IUserProfileRepository
             .ToListAsync();
     }
 
+    public async Task<bool> DeleteProfileAsync(string userId)
+    {
+        var profile = await _context.UserProfile.FirstOrDefaultAsync(u => u.UserId == userId);
+        if (profile == null) return false;
+
+        _context.UserProfile.Remove(profile);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
     public async Task MarkNotificationSentAsync(List<string> userIds)
     {
         var profiles = await _context.UserProfile

@@ -14,5 +14,6 @@ namespace UserService.Repositories
         Task<List<UserProfile>> GetAllProfilesAsync();
         Task<List<UserProfile>> GetUsersForNotificationAsync();
         Task MarkNotificationSentAsync(List<string> userIds);
+        Task<bool> DeleteProfileAsync(string userId);
     }
 }

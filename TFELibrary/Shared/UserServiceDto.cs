@@ -51,3 +51,5 @@ public record RoleUpdateResponse(OperationResult Error);
 public record SuspensionUpdateRequest(bool IsSuspended);
 
 public record SuspensionUpdateResponse(OperationResult Error);
+
+public record DeleteProfileResponse(OperationResult Error);
