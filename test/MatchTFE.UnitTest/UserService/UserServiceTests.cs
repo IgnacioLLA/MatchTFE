@@ -421,4 +421,53 @@ public class UserServiceTests
         Assert.IsNotNull(luisProfile);
         Assert.AreEqual("Luis", luisProfile.FirstName);
     }
+
+    // -------------------------------------------------------------------------
+    // DeleteProfileAsync
+    // -------------------------------------------------------------------------
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("   ")]
+    public async Task DeleteProfileAsync_WhenUserIdIsInvalid_ReturnsError(string? userId)
+    {
+        var result = await _service.DeleteProfileAsync(userId!);
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("User ID is required.", result.Error.Message);
+    }
+
+    [TestMethod]
+    public async Task DeleteProfileAsync_WhenUserNotFound_ReturnsUserNotFoundError()
+    {
+        _repositoryMock.Setup(r => r.DeleteProfileAsync("user-99")).ReturnsAsync(false);
+
+        var result = await _service.DeleteProfileAsync("user-99");
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("UserNotFound", result.Error.ErrorCode);
+    }
+
+    [TestMethod]
+    public async Task DeleteProfileAsync_WhenSuccessful_ReturnsSuccess()
+    {
+        _repositoryMock.Setup(r => r.DeleteProfileAsync("user-1")).ReturnsAsync(true);
+
+        var result = await _service.DeleteProfileAsync("user-1");
+
+        Assert.IsTrue(result.Error.IsSuccess);
+        Assert.AreEqual("User profile deleted successfully.", result.Error.Message);
+    }
+
+    [TestMethod]
+    public async Task DeleteProfileAsync_WhenRepositoryThrows_ReturnsDatabaseError()
+    {
+        _repositoryMock.Setup(r => r.DeleteProfileAsync(It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Simulated DB failure"));
+
+        var result = await _service.DeleteProfileAsync("user-1");
+
+        Assert.IsFalse(result.Error.IsSuccess);
+        Assert.AreEqual("DatabaseError", result.Error.ErrorCode);
+    }
 }

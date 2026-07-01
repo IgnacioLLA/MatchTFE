@@ -340,4 +340,38 @@ public class UserControllerTests
         Assert.IsNotNull(body);
         Assert.AreEqual(2, body.Profiles.Count);
     }
+
+    // -------------------------------------------------------------------------
+    // DeleteProfile
+    // -------------------------------------------------------------------------
+
+    [TestMethod]
+    public async Task DeleteProfile_WhenUserIdIsWhitespace_ReturnsBadRequest()
+    {
+        var result = await _controller.DeleteProfile("   ");
+
+        Assert.IsInstanceOfType(result.Result, typeof(BadRequestObjectResult));
+    }
+
+    [TestMethod]
+    public async Task DeleteProfile_WhenServiceReturnsUserNotFound_ReturnsNotFound()
+    {
+        var serviceResponse = new DeleteProfileResponse(new OperationResult(false, "User not found.", "UserNotFound"));
+        _serviceMock.Setup(s => s.DeleteProfileAsync("user-99")).ReturnsAsync(serviceResponse);
+
+        var result = await _controller.DeleteProfile("user-99");
+
+        Assert.IsInstanceOfType(result.Result, typeof(NotFoundObjectResult));
+    }
+
+    [TestMethod]
+    public async Task DeleteProfile_WhenServiceReturnsSuccess_ReturnsOk()
+    {
+        var serviceResponse = new DeleteProfileResponse(new OperationResult(true, "User profile deleted successfully."));
+        _serviceMock.Setup(s => s.DeleteProfileAsync("user-1")).ReturnsAsync(serviceResponse);
+
+        var result = await _controller.DeleteProfile("user-1");
+
+        Assert.IsInstanceOfType(result.Result, typeof(OkObjectResult));
+    }
 }
