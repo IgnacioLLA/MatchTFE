@@ -1,13 +1,24 @@
 # --------------------------------------------------------------
 #  MATCH-TFE  -  CI Pipeline
 #  Build -> Analyze -> Test -> Coverage
+#
+#  Required repository secrets (Settings > Secrets and variables > Actions):
+#    secrets.GIST_TOKEN  - GitHub personal access token with 'gist' scope.
+#                          Used to update the coverage badge stored in a Gist.
+#                          Create one at: https://github.com/settings/tokens
+#
+#  Required repository variables (Settings > Secrets and variables > Actions > Variables):
+#    vars.COVERAGE_GIST_ID - The ID of the public Gist where the badge JSON is stored.
+#                            Create a public Gist at https://gist.github.com, then copy
+#                            the ID from the URL: gist.github.com/<username>/<GIST_ID>
+#
+#  Both are only needed if you want the coverage badge. The rest of the pipeline
+#  works without them (the badge step has continue-on-error: true).
 # --------------------------------------------------------------
 name: CI - Build, Test & Coverage
 
 on:
   push:
-    branches: [ main, master, develop ]
-  pull_request:
     branches: [ main, master, develop ]
 
 concurrency:
