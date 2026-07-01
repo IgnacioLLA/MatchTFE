@@ -19,7 +19,7 @@ name: CI - Build, Test & Coverage
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [ main, master, dev, sonarqube ]
 
 concurrency:
   group: ci-${{ github.ref }}
