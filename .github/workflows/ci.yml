@@ -1,19 +1,14 @@
 # --------------------------------------------------------------
 #  MATCH-TFE  -  CI Pipeline
-#  Build -> Analyze -> Test -> Coverage
+#  Build -> Test -> Coverage -> SonarCloud Analysis
 #
 #  Required repository secrets (Settings > Secrets and variables > Actions):
-#    secrets.GIST_TOKEN  - GitHub personal access token with 'gist' scope.
-#                          Used to update the coverage badge stored in a Gist.
-#                          Create one at: https://github.com/settings/tokens
+#    secrets.SONAR_TOKEN     - Token generated in SonarCloud -> My Account -> Security -> Generate Token
+#    secrets.GIST_TOKEN      - GitHub PAT with 'gist' scope (only needed for coverage badge)
 #
 #  Required repository variables (Settings > Secrets and variables > Actions > Variables):
-#    vars.COVERAGE_GIST_ID - The ID of the public Gist where the badge JSON is stored.
-#                            Create a public Gist at https://gist.github.com, then copy
-#                            the ID from the URL: gist.github.com/<username>/<GIST_ID>
-#
-#  Both are only needed if you want the coverage badge. The rest of the pipeline
-#  works without them (the badge step has continue-on-error: true).
+#    vars.COVERAGE_GIST_ID   - ID of a public Gist where the badge JSON is stored
+#                              (only needed for coverage badge)
 # --------------------------------------------------------------
 name: CI - Build, Test & Coverage
 
@@ -32,7 +27,7 @@ env:
 
 jobs:
   # --------------------------------------------
-  #  1. Build & Static Analysis
+  #  1. Build & Static Analysis (fast gate)
   # --------------------------------------------
   build:
     name: Build & Analysis
@@ -58,16 +53,34 @@ jobs:
         continue-on-error: true
 
   # --------------------------------------------
-  #  2. Unit Tests + Coverage
+  #  2. Tests + Coverage + SonarCloud Analysis
+  #
+  #  Per official SonarCloud docs, the .NET scanner
+  #  MUST wrap build and test in the same job:
+  #    sonar begin -> dotnet build -> dotnet test -> sonar end
+  #
+  #  SonarCloud does NOT support Cobertura for .NET.
+  #  Use OpenCover format for Sonar and generate
+  #  Cobertura separately for the HTML coverage report.
   # --------------------------------------------
-  test:
-    name: Tests & Coverage
+  sonar-and-test:
+    name: Tests, Coverage & SonarCloud
     runs-on: ubuntu-latest
     needs: build
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # Shallow clones must be disabled for SonarCloud
+          # to correctly track new code and blame information
+          fetch-depth: 0
+
+      - name: Setup Java 17 (required by SonarScanner)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
 
       - name: Setup .NET ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v4
@@ -77,6 +90,26 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore MATCH-TFE.slnx
 
+      - name: Install dotnet-sonarscanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: SonarCloud - Begin analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          dotnet sonarscanner begin \
+            /k:"IgnacioLLA_MatchTFE" \
+            /o:"ignaciolla" \
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
+            /d:sonar.coverage.exclusions="**/Migrations/**,**/*.razor.g.cs" \
+            /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**,**/*.Designer.cs"
+
+      - name: Build solution (instrumented for Sonar)
+        run: dotnet build MATCH-TFE.slnx --no-restore --configuration Release
+
       - name: Run tests with coverage
         run: |
           dotnet test MATCH-TFE.slnx \
@@ -85,8 +118,14 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./TestResults \
             --collect:"XPlat Code Coverage" \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura \
                DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByFile="**/Migrations/**"
+
+      - name: SonarCloud - End analysis
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: Generate coverage report
         uses: danielpalme/ReportGenerator-GitHub-Action@5
