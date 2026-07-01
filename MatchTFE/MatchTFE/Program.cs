@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient("GatewayAPI", client =>
 {
-    client.BaseAddress = new Uri(GetConfiguredUrl("GATEWAY_BASE_URL", "http://apigateway/"));
+    client.BaseAddress = new Uri(GetConfiguredUrl("GATEWAY_BASE_URL", "https://apigateway/"));
 });
 
 // Add services to the container.

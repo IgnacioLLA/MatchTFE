@@ -132,7 +132,7 @@ jobs:
             --logger "trx;LogFileName=test-results.trx" \
             --results-directory ./TestResults \
             --collect:"XPlat Code Coverage" \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover,cobertura \
+            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover \
                DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.ExcludeByFile="**/Migrations/**"
 
       - name: SonarCloud - End analysis
@@ -141,23 +141,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-      - name: Generate coverage report
-        uses: danielpalme/ReportGenerator-GitHub-Action@5
-        with:
-          reports: '**/TestResults/**/coverage.cobertura.xml'
-          targetdir: ./CoverageReport
-          reporttypes: 'HtmlInline_AzurePipelines;Cobertura;MarkdownSummaryGithub'
-          assemblyfilters: '-*.Tests;-*.UnitTest'
-
-      - name: Publish coverage summary
-        if: always()
-        run: |
-          if [ -f ./CoverageReport/SummaryGithub.md ]; then
-            echo "## Code Coverage Report" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            cat ./CoverageReport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
-          fi
-
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
@@ -165,25 +148,3 @@ jobs:
           name: test-results
           path: ./TestResults/**/*.trx
           retention-days: 30
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: ./CoverageReport
-          retention-days: 30
-
-      - name: Publish coverage badge
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_TOKEN }}
-          gistID: ${{ vars.COVERAGE_GIST_ID }}
-          filename: coverage-badge.json
-          label: Coverage
-          message: ${{ steps.coverage.outputs.coverage }}
-          valColorRange: ${{ steps.coverage.outputs.coverage }}
-          minColorRange: 0
-          maxColorRange: 100
-        continue-on-error: true

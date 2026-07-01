@@ -20,7 +20,7 @@ builder.Services.AddIdentityCore<MatchUser>(options =>
 
 builder.Services.AddCors(options =>
 {
-    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "http://localhost:5000");
+    var frontendOrigin = GetConfiguredUrl("FRONTEND_ORIGIN", "https://localhost:5000");
 
     options.AddPolicy("AllowBlazor", policy =>
     {
@@ -35,7 +35,7 @@ builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 builder.Services.AddHttpClient("UserServiceClient", client =>
 {
-    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "http://userservice:8080/"));
+    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "https://userservice:8080/"));
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 

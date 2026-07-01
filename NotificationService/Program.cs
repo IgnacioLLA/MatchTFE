@@ -19,13 +19,13 @@ builder.Services.AddHostedService<EmailJob>();
 
 builder.Services.AddHttpClient("UserServiceClient", client =>
 {
-    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "http://userservice:8080/"));
+    client.BaseAddress = new Uri(GetConfiguredUrl("USER_SERVICE_BASE_URL", "https://userservice:8080/"));
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 builder.Services.AddHttpClient("MatchServiceClient", client =>
 {
-    client.BaseAddress = new Uri(GetConfiguredUrl("MATCH_SERVICE_BASE_URL", "http://matchservice:8080/"));
+    client.BaseAddress = new Uri(GetConfiguredUrl("MATCH_SERVICE_BASE_URL", "https://matchservice:8080/"));
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
