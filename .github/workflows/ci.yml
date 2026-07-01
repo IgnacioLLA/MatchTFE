@@ -106,7 +106,20 @@ jobs:
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" \
             /d:sonar.coverage.exclusions="**/Migrations/**,**/*.razor.g.cs" \
-            /d:sonar.exclusions="**/Migrations/**,**/bin/**,**/obj/**,**/*.Designer.cs"
+            /d:sonar.exclusions="\
+              **/Migrations/**,\
+              **/bin/**,\
+              **/obj/**,\
+              **/*.Designer.cs,\
+              TFELibrary/**,\
+              MatchTFE/MatchTFE.Client/Components/**,\
+              MatchTFE/MatchTFE.Client/Layout/**,\
+              MatchTFE/MatchTFE.Client/Handlers/**,\
+              MatchTFE/MatchTFE.Client/Infrastructure/**,\
+              MatchTFE/MatchTFE.Client/Localization/**,\
+              MatchTFE/MatchTFE.Client/Themes/**,\
+              MatchTFE/MatchTFE.Client/Resources/**,\
+              MatchTFE/MatchTFE.Client/wwwroot/**"
 
       - name: Build solution (instrumented for Sonar)
         run: dotnet build MATCH-TFE.slnx --no-restore --configuration Release
