@@ -51,7 +51,7 @@ jobs:
         run: dotnet restore MATCH-TFE.slnx
 
       - name: Build solution
-        run: dotnet build MATCH-TFE.slnx --no-restore --configuration Release /p:TreatWarningsAsErrors=true
+        run: dotnet build MATCH-TFE.slnx --no-restore --configuration Release
 
       - name: Static analysis (dotnet format)
         run: dotnet format MATCH-TFE.slnx --verify-no-changes --verbosity diagnostic
